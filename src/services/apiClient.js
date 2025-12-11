@@ -10,17 +10,13 @@ const ONLINE_API = "https://marketing-backend-1-m8e3.onrender.com";
 // 🔹 رابط السيرفر المحلي
 const LOCAL_API = "http://localhost:5000";
 
-// 🔹 اختيار تلقائي:
-let API_URL =
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
-    ? LOCAL_API
-    : ONLINE_API;
+// 🔹 الوضع الافتراضي = السيرفر الأونلاين دائماً
+let API_URL = ONLINE_API;
 
-// 🔹 إجبار الوضع يدويًا (اختياري)
+// 🔹 إن أراد المستخدم تشغيل المحلي يدوياً
 const mode = localStorage.getItem("api_mode");
-if (mode === "online") API_URL = ONLINE_API;
 if (mode === "local") API_URL = LOCAL_API;
+if (mode === "online") API_URL = ONLINE_API;
 
 console.log("🌐 API Running On:", API_URL);
 
