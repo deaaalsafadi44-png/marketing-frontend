@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getTaskById } from "../../services/tasksService";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../services/apiClient";
 import "./view.css";
 
 const ViewTask = () => {
@@ -12,13 +12,9 @@ const ViewTask = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  // --------------------------
-  // TIMER STATES
-  // --------------------------
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
-  // Load task
   useEffect(() => {
     const loadTask = async () => {
       try {
@@ -47,9 +43,6 @@ const ViewTask = () => {
     loadTask();
   }, [id, navigate]);
 
-  // --------------------------
-  // RESTORE TIMER STATE
-  // --------------------------
   useEffect(() => {
     const savedStart = localStorage.getItem("timer_start_" + id);
     const savedSeconds = localStorage.getItem("timer_seconds_" + id);
@@ -64,9 +57,6 @@ const ViewTask = () => {
     }
   }, [id]);
 
-  // --------------------------
-  // TIMER INTERVAL
-  // --------------------------
   useEffect(() => {
     let interval = null;
 
@@ -83,9 +73,6 @@ const ViewTask = () => {
     return () => clearInterval(interval);
   }, [isRunning, id]);
 
-  // --------------------------
-  // BUTTON HANDLERS
-  // --------------------------
   const startTimer = () => {
     localStorage.setItem("timer_start_" + id, Date.now());
     setIsRunning(true);
@@ -102,19 +89,12 @@ const ViewTask = () => {
     const totalMinutes = Math.floor(seconds / 60);
 
     try {
-      await axios.put(
-        `http://localhost:5000/tasks/${id}/time`,
-        { timeSpent: totalMinutes },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
+      await api.put(`/tasks/${id}/time`, {
+        timeSpent: totalMinutes,
+      });
 
-      alert("✅ Task finished! Total time saved: " + totalMinutes + " min");
+      alert("✅ Task finished! Time saved: " + totalMinutes + " min");
 
-      // Reset timer immediately
       setSeconds(0);
       setIsRunning(false);
       localStorage.removeItem("timer_start_" + id);
@@ -126,9 +106,6 @@ const ViewTask = () => {
     }
   };
 
-  // --------------------------
-  // FORMAT TIMER (running timer)
-  // --------------------------
   const formatTime = () => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -139,9 +116,6 @@ const ViewTask = () => {
       .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  // --------------------------
-  // FORMAT STORED TIME -> C STYLE
-  // --------------------------
   const formatStoredTime = (minutes) => {
     if (!minutes || minutes === 0) return "0m";
 
@@ -153,9 +127,6 @@ const ViewTask = () => {
     return `${m}m`;
   };
 
-  // --------------------------
-  // PAGE DISPLAY
-  // --------------------------
   if (loading) return <div className="loading">Loading...</div>;
   if (notFound)
     return <h2 style={{ textAlign: "center" }}>❌ Task Not Found</h2>;
@@ -163,17 +134,13 @@ const ViewTask = () => {
   return (
     <div className="view-wrapper">
       <div className="view-card">
-
-        {/* Title */}
         <h1 className="task-title">{task.title}</h1>
 
-        {/* Meta info */}
         <div className="meta-section">
           <span className="badge badge-priority">{task.priority}</span>
           <span className="badge badge-status">{task.status}</span>
         </div>
 
-        {/* TIMER UI */}
         <div className="timer-box">
           <div className="timer-time">{formatTime()}</div>
 
@@ -192,9 +159,7 @@ const ViewTask = () => {
           </button>
         </div>
 
-        {/* Grid info */}
         <div className="info-grid">
-
           <div>
             <h3>Company</h3>
             <p>{task.company}</p>
@@ -215,15 +180,12 @@ const ViewTask = () => {
             <p>{new Date(task.createdAt).toLocaleString()}</p>
           </div>
 
-          {/* 🟢 NEW FIELD — Stored Time */}
           <div>
             <h3>Time Spent</h3>
             <p>{formatStoredTime(task.timeSpent)}</p>
           </div>
-
         </div>
 
-        {/* Description */}
         <div className="desc-section">
           <h2>Description</h2>
           <div
@@ -234,7 +196,6 @@ const ViewTask = () => {
           />
         </div>
 
-        {/* Buttons */}
         <div className="actions-row">
           <Link to={`/tasks/edit/${id}`} className="btn-edit">
             ✏ Edit Task

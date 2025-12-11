@@ -1,13 +1,14 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:5000";
+import api from "./apiClient";
 
 const authService = {
+  // نستخدم apiClient بدل axios + localhost
   login: (email, password) =>
-    axios.post(`${API_URL}/login`, { email, password }),
+    api.post("/login", { email, password }),
 
   logout: () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
   },
 
   me: () => {

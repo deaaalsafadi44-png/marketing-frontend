@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../services/apiClient";
 import "./manageOptions.css";
-
-const API_URL = "http://localhost:5000/options";
 
 const ManageOptions = () => {
   const [options, setOptions] = useState({ priority: [], status: [] });
@@ -11,16 +9,9 @@ const ManageOptions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ⬅️ استخدم التوكن الصحيح
-  const token = localStorage.getItem("accessToken");
-
-  const axiosAuth = axios.create({
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
   const loadOptions = async () => {
     try {
-      const res = await axiosAuth.get(API_URL);
+      const res = await api.get("/options");
       setOptions(res.data);
     } catch (err) {
       if (err.response?.status === 401) {
@@ -40,7 +31,7 @@ const ManageOptions = () => {
 
   const saveOptions = async (updated) => {
     try {
-      await axiosAuth.put(API_URL, updated);
+      await api.put("/options", updated);
       setOptions(updated);
     } catch (err) {
       setError("Failed to save options.");

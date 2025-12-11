@@ -1,13 +1,11 @@
 import api from "./apiClient";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000";
-
 // ===============================
 // LOGIN
 // ===============================
 export const loginUser = async (email, password) => {
-  const res = await axios.post(`${API_URL}/login`, { email, password });
+  const res = await api.post("/login", { email, password });
 
   localStorage.setItem("accessToken", res.data.accessToken);
   localStorage.setItem("refreshToken", res.data.refreshToken);
