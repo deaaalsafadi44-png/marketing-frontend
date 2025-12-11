@@ -1,0 +1,77 @@
+.opt-container {
+  padding: 30px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.opt-title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.opt-box {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.opt-box h2 {
+  margin-bottom: 15px;
+}
+
+.opt-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.opt-form input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.opt-form button {
+  padding: 10px 18px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.opt-form button:hover {
+  background: #125aaa;
+}
+
+.opt-list {
+  list-style: none;
+  padding: 0;
+}
+
+.opt-list li {
+  display: flex;
+  justify-content: space-between;
+  background: #f4f4f4;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+}
+
+.del-btn {
+  background: red;
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+  
+.del-btn:hover {
+  background: darkred;
+}

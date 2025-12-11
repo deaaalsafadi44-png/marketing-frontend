@@ -1,0 +1,14 @@
+.filters-box {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.filters-box input {
+  padding: 7px;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+}

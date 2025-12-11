@@ -1,0 +1,11 @@
+.view-link {
+  color: #1976d2;
+  cursor: pointer;
+}
+
+.delete-link {
+  color: #c62828;
+  cursor: pointer;
+  margin-left: 5px;
+}
+

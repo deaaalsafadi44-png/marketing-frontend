@@ -1,0 +1,26 @@
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f4f6fa;
+}
+
+.login-box {
+  background: white;
+  width: 350px;
+  padding: 30px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.login-btn {
+  background: #1976d2;
+  padding: 10px;
+  color: white;
+  border-radius: 6px;
+  border: none;
+}

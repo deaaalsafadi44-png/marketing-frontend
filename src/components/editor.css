@@ -1,0 +1,46 @@
+.tiptap-wrapper {
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  background: white;
+  padding: 8px;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.toolbar button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #f4f4f4;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.toolbar button:hover {
+  background: #e5e5e5;
+}
+
+.toolbar button.active {
+  background: #7b2fff;
+  color: white;
+  border-color: #7b2fff;
+}
+
+/* Editor area */
+.editor-area {
+  min-height: 170px;
+  padding: 12px;
+  line-height: 1.6;
+}
+
+.editor-area:focus {
+  outline: none;
+}

@@ -1,0 +1,51 @@
+.reports-container {
+  width: 100%;
+}
+
+.reports-filters {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 20px;
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.reports-filters select,
+.reports-filters input {
+  padding: 7px;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+}
+
+.report-summary {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  line-height: 1.7;
+}
+
+.reports-charts {
+  display: flex;
+  gap: 25px;
+}
+
+.chart-box {
+  background: white;
+  padding: 20px;
+  width: 50%;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+  /* ⭐ إضافات مهمة لإصلاح تشوّه الرسم */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ⭐ إصلاح تمدد الدائرة داخل الكانفاس */
+.chart-box canvas {
+  max-width: 100%;
+  max-height: 350px;
+}

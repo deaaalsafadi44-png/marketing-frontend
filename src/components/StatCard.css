@@ -1,0 +1,20 @@
+.stat-card {
+  background: white;
+  width: 22%;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 35px;
+  font-weight: bold;
+  display: block;
+}
+
+.stat-title {
+  font-size: 17px;
+  margin-top: 10px;
+  color: #444;
+}

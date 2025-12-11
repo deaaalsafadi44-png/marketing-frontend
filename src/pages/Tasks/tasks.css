@@ -1,0 +1,222 @@
+/* الشكل العام */
+.tasks-container {
+  padding: 20px;
+}
+
+.tasks-title {
+  font-size: 26px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.filters-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.filters-row select,
+.filters-row input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.add-task-btn {
+  background: #2e7d32;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.tasks-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+}
+
+.tasks-table th,
+.tasks-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+/* ألوان الأولوية */
+.tag {
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+}
+
+.tag-high { background: #c62828; }
+.tag-normal { background: gray; }
+.tag-urgent { background: orange; }
+
+/* ------------------------------- */
+/*   تصميم قائمة الحالات Status   */
+/* ------------------------------- */
+
+/* ====== تصميم القائمة الأساسية ====== */
+.status-dropdown {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  color: #fff;        /* النص أبيض */
+  cursor: pointer;
+}
+
+/* القيم داخل القائمة تظهر بخلفية بيضاء ونص أسود */
+.status-dropdown option {
+  background: #fff !important;
+  color: #000 !important;
+}
+
+
+.status-dropdown option {
+  color: #000 !important; /* النص داخل القائمة أسود */
+}
+
+/* NEW */
+.status-New,
+.status-new {
+  background-color: #2196f3 !important; /* أزرق */
+  color: #fff !important;
+}
+
+/* ACCEPTED */
+.status-Accebted,
+.status-accebted {
+  background-color: #9c27b0 !important; /* بنفسجي */
+  color: #fff !important;
+}
+
+/* IN PROGRESS */
+.status-In-Progress,
+.status-in-progress,
+.status-In-progress {
+  background-color: #fbc02d !important; /* أصفر */
+  color: #fff !important;
+}
+
+/* UNDER REVIEW */
+.status-Under-Review,
+.status-under-review,
+.status-Under-review {
+  background-color: #ff9800 !important; /* برتقالي */
+  color: #fff !important;
+}
+
+/* APPROVED */
+.status-Approved,
+.status-approved {
+  background-color: #4caf50 !important; /* أخضر */
+  color: #fff !important;
+}
+.play-btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.35);
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.play-btn:hover {
+  background: rgba(0, 0, 0, 0.45);
+}
+.priority-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.priority-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: bold;
+}
+
+.priority-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Different colors for priority levels */
+.priority-badge.low {
+  background: #4caf50;
+}
+
+.priority-badge.medium {
+  background: #ff9800;
+}
+
+.priority-badge.high {
+  background: #f44336;
+}
+
+.priority-badge.urgent {
+  background: #d32f2f;
+}
+.tasks-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.tasks-table th,
+.tasks-table td {
+  padding: 12px;
+  vertical-align: middle;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tasks-table td select {
+  height: 36px;
+  padding: 4px 8px;
+}
+.tag {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+}
+
+.tag-low {
+  background: #4caf50;
+}
+
+.tag-medium {
+  background: #ff9800;
+}
+
+.tag-high {
+  background: #f44336;
+}
+/* fallback لون افتراضي لأي Priority غير معرفة */
+.tag[class*="tag-"] {
+  background: #607d8b; /* رمادي */
+  color: white;
+}
+
+/* ألوان محددة للمعروفة */
+.tag-low { background: #4caf50; }
+.tag-medium { background: #ff9800; }
+.tag-high { background: #f44336; }
