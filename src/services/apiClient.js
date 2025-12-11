@@ -4,27 +4,21 @@ import axios from "axios";
    1️⃣ إعداد اختيار السيرفر (محلي / أونلاين)
    ========================================= */
 
-// 🔹 رابط السيرفر المرفوع على Render
-const ONLINE_API = "https://marketing-backend-brzi.onrender.com";
+// 🔹 رابط السيرفر المرفوع على Render (الصحيح)
+const ONLINE_API = "https://marketing-backend-1-m8e3.onrender.com";
 
 // 🔹 رابط السيرفر المحلي
 const LOCAL_API = "http://localhost:5000";
 
-// 🔹 اختيار تلقائي:  
-// إذا كنا على localhost → استخدم المحلي  
-// إذا كنا على موقع حقيقي → استخدم الأونلاين
+// 🔹 اختيار تلقائي:
 let API_URL =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1"
     ? LOCAL_API
     : ONLINE_API;
 
-// 🔹 يمكنك إجبار النظام يدويًا باستخدام:
-// localStorage.setItem("api_mode", "online");
-// localStorage.setItem("api_mode", "local");
-
+// 🔹 إجبار الوضع يدويًا (اختياري)
 const mode = localStorage.getItem("api_mode");
-
 if (mode === "online") API_URL = ONLINE_API;
 if (mode === "local") API_URL = LOCAL_API;
 
