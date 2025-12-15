@@ -5,7 +5,7 @@ import api from "../../services/apiClient";
 import "./view.css";
 
 const ViewTask = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // task numeric id
   const navigate = useNavigate();
 
   const [task, setTask] = useState(null);
@@ -15,12 +15,20 @@ const ViewTask = () => {
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
+  /* ================= LOAD TASK ================= */
+
   useEffect(() => {
+    if (!id) {
+      setLoading(false);
+      setNotFound(true);
+      return;
+    }
+
     const loadTask = async () => {
       try {
         const res = await getTaskById(id);
 
-        if (!res.data) {
+        if (!res?.data) {
           setNotFound(true);
         } else {
           setTask(res.data);
@@ -43,7 +51,11 @@ const ViewTask = () => {
     loadTask();
   }, [id, navigate]);
 
+  /* ================= TIMER ================= */
+
   useEffect(() => {
+    if (!id) return;
+
     const savedStart = localStorage.getItem("timer_start_" + id);
     const savedSeconds = localStorage.getItem("timer_seconds_" + id);
 
@@ -60,7 +72,7 @@ const ViewTask = () => {
   useEffect(() => {
     let interval = null;
 
-    if (isRunning) {
+    if (isRunning && id) {
       interval = setInterval(() => {
         setSeconds((prev) => {
           const updated = prev + 1;
@@ -74,18 +86,21 @@ const ViewTask = () => {
   }, [isRunning, id]);
 
   const startTimer = () => {
+    if (!id) return;
     localStorage.setItem("timer_start_" + id, Date.now());
     setIsRunning(true);
   };
 
   const pauseTimer = () => {
+    if (!id) return;
     localStorage.removeItem("timer_start_" + id);
     setIsRunning(false);
   };
 
   const finishTask = async () => {
-    pauseTimer();
+    if (!id) return;
 
+    pauseTimer();
     const totalMinutes = Math.floor(seconds / 60);
 
     try {
@@ -99,12 +114,13 @@ const ViewTask = () => {
       setIsRunning(false);
       localStorage.removeItem("timer_start_" + id);
       localStorage.removeItem("timer_seconds_" + id);
-
     } catch (err) {
       alert("❌ Error saving time");
       console.error(err);
     }
   };
+
+  /* ================= HELPERS ================= */
 
   const formatTime = () => {
     const h = Math.floor(seconds / 3600);
@@ -118,14 +134,14 @@ const ViewTask = () => {
 
   const formatStoredTime = (minutes) => {
     if (!minutes || minutes === 0) return "0m";
-
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
-
     if (h > 0 && m > 0) return `${h}h ${m}m`;
     if (h > 0) return `${h}h`;
     return `${m}m`;
   };
+
+  /* ================= RENDER ================= */
 
   if (loading) return <div className="loading">Loading...</div>;
   if (notFound)
@@ -134,11 +150,15 @@ const ViewTask = () => {
   return (
     <div className="view-wrapper">
       <div className="view-card">
-        <h1 className="task-title">{task.title}</h1>
+        <h1 className="task-title">{task?.title || "—"}</h1>
 
         <div className="meta-section">
-          <span className="badge badge-priority">{task.priority}</span>
-          <span className="badge badge-status">{task.status}</span>
+          <span className="badge badge-priority">
+            {task?.priority || "—"}
+          </span>
+          <span className="badge badge-status">
+            {task?.status || "—"}
+          </span>
         </div>
 
         <div className="timer-box">
@@ -162,27 +182,31 @@ const ViewTask = () => {
         <div className="info-grid">
           <div>
             <h3>Company</h3>
-            <p>{task.company}</p>
+            <p>{task?.company || "—"}</p>
           </div>
 
           <div>
             <h3>Task Type</h3>
-            <p>{task.type}</p>
+            <p>{task?.type || "—"}</p>
           </div>
 
           <div>
             <h3>Assigned To</h3>
-            <p>{task.workerName}</p>
+            <p>{task?.workerName || "—"}</p>
           </div>
 
           <div>
             <h3>Created At</h3>
-            <p>{new Date(task.createdAt).toLocaleString()}</p>
+            <p>
+              {task?.createdAt
+                ? new Date(task.createdAt).toLocaleString()
+                : "—"}
+            </p>
           </div>
 
           <div>
             <h3>Time Spent</h3>
-            <p>{formatStoredTime(task.timeSpent)}</p>
+            <p>{formatStoredTime(task?.timeSpent)}</p>
           </div>
         </div>
 
@@ -191,7 +215,7 @@ const ViewTask = () => {
           <div
             className="desc-box"
             dangerouslySetInnerHTML={{
-              __html: task.description || "<i>No description</i>",
+              __html: task?.description || "<i>No description</i>",
             }}
           />
         </div>
@@ -204,7 +228,6 @@ const ViewTask = () => {
             ← Back to Tasks
           </Link>
         </div>
-
       </div>
     </div>
   );
