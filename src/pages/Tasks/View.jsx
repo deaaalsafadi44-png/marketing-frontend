@@ -106,9 +106,16 @@ const ViewTask = () => {
     const totalMinutes = Math.floor(seconds / 60);
 
     try {
-      await api.put(`/tasks/${id}/time`, {
-        timeSpent: totalMinutes,
-      });
+     const res = await api.put(`/tasks/${id}/time`, {
+  timeSpent: totalMinutes,
+});
+
+// تحديث التاسك مباشرة من السيرفر
+setTask((prev) => ({
+  ...prev,
+  timeSpent: res.data.timeSpent,
+}));
+
 
       alert("✅ Task finished! Time saved: " + totalMinutes + " min");
 
@@ -134,14 +141,17 @@ const ViewTask = () => {
       .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  const formatStoredTime = (minutes) => {
-    if (!minutes || minutes === 0) return "0m";
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    if (h > 0 && m > 0) return `${h}h ${m}m`;
-    if (h > 0) return `${h}h`;
-    return `${m}m`;
-  };
+const formatStoredTime = (minutes) => {
+  if (!minutes || minutes <= 0) return "—";
+
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+
+  if (h > 0 && m > 0) return `${h}h ${m}m`;
+  if (h > 0) return `${h}h`;
+  return `${m} min`;
+};
+
 
   /* ================= RENDER ================= */
 
