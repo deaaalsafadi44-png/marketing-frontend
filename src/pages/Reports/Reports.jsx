@@ -192,7 +192,12 @@ const Reports = () => {
     doc.text("Tasks Report", 14, 20);
 
     doc.setFontSize(12);
-    doc.text(`Total Tasks: ${totalTasks}`, 14, 30);
+   doc.text(
+  `Total Time: ${formatMinutes(Math.round(totalHours * 60))}`,
+  14,
+  36
+);
+
    doc.text(
   `Total Time: ${formatMinutesToText(totalHours)}`,
   14,
@@ -232,7 +237,8 @@ const Reports = () => {
         Assigned: t.assigned,
         Priority: t.priority,
         Status: t.status,
-        HoursSpent: ((t.timeSpent || 0) / 60).toFixed(2),
+        HoursSpent: formatMinutes(t.timeSpent || 0)
+,
         CreatedAt: t.createdAt,
       }))
     );
