@@ -3,7 +3,7 @@ import {
   getTasks,
   deleteTaskApi,
   updateTaskApi,
-  getOptions,        // ⬅ تمت إضافته
+  getOptions,
 } from "../../services/tasksService";
 import "./tasks.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -16,9 +16,19 @@ const TasksList = () => {
 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // ⬅ الحالة الجديدة بدل المصفوفة الثابتة
   const [statusOptions, setStatusOptions] = useState([]);
+
+  /* =========================
+     🛡 Helpers
+     ========================= */
+  const safeLower = (val) => String(val || "").toLowerCase();
+
+  const safeDate = (val) => {
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? null : d;
+  };
+
+  /* ========================= */
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -37,19 +47,8 @@ const TasksList = () => {
     }
   };
 
-  const normalizeStatusStrict = (value) => {
-    if (!value) return "New";
-    const clean = value.trim().toLowerCase();
-    if (clean === "new") return "New";
-    if (clean === "accepted") return "Accepted";
-    if (clean === "in progress") return "In Progress";
-    if (clean === "under review") return "Under Review";
-    if (clean === "approved") return "Approved";
-    return value;
-  };
-
   const normalizeClass = (text) => {
-    return text?.toLowerCase().replace(/\s+/g, "-") || "default";
+    return safeLower(text).replace(/\s+/g, "-") || "default";
   };
 
   const [dateFrom, setDateFrom] = useState("");
@@ -61,12 +60,10 @@ const TasksList = () => {
   const loadTasks = async () => {
     try {
       const res = await getTasks();
-      setTasks(res.data);
+      setTasks(res.data || []);
 
-      // ⬅ تحميل خيارات status من السيرفر
       const opt = await getOptions();
-      setStatusOptions(opt.data.status || []);
-
+      setStatusOptions(opt.data?.status || []);
     } catch (err) {
       console.error("Error loading tasks:", err);
 
@@ -86,46 +83,48 @@ const TasksList = () => {
     }
   }, [location.state]);
 
-  const handleStatusChange = async (id, newStatus) => {
-    const updatedStatus = newStatus;
-    const task = tasks.find((t) => t.id === id);
+  const handleStatusChange = async (taskId, newStatus) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
 
     try {
-      await updateTaskApi(id, { ...task, status: updatedStatus });
+      await updateTaskApi(taskId, { ...task, status: newStatus });
       loadTasks();
     } catch (err) {
       console.error("Status update error:", err);
-
       if (err?.response?.status === 403) {
         alert("❌ لا تملك صلاحية لتعديل حالة المهمة");
       }
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (taskId) => {
+    if (!taskId) return;
     if (!window.confirm("Are you sure you want to delete this task?")) return;
 
     try {
-      await deleteTaskApi(id);
+      await deleteTaskApi(taskId);
       loadTasks();
     } catch (err) {
       console.error("Delete error:", err);
-
       if (err?.response?.status === 403) {
         alert("❌ فقط الأدمن يمكنه حذف المهام!");
       }
     }
   };
 
+  /* =========================
+     ✅ الفلترة
+     ========================= */
   const filteredTasks = tasks.filter((task) => {
-    const created = new Date(task.createdAt);
+    const created = safeDate(task.createdAt);
 
     return (
       (companyFilter === "" || task.company === companyFilter) &&
       (statusFilter === "" || task.status === statusFilter) &&
-      task.type.toLowerCase().includes(search.toLowerCase()) &&
-      (dateFrom === "" || created >= new Date(dateFrom)) &&
-      (dateTo === "" || created <= new Date(dateTo + " 23:59:59"))
+      safeLower(task.type).includes(safeLower(search)) &&
+      (!dateFrom || (created && created >= new Date(dateFrom))) &&
+      (!dateTo || (created && created <= new Date(dateTo + " 23:59:59")))
     );
   });
 
@@ -140,17 +139,18 @@ const TasksList = () => {
       <div className="filters-row">
         <select onChange={(e) => setCompanyFilter(e.target.value)}>
           <option value="">Company</option>
-          {[...new Set(tasks.map((t) => t.company))].map((company, i) => (
-            <option key={i} value={company}>
-              {company}
-            </option>
-          ))}
+          {[...new Set(tasks.map((t) => t.company).filter(Boolean))].map(
+            (company, i) => (
+              <option key={i} value={company}>
+                {company}
+              </option>
+            )
+          )}
         </select>
 
         <input type="date" onChange={(e) => setDateFrom(e.target.value)} />
         <input type="date" onChange={(e) => setDateTo(e.target.value)} />
 
-        {/* ⬅ الآن يجلب الـ Status من الإعدادات */}
         <select onChange={(e) => setStatusFilter(e.target.value)}>
           <option value="">Status</option>
           {statusOptions.map((s, i) => (
@@ -174,7 +174,6 @@ const TasksList = () => {
         )}
       </div>
 
-      {/* TABLE */}
       <table className="tasks-table">
         <thead>
           <tr>
@@ -190,24 +189,28 @@ const TasksList = () => {
 
         <tbody>
           {filteredTasks.map((task) => {
+            const taskId = task.id; // ✅ الصحيح
+
+            if (!taskId) return null;
+
             return (
-              <tr key={task.id}>
-                <td>{task.id}</td>
-                <td>{task.company}</td>
-                <td>{task.type}</td>
+              <tr key={taskId}>
+                <td>{taskId}</td>
+                <td>{task.company || "—"}</td>
+                <td>{task.type || "—"}</td>
                 <td>{task.workerName || "—"}</td>
 
                 <td>
                   <span className={`tag tag-${normalizeClass(task.priority)}`}>
-                    {task.priority}
+                    {task.priority || "—"}
                   </span>
                 </td>
 
                 <td>
                   <select
-                    value={task.status}
+                    value={task.status || ""}
                     onChange={(e) =>
-                      handleStatusChange(task.id, e.target.value)
+                      handleStatusChange(taskId, e.target.value)
                     }
                     style={{
                       backgroundColor: getStatusColor(task.status),
@@ -223,7 +226,7 @@ const TasksList = () => {
                 </td>
 
                 <td>
-                  <Link to={`/tasks/view/${task.id}`} className="view-link">
+                  <Link to={`/tasks/view/${taskId}`} className="view-link">
                     View
                   </Link>
 
@@ -231,7 +234,7 @@ const TasksList = () => {
                     <>
                       {" | "}
                       <Link
-                        to={`/tasks/edit/${task.id}`}
+                        to={`/tasks/edit/${taskId}`}
                         className="edit-link"
                       >
                         Edit
@@ -244,7 +247,7 @@ const TasksList = () => {
                       {" | "}
                       <span
                         className="delete-link"
-                        onClick={() => handleDelete(task.id)}
+                        onClick={() => handleDelete(taskId)}
                       >
                         Delete
                       </span>
