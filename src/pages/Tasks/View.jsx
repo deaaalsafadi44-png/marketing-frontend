@@ -5,7 +5,7 @@ import api from "../../services/apiClient";
 import "./view.css";
 
 const ViewTask = () => {
-  const { id } = useParams(); // task numeric id
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [task, setTask] = useState(null);
@@ -18,7 +18,6 @@ const ViewTask = () => {
   /* ================= LOAD TASK ================= */
 
   useEffect(() => {
-    // 🛡️ تحقق قوي من الـ ID
     if (!id || isNaN(Number(id))) {
       setLoading(false);
       setNotFound(true);
@@ -28,7 +27,6 @@ const ViewTask = () => {
     const loadTask = async () => {
       try {
         const res = await getTaskById(id);
-
         if (!res?.data) {
           setNotFound(true);
         } else {
@@ -36,23 +34,20 @@ const ViewTask = () => {
         }
       } catch (err) {
         console.error("Error loading task:", err);
-
         if (err?.response?.status === 403) {
           alert("❌ غير مسموح لك بعرض هذه المهمة");
           navigate("/tasks");
           return;
         }
-
         setNotFound(true);
       }
-
       setLoading(false);
     };
 
     loadTask();
   }, [id, navigate]);
 
-  /* ================= TIMER ================= */
+  /* ================= TIMER (FIXED) ================= */
 
   useEffect(() => {
     if (!id || isNaN(Number(id))) return;
@@ -60,14 +55,20 @@ const ViewTask = () => {
     const savedStart = localStorage.getItem("timer_start_" + id);
     const savedSeconds = localStorage.getItem("timer_seconds_" + id);
 
-    if (savedSeconds) setSeconds(Number(savedSeconds));
+    let totalSeconds = 0;
+
+    if (savedSeconds) {
+      totalSeconds = Number(savedSeconds);
+    }
 
     if (savedStart) {
       const startTime = Number(savedStart);
       const diff = Math.floor((Date.now() - startTime) / 1000);
-      setSeconds((prev) => prev + diff);
+      totalSeconds += diff;
       setIsRunning(true);
     }
+
+    setSeconds(totalSeconds);
   }, [id]);
 
   useEffect(() => {
