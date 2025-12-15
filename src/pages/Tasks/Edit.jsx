@@ -22,7 +22,7 @@ const EditTask = () => {
 
   const [users, setUsers] = useState([]);
 
-  // ✅ تهيئة task بقيم افتراضية (الحل الجذري)
+  // ✅ تهيئة task بقيم افتراضية ثابتة
   const [task, setTask] = useState({
     title: "",
     description: "",
@@ -56,7 +56,7 @@ const EditTask = () => {
             ?.replace(/<[^>]+>/g, "")
             .trim() || "";
 
-        // ✅ دمج البيانات مع القيم الافتراضية
+        // ✅ تحميل البيانات مرة واحدة فقط
         setTask({
           title: taskRes.data.title || "",
           description: cleanDescription,
@@ -88,7 +88,8 @@ const EditTask = () => {
     };
 
     loadData();
-  }, [id, navigate, user]);
+  // ✅ مهم جدًا: لا تضف user أو navigate
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
