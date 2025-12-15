@@ -4,12 +4,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import "./editUser.css";
 
 const EditUser = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // Mongo _id
   const navigate = useNavigate();
 
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
@@ -29,13 +28,17 @@ const EditUser = () => {
       try {
         const res = await getUserById(id);
 
+        if (!res?.data) {
+          throw new Error("User not found");
+        }
+
         setForm({
-          name: res.data.name,
-          email: res.data.email,
+          name: res.data.name || "",
+          email: res.data.email || "",
           password: "",
           confirmPassword: "",
-          role: res.data.role,
-          dept: res.data.dept,
+          role: res.data.role || "Employee",
+          dept: res.data.dept || "Design",
         });
       } catch (err) {
         console.error(err);
@@ -47,21 +50,19 @@ const EditUser = () => {
     };
 
     load();
-  }, [id]);
+  }, [id, navigate]);
 
   const handleChange = (e) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
     });
-
     setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ❌ تحقق من تطابق كلمة المرور
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match!");
       return;
@@ -72,19 +73,20 @@ const EditUser = () => {
     const dataToSend = {
       name: form.name,
       email: form.email,
-      password: form.password || undefined, // لا نرسل كلمة المرور إذا لم يتم تغييرها
       role: form.role,
       dept: form.dept,
     };
 
+    if (form.password) {
+      dataToSend.password = form.password;
+    }
+
     try {
       await updateUserApi(id, dataToSend);
-
       alert("User updated successfully!");
       navigate("/users");
     } catch (err) {
       console.error(err);
-
       if (err?.response?.status === 400) {
         setError("Email already exists!");
       } else {

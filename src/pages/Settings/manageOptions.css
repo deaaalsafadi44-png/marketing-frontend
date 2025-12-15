@@ -75,3 +75,15 @@
 .del-btn:hover {
   background: darkred;
 }
+
+/* ------------------------------
+   NEW: Companies Box styling  
+   ------------------------------ */
+
+.opt-box.companies-box {
+  border-left: 5px solid #4caf50;
+}
+
+.opt-box.companies-box h2 {
+  color: #4caf50;
+}

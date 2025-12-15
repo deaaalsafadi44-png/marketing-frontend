@@ -3,16 +3,25 @@ import api from "../../services/apiClient";
 import "./manageOptions.css";
 
 const ManageOptions = () => {
-  const [options, setOptions] = useState({ priority: [], status: [] });
+  const [options, setOptions] = useState({ priority: [], status: [], companies: [] });
   const [newPriority, setNewPriority] = useState("");
   const [newStatus, setNewStatus] = useState("");
+  const [newCompany, setNewCompany] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const loadOptions = async () => {
     try {
       const res = await api.get("/options");
-      setOptions(res.data);
+
+      const data = res.data || {};
+
+      // نضمن دائماً وجود المصفوفات حتى لو الملف قديم
+      setOptions({
+        priority: data.priority || [],
+        status: data.status || [],
+        companies: data.companies || [],
+      });
     } catch (err) {
       if (err.response?.status === 401) {
         setError("Session expired. Please refresh page.");
@@ -31,8 +40,15 @@ const ManageOptions = () => {
 
   const saveOptions = async (updated) => {
     try {
-      await api.put("/options", updated);
-      setOptions(updated);
+      // نحافظ دائماً على المفاتيح الثلاثة
+      const payload = {
+        priority: updated.priority || [],
+        status: updated.status || [],
+        companies: updated.companies || [],
+      };
+
+      await api.put("/options", payload);
+      setOptions(payload);
     } catch (err) {
       setError("Failed to save options.");
     }
@@ -56,6 +72,15 @@ const ManageOptions = () => {
     setNewStatus("");
   };
 
+  const addCompany = () => {
+    if (!newCompany.trim()) return;
+    saveOptions({
+      ...options,
+      companies: [...(options.companies || []), newCompany.trim()],
+    });
+    setNewCompany("");
+  };
+
   const deletePriority = (item) => {
     saveOptions({
       ...options,
@@ -70,6 +95,13 @@ const ManageOptions = () => {
     });
   };
 
+  const deleteCompany = (item) => {
+    saveOptions({
+      ...options,
+      companies: (options.companies || []).filter((c) => c !== item),
+    });
+  };
+
   if (loading) return <div className="opt-loading">Loading options...</div>;
 
   return (
@@ -78,6 +110,7 @@ const ManageOptions = () => {
 
       {error && <p className="opt-error">{error}</p>}
 
+      {/* Priority Options */}
       <div className="opt-box">
         <h2>Priority Options</h2>
 
@@ -103,6 +136,7 @@ const ManageOptions = () => {
         </ul>
       </div>
 
+      {/* Status Options */}
       <div className="opt-box">
         <h2>Status Options</h2>
 
@@ -121,6 +155,32 @@ const ManageOptions = () => {
             <li key={i}>
               {s}
               <button className="del-btn" onClick={() => deleteStatus(s)}>
+                ✖
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Companies Options */}
+      <div className="opt-box">
+        <h2>Companies</h2>
+
+        <div className="opt-form">
+          <input
+            type="text"
+            placeholder="Add new company..."
+            value={newCompany}
+            onChange={(e) => setNewCompany(e.target.value)}
+          />
+          <button onClick={addCompany}>Add</button>
+        </div>
+
+        <ul className="opt-list">
+          {(options.companies || []).map((c, i) => (
+            <li key={i}>
+              {c}
+              <button className="del-btn" onClick={() => deleteCompany(c)}>
                 ✖
               </button>
             </li>

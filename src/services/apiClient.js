@@ -1,19 +1,19 @@
 import axios from "axios";
 
 /* =========================================
-   1️⃣ إعداد اختيار السيرفر (محلي / أونلاين)
+   1️⃣ Server Selection (Local / Online)
    ========================================= */
 
-// 🔹 رابط السيرفر المرفوع على Render (الصحيح)
-const ONLINE_API = "https://marketing-backend-1-m8e3.onrender.com";
+// ✅ الرابط الصحيح الجديد للباك (Render)
+const ONLINE_API = "https://marketing-backend-1-db4i.onrender.com";
 
-// 🔹 رابط السيرفر المحلي
+// 🔹 السيرفر المحلي
 const LOCAL_API = "http://localhost:5000";
 
-// 🔹 الوضع الافتراضي = السيرفر الأونلاين دائماً
+// 🔹 الافتراضي: أونلاين
 let API_URL = ONLINE_API;
 
-// 🔹 إن أراد المستخدم تشغيل المحلي يدوياً
+// 🔹 تبديل يدوي (للتطوير)
 const mode = localStorage.getItem("api_mode");
 if (mode === "local") API_URL = LOCAL_API;
 if (mode === "online") API_URL = ONLINE_API;
@@ -21,11 +21,10 @@ if (mode === "online") API_URL = ONLINE_API;
 console.log("🌐 API Running On:", API_URL);
 
 /* =========================================
-   2️⃣ Helpers
+   2️⃣ Token Helpers
    ========================================= */
 const getAccessToken = () => localStorage.getItem("accessToken");
 const getRefreshToken = () => localStorage.getItem("refreshToken");
-
 const saveAccessToken = (token) => localStorage.setItem("accessToken", token);
 
 /* =========================================
@@ -55,7 +54,11 @@ api.interceptors.response.use(
   async (error) => {
     const original = error.config;
 
-    if (error.response?.status === 401 && !original._retry) {
+    if (
+      error.response?.status === 401 &&
+      !original._retry &&
+      !original.url.includes("/login")
+    ) {
       original._retry = true;
 
       const refreshToken = getRefreshToken();
@@ -77,7 +80,6 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // 🔥🔥 الإصلاح الحقيقي هنا 🔥🔥
         const res = await api.post("/refresh", { refreshToken });
 
         const newAccessToken = res.data.accessToken;

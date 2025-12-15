@@ -18,7 +18,8 @@ const ViewTask = () => {
   /* ================= LOAD TASK ================= */
 
   useEffect(() => {
-    if (!id) {
+    // 🛡️ تحقق قوي من الـ ID
+    if (!id || isNaN(Number(id))) {
       setLoading(false);
       setNotFound(true);
       return;
@@ -54,7 +55,7 @@ const ViewTask = () => {
   /* ================= TIMER ================= */
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || isNaN(Number(id))) return;
 
     const savedStart = localStorage.getItem("timer_start_" + id);
     const savedSeconds = localStorage.getItem("timer_seconds_" + id);
@@ -72,7 +73,7 @@ const ViewTask = () => {
   useEffect(() => {
     let interval = null;
 
-    if (isRunning && id) {
+    if (isRunning && id && !isNaN(Number(id))) {
       interval = setInterval(() => {
         setSeconds((prev) => {
           const updated = prev + 1;
@@ -86,19 +87,19 @@ const ViewTask = () => {
   }, [isRunning, id]);
 
   const startTimer = () => {
-    if (!id) return;
+    if (!id || isNaN(Number(id))) return;
     localStorage.setItem("timer_start_" + id, Date.now());
     setIsRunning(true);
   };
 
   const pauseTimer = () => {
-    if (!id) return;
+    if (!id || isNaN(Number(id))) return;
     localStorage.removeItem("timer_start_" + id);
     setIsRunning(false);
   };
 
   const finishTask = async () => {
-    if (!id) return;
+    if (!id || isNaN(Number(id))) return;
 
     pauseTimer();
     const totalMinutes = Math.floor(seconds / 60);

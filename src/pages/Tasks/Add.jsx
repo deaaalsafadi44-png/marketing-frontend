@@ -3,13 +3,17 @@ import { addTaskApi, getOptions } from "../../services/tasksService";
 import { getUsers } from "../../services/usersService";
 import { useNavigate } from "react-router-dom";
 
-
 import "./add.css";
 
 const AddTask = () => {
   const navigate = useNavigate();
 
-  const [options, setOptions] = useState({ priority: [], status: [] });
+  const [options, setOptions] = useState({
+    priority: [],
+    status: [],
+    companies: []
+  });
+
   const [users, setUsers] = useState([]);
 
   const [task, setTask] = useState({
@@ -31,14 +35,19 @@ const AddTask = () => {
     const load = async () => {
       try {
         const ops = await getOptions();
-        setOptions(ops.data);
+
+        setOptions({
+          priority: ops.data.priority || [],
+          status: ops.data.status || [],
+          companies: ops.data.companies || [],   // ⬅️ الشركات الجديدة
+        });
 
         const u = await getUsers();
         setUsers(u.data);
+
       } catch (err) {
         console.error("Error loading form data:", err);
 
-        // ممنوع لغير الأدمن
         if (err?.response?.status === 403) {
           alert("❌ فقط الأدمن يمكنه الوصول إلى صفحة إضافة مهمة");
           navigate("/tasks");
@@ -88,7 +97,7 @@ const AddTask = () => {
         <h2 className="card-title">📝 Add New Task</h2>
 
         <form onSubmit={handleSubmit}>
-          
+
           {/* Title */}
           <div className="form-group">
             <label>Task Title</label>
@@ -98,22 +107,26 @@ const AddTask = () => {
           {/* Description */}
           <div className="form-group">
             <label>Description</label>
-           <textarea
-  name="description"
-  className="description-box"
-  value={task.description}
-  onChange={(e) =>
-    setTask({ ...task, description: e.target.value })
-  }
-  placeholder="Enter task description..."
-/>
-
+            <textarea
+              name="description"
+              className="description-box"
+              value={task.description}
+              onChange={(e) =>
+                setTask({ ...task, description: e.target.value })
+              }
+              placeholder="Enter task description..."
+            />
           </div>
 
-          {/* Company */}
+          {/* Company (DROP-DOWN OPTION) */}
           <div className="form-group">
             <label>Company</label>
-            <input type="text" name="company" required onChange={handleChange} />
+            <select name="company" required onChange={handleChange}>
+              <option value="">Select Company</option>
+              {options.companies.map((c, i) => (
+                <option key={i} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
 
           {/* Type */}
