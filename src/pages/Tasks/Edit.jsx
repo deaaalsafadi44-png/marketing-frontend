@@ -19,8 +19,19 @@ const EditTask = () => {
     status: [],
     companies: []
   });
+
   const [users, setUsers] = useState([]);
-  const [task, setTask] = useState(null);
+
+  // ✅ تهيئة task بقيم افتراضية (الحل الجذري)
+  const [task, setTask] = useState({
+    title: "",
+    description: "",
+    company: "",
+    type: "",
+    workerId: "",
+    priority: "",
+    status: ""
+  });
 
   useEffect(() => {
     // 🔒 منع الموظف
@@ -40,13 +51,20 @@ const EditTask = () => {
       try {
         const taskRes = await getTaskById(id);
 
-        const cleanDescription = taskRes.data.description
-          ?.replace(/<[^>]+>/g, "")
-          .trim();
+        const cleanDescription =
+          taskRes.data.description
+            ?.replace(/<[^>]+>/g, "")
+            .trim() || "";
 
+        // ✅ دمج البيانات مع القيم الافتراضية
         setTask({
-          ...taskRes.data,
-          description: cleanDescription || ""
+          title: taskRes.data.title || "",
+          description: cleanDescription,
+          company: taskRes.data.company || "",
+          type: taskRes.data.type || "",
+          workerId: Number(taskRes.data.workerId) || "",
+          priority: taskRes.data.priority || "",
+          status: taskRes.data.status || ""
         });
 
         const optRes = await getOptions();
@@ -73,24 +91,21 @@ const EditTask = () => {
   }, [id, navigate, user]);
 
   const handleChange = (e) => {
-    setTask({ ...task, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    setTask((prev) => ({
+      ...prev,
+      [name]: name === "workerId" ? Number(value) : value
+    }));
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
 
     try {
-      // ✨ تنظيف البيانات قبل الإرسال
-      const {
-        id: _id,
-        createdAt,
-        workerName,
-        ...cleanTask
-      } = task;
+      await updateTaskApi(id, task);
 
-      await updateTaskApi(id, cleanTask);
-
-      alert("Task updated successfully!");
+      alert("✅ Task updated successfully!");
       navigate(`/tasks/view/${id}`);
     } catch (err) {
       console.error("Error updating task:", err);
@@ -103,8 +118,6 @@ const EditTask = () => {
       alert("❌ Failed to update task. Try again.");
     }
   };
-
-  if (!task) return <div className="loading">Loading...</div>;
 
   return (
     <div className="edit-page">
@@ -129,19 +142,10 @@ const EditTask = () => {
             <label>Description</label>
             <textarea
               className="simple-textarea"
+              name="description"
               value={task.description}
-              onChange={(e) =>
-                setTask({ ...task, description: e.target.value })
-              }
+              onChange={handleChange}
               rows="6"
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "8px",
-                border: "1px solid #ccc",
-                fontSize: "16px",
-                resize: "vertical"
-              }}
             />
           </div>
 
@@ -175,7 +179,7 @@ const EditTask = () => {
             />
           </div>
 
-          {/* Assigned Worker */}
+          {/* Assigned User */}
           <div className="form-group">
             <label>Assigned User</label>
             <select
