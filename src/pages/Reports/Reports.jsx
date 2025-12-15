@@ -193,7 +193,12 @@ const Reports = () => {
 
     doc.setFontSize(12);
     doc.text(`Total Tasks: ${totalTasks}`, 14, 30);
-    doc.text(`Total Hours: ${totalHours} hrs`, 14, 36);
+   doc.text(
+  `Total Time: ${formatMinutesToText(totalHours)}`,
+  14,
+  36
+);
+
     doc.text(`Most Common Task: ${mostCommonTask}`, 14, 42);
 
     const tableData = filteredTasks.map((t) => [
@@ -202,7 +207,8 @@ const Reports = () => {
       t.assigned,
       t.priority,
       t.status,
-      ((t.timeSpent || 0) / 60).toFixed(2) + " hrs",
+      formatMinutesToText(t.timeSpent || 0),
+
       t.createdAt,
     ]);
 
