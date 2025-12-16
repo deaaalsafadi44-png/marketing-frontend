@@ -7,12 +7,16 @@ import {
 } from "../../services/tasksService";
 import "./tasks.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const TasksList = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  /* =========================
+     ✅ AUTH (بدون localStorage)
+     ========================= */
+  const { user, loading: authLoading } = useAuth();
 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,8 +31,6 @@ const TasksList = () => {
     const d = new Date(val);
     return isNaN(d.getTime()) ? null : d;
   };
-
-  /* ========================= */
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -57,6 +59,9 @@ const TasksList = () => {
   const [companyFilter, setCompanyFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
+  /* =========================
+     📥 Load Tasks
+     ========================= */
   const loadTasks = async () => {
     try {
       const res = await getTasks();
@@ -66,23 +71,27 @@ const TasksList = () => {
       setStatusOptions(opt.data?.status || []);
     } catch (err) {
       console.error("Error loading tasks:", err);
-
       if (err?.response?.status === 403) {
-        alert("❌ غير مصرح لك بعرض المهام");
-        navigate("/");
+        navigate("/unauthorized", { replace: true });
       }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    loadTasks();
+    if (!authLoading && user) {
+      loadTasks();
+    }
 
     if (location.state?.refresh) {
       navigate("/tasks", { replace: true, state: {} });
     }
-  }, [location.state]);
+  }, [authLoading, user, location.state]);
 
+  /* =========================
+     ✏️ Update Status
+     ========================= */
   const handleStatusChange = async (taskId, newStatus) => {
     const task = tasks.find((t) => t.id === taskId);
     if (!task) return;
@@ -93,13 +102,15 @@ const TasksList = () => {
     } catch (err) {
       console.error("Status update error:", err);
       if (err?.response?.status === 403) {
-        alert("❌ لا تملك صلاحية لتعديل حالة المهمة");
+        alert("❌ لا تملك صلاحية تعديل الحالة");
       }
     }
   };
 
+  /* =========================
+     🗑 Delete Task
+     ========================= */
   const handleDelete = async (taskId) => {
-    if (!taskId) return;
     if (!window.confirm("Are you sure you want to delete this task?")) return;
 
     try {
@@ -107,14 +118,12 @@ const TasksList = () => {
       loadTasks();
     } catch (err) {
       console.error("Delete error:", err);
-      if (err?.response?.status === 403) {
-        alert("❌ فقط الأدمن يمكنه حذف المهام!");
-      }
+      alert("❌ لا تملك صلاحية حذف المهمة");
     }
   };
 
   /* =========================
-     ✅ الفلترة
+     🔍 Filtering
      ========================= */
   const filteredTasks = tasks.filter((task) => {
     const created = safeDate(task.createdAt);
@@ -128,8 +137,18 @@ const TasksList = () => {
     );
   });
 
-  if (loading) return <h2 style={{ textAlign: "center" }}>Loading...</h2>;
+  /* =========================
+     ⏳ Guards
+     ========================= */
+  if (authLoading || loading) {
+    return <h2 style={{ textAlign: "center" }}>Loading...</h2>;
+  }
 
+  if (!user) return null;
+
+  /* =========================
+     🖥 UI
+     ========================= */
   return (
     <div className="tasks-container">
       <h1 className="tasks-title">
@@ -188,76 +207,64 @@ const TasksList = () => {
         </thead>
 
         <tbody>
-          {filteredTasks.map((task) => {
-            const taskId = task.id; // ✅ الصحيح
+          {filteredTasks.map((task) => (
+            <tr key={task.id}>
+              <td>{task.id}</td>
+              <td>{task.company || "—"}</td>
+              <td>{task.type || "—"}</td>
+              <td>{task.workerName || "—"}</td>
 
-            if (!taskId) return null;
+              <td>
+                <span className={`tag tag-${normalizeClass(task.priority)}`}>
+                  {task.priority || "—"}
+                </span>
+              </td>
 
-            return (
-              <tr key={taskId}>
-                <td>{taskId}</td>
-                <td>{task.company || "—"}</td>
-                <td>{task.type || "—"}</td>
-                <td>{task.workerName || "—"}</td>
+              <td>
+                <select
+                  value={task.status || ""}
+                  onChange={(e) =>
+                    handleStatusChange(task.id, e.target.value)
+                  }
+                  style={{
+                    backgroundColor: getStatusColor(task.status),
+                    color: "#fff",
+                  }}
+                >
+                  {statusOptions.map((s, i) => (
+                    <option key={i} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </td>
 
-                <td>
-                  <span className={`tag tag-${normalizeClass(task.priority)}`}>
-                    {task.priority || "—"}
-                  </span>
-                </td>
+              <td>
+                <Link to={`/tasks/view/${task.id}`} className="view-link">
+                  View
+                </Link>
 
-                <td>
-                  <select
-                    value={task.status || ""}
-                    onChange={(e) =>
-                      handleStatusChange(taskId, e.target.value)
-                    }
-                    style={{
-                      backgroundColor: getStatusColor(task.status),
-                      color: "#fff",
-                    }}
-                  >
-                    {statusOptions.map((s, i) => (
-                      <option key={i} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-
-                <td>
-                  <Link to={`/tasks/view/${taskId}`} className="view-link">
-                    View
-                  </Link>
-
-                  {(user.role === "Admin" || user.role === "Manager") && (
-                    <>
-                      {" | "}
-                      <Link
-                        to={`/tasks/edit/${taskId}`}
-                        className="edit-link"
-                      >
-                        Edit
-                      </Link>
-                    </>
-                  )}
-
-                  {(user.role === "Admin" || user.role === "Manager") && (
-
-                    <>
-                      {" | "}
-                      <span
-                        className="delete-link"
-                        onClick={() => handleDelete(taskId)}
-                      >
-                        Delete
-                      </span>
-                    </>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
+                {(user.role === "Admin" || user.role === "Manager") && (
+                  <>
+                    {" | "}
+                    <Link
+                      to={`/tasks/edit/${task.id}`}
+                      className="edit-link"
+                    >
+                      Edit
+                    </Link>
+                    {" | "}
+                    <span
+                      className="delete-link"
+                      onClick={() => handleDelete(task.id)}
+                    >
+                      Delete
+                    </span>
+                  </>
+                )}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
