@@ -186,11 +186,12 @@ const TasksList = () => {
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        {user.role === "Admin" && (
-          <Link to="/tasks/add" className="add-task-btn">
-            + Add New Task
-          </Link>
-        )}
+      {(user.role === "Admin" || user.role === "Manager") && (
+  <Link to="/tasks/add" className="add-task-btn">
+    + Add New Task
+  </Link>
+)}
+
       </div>
 
       <table className="tasks-table">
