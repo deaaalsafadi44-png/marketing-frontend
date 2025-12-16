@@ -20,16 +20,16 @@ if (!isProd) {
 }
 
 /* =========================================
-   3️⃣ Axios Instance (Cookies Enabled)
+   3️⃣ Axios Instance (HttpOnly Cookies)
 ========================================= */
 
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true, // ✅ HttpOnly Cookies
+  withCredentials: true, // ✅ ضروري
 });
 
 /* =========================================
-   4️⃣ Refresh Token Handler (HttpOnly)
+   4️⃣ Refresh Token Handler (SAFE)
 ========================================= */
 
 let isRefreshing = false;
@@ -47,12 +47,16 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    const isAuthEndpoint =
+      originalRequest.url.includes("/login") ||
+      originalRequest.url.includes("/refresh") ||
+      originalRequest.url.includes("/auth/me") ||
+      originalRequest.url.includes("/logout");
+
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url.includes("/login") &&
-      !originalRequest.url.includes("/refresh") &&
-      !originalRequest.url.includes("/auth/me")
+      !isAuthEndpoint
     ) {
       originalRequest._retry = true;
 
@@ -65,12 +69,13 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await api.post("/refresh");
+        await api.post("/refresh"); // Cookie يُرسل تلقائيًا
         processQueue();
         return api(originalRequest);
       } catch (err) {
         processQueue(err);
-        window.location.href = "/login";
+
+        // ⛔ لا Redirect هنا — AuthContext سيتكفّل
         return Promise.reject(err);
       } finally {
         isRefreshing = false;
