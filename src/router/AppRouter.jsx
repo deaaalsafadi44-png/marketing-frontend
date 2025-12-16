@@ -6,6 +6,9 @@ import MainLayout from "../layout/MainLayout";
 // Components
 import PrivateRoute from "../components/PrivateRoute";
 
+// Context
+import { useAuth } from "../context/AuthContext";
+
 // Pages
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Unauthorized from "../pages/Unauthorized";
@@ -26,20 +29,25 @@ import ManageOptions from "../pages/Settings/ManageOptions";
 
 import Login from "../pages/Login/Login";
 
-// ===============================
-// Redirect Logged-in User
-// ===============================
-const RedirectLoggedIn = () => {
-  const user = localStorage.getItem("user");
-  const refresh = localStorage.getItem("refreshToken");
+/* ===============================
+   ROLE BASED HOME
+================================ */
+const RoleBasedHome = () => {
+  const { user, loading } = useAuth();
 
-  if (user && refresh) return <Navigate to="/" replace />;
-  return <Login />;
+  if (loading) return null;
+
+  if (user?.role === "Admin") {
+    return <Dashboard />;
+  }
+
+  // Manager + User
+  return <Navigate to="/tasks" replace />;
 };
 
-// ===============================
-// Error Page
-// ===============================
+/* ===============================
+   Error Page
+================================ */
 const ErrorPage = () => (
   <div style={{ padding: 40, textAlign: "center" }}>
     <h1>404 - Page Not Found</h1>
@@ -47,14 +55,14 @@ const ErrorPage = () => (
   </div>
 );
 
-// ===============================
-// ROUTER
-// ===============================
+/* ===============================
+   ROUTER
+================================ */
 export const router = createBrowserRouter([
   // Login
   {
     path: "/login",
-    element: <RedirectLoggedIn />,
+    element: <Login />,
   },
 
   // Unauthorized
@@ -63,7 +71,7 @@ export const router = createBrowserRouter([
     element: <Unauthorized />,
   },
 
-  // Protected Routes
+  // Protected App
   {
     path: "/",
     element: (
@@ -74,16 +82,13 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
 
     children: [
+      // ✅ الصفحة الافتراضية حسب الدور
       {
         index: true,
-        element: (
-          <PrivateRoute role="Admin">
-            <Dashboard />
-          </PrivateRoute>
-        ),
+        element: <RoleBasedHome />,
       },
 
-      // Settings
+      // Settings (Admin فقط)
       {
         path: "settings",
         element: (
@@ -101,7 +106,7 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // Tasks
+      // Tasks (الجميع)
       {
         path: "tasks",
         children: [
@@ -140,7 +145,7 @@ export const router = createBrowserRouter([
         ],
       },
 
-      // Reports
+      // Reports (Admin + Manager)
       {
         path: "reports",
         element: (
@@ -150,7 +155,7 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // Users
+      // Users (Admin فقط)
       {
         path: "users",
         element: (

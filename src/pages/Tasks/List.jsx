@@ -242,7 +242,8 @@ const TasksList = () => {
                     </>
                   )}
 
-                  {user.role === "Admin" && (
+                  {(user.role === "Admin" || user.role === "Manager") && (
+
                     <>
                       {" | "}
                       <span

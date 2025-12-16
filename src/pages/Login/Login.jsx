@@ -1,10 +1,11 @@
 import "./login.css";
 import React, { useState } from "react";
-import { loginUser } from "../../services/usersService";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,20 +18,19 @@ const Login = () => {
     setError("");
 
     try {
-      const res = await loginUser(email, password);
+      const user = await login(email, password);
 
-      const user = res.data.user;
-
-      if (user.role === "Admin") navigate("/");
-      else navigate("/tasks");
-
+      // ⏭️ redirect واحد فقط
+      navigate("/");
     } catch (err) {
-      if (err?.response?.status === 401)
+      if (err?.response?.status === 401) {
         setError("❌ Invalid email or password");
-      else setError("❌ Something went wrong.");
+      } else {
+        setError("❌ Something went wrong.");
+      }
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

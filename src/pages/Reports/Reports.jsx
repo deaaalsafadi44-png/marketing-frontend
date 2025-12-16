@@ -32,8 +32,25 @@ ChartJS.register(
   Legend
 );
 
+/* =============================
+   UTIL: FORMAT MINUTES
+============================= */
+const formatMinutesToText = (minutes) => {
+  if (!minutes || minutes <= 0) return "0 minutes";
+
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+
+  if (h > 0 && m > 0)
+    return `${h} hour${h > 1 ? "s" : ""}, ${m} minute${m > 1 ? "s" : ""}`;
+  if (h > 0) return `${h} hour${h > 1 ? "s" : ""}`;
+  return `${m} minute${m > 1 ? "s" : ""}`;
+};
+
 const Reports = () => {
   const [tasks, setTasks] = useState([]);
+  const [summary, setSummary] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -41,33 +58,59 @@ const Reports = () => {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
+  /* =============================
+     LOAD TASKS (مرة واحدة)
+  ============================= */
   useEffect(() => {
-    const load = async () => {
+    const loadTasks = async () => {
       try {
         const res = await api.get("/tasks");
         setTasks(res.data);
       } catch (err) {
         console.error(err);
+        setError("Failed to load tasks.");
+      }
+    };
 
-        if (err.response?.status === 403) {
-          setError("You are not allowed to access reports.");
-        } else {
-          setError("Failed to load tasks.");
-        }
+    loadTasks();
+  }, []);
+
+  /* =============================
+     LOAD SUMMARY (يتغير مع الفلاتر)
+  ============================= */
+  useEffect(() => {
+    const loadSummary = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const res = await api.get("/reports/summary", {
+          params: {
+            company: companyFilter || undefined,
+            dateFrom: dateFrom || undefined,
+            dateTo: dateTo || undefined,
+          },
+        });
+
+        setSummary(res.data);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load summary.");
       } finally {
         setLoading(false);
       }
     };
 
-    load();
-  }, []);
+    loadSummary();
+  }, [companyFilter, dateFrom, dateTo]);
 
   if (loading) return <div className="loading">Loading reports...</div>;
   if (error) return <div className="error-box">{error}</div>;
+  if (!summary) return <div className="loading">Preparing summary...</div>;
 
-  // =============================
-  // FILTER TASKS
-  // =============================
+  /* =============================
+     FILTER TASKS (للرسوم فقط)
+  ============================= */
   const filteredTasks = tasks.filter((task) => {
     if (!task.createdAt) return false;
 
@@ -85,26 +128,9 @@ const Reports = () => {
     return matchCompany && matchDateFrom && matchDateTo;
   });
 
-  // SUMMARY
-  const totalTasks = filteredTasks.length;
-
-  const totalHours = filteredTasks
-    .reduce((sum, t) => sum + (t.timeSpent || 0) / 60, 0)
-    .toFixed(2);
-
-  const mostCommonTask =
-    filteredTasks.length > 0
-      ? Object.entries(
-          filteredTasks.reduce((acc, t) => {
-            acc[t.type] = (acc[t.type] || 0) + 1;
-            return acc;
-          }, {})
-        ).sort((a, b) => b[1] - a[1])[0][0]
-      : "—";
-
-  // =============================
-  // 🟢 DYNAMIC COMPANIES (MATCH COLORS WITH DASHBOARD)
-  // =============================
+  /* =============================
+     CHARTS: COMPANY
+  ============================= */
   const uniqueCompanies = [...new Set(filteredTasks.map((t) => t.company))];
 
   const dashboardColors = [
@@ -118,31 +144,23 @@ const Reports = () => {
     "#42a5f5",
   ];
 
-  const companyCounts = {};
-  uniqueCompanies.forEach((company) => {
-    companyCounts[company] = filteredTasks.filter(
-      (t) => t.company === company
-    ).length;
-  });
-
-  // نفس ترتيب الألوان بين Dashboard و Reports
-  const dynamicColors = uniqueCompanies.map(
-    (_, i) => dashboardColors[i % dashboardColors.length]
-  );
-
   const pieData = {
     labels: uniqueCompanies,
     datasets: [
       {
-        data: Object.values(companyCounts),
-        backgroundColor: dynamicColors,
+        data: uniqueCompanies.map(
+          (c) => filteredTasks.filter((t) => t.company === c).length
+        ),
+        backgroundColor: uniqueCompanies.map(
+          (_, i) => dashboardColors[i % dashboardColors.length]
+        ),
       },
     ],
   };
 
-  // =============================
-  // TYPE COUNTS
-  // =============================
+  /* =============================
+     CHARTS: TYPE
+  ============================= */
   const typeCounts = filteredTasks.reduce((acc, t) => {
     acc[t.type] = (acc[t.type] || 0) + 1;
     return acc;
@@ -159,9 +177,9 @@ const Reports = () => {
     ],
   };
 
-  // =============================
-  // MONTHLY HOURS
-  // =============================
+  /* =============================
+     CHARTS: MONTHLY HOURS
+  ============================= */
   const monthlyHours = Array(12).fill(0);
   filteredTasks.forEach((task) => {
     const month = new Date(task.createdAt).getMonth();
@@ -185,6 +203,9 @@ const Reports = () => {
     ],
   };
 
+  /* =============================
+     EXPORT PDF
+  ============================= */
   const exportPDF = () => {
     const doc = new jsPDF();
 
@@ -192,53 +213,44 @@ const Reports = () => {
     doc.text("Tasks Report", 14, 20);
 
     doc.setFontSize(12);
-   doc.text(
-  `Total Time: ${formatMinutes(Math.round(totalHours * 60))}`,
-  14,
-  36
-);
+    doc.text(
+      `Total Time: ${formatMinutesToText(summary.totalMinutes)}`,
+      14,
+      36
+    );
 
-   doc.text(
-  `Total Time: ${formatMinutesToText(totalHours)}`,
-  14,
-  36
-);
-
-    doc.text(`Most Common Task: ${mostCommonTask}`, 14, 42);
-
-    const tableData = filteredTasks.map((t) => [
-      t.company,
-      t.type,
-      t.assigned,
-      t.priority,
-      t.status,
-      formatMinutesToText(t.timeSpent || 0),
-
-      t.createdAt,
-    ]);
+    doc.text(`Most Common Task: ${summary.mostCommonTask}`, 14, 42);
 
     autoTable(doc, {
       startY: 50,
       head: [[
-        "Company", "Type", "Assigned", "Priority",
-        "Status", "Hours Spent", "Created At"
+        "Company", "Type", "Priority",
+        "Status", "Time Spent", "Created At"
       ]],
-      body: tableData,
+      body: filteredTasks.map((t) => [
+        t.company,
+        t.type,
+        t.priority,
+        t.status,
+        formatMinutesToText(t.timeSpent || 0),
+        t.createdAt,
+      ]),
     });
 
     doc.save("Tasks_Report.pdf");
   };
 
+  /* =============================
+     EXPORT EXCEL
+  ============================= */
   const exportExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
       filteredTasks.map((t) => ({
         Company: t.company,
         Type: t.type,
-        Assigned: t.assigned,
         Priority: t.priority,
         Status: t.status,
-        HoursSpent: formatMinutes(t.timeSpent || 0)
-,
+        TimeSpent: formatMinutesToText(t.timeSpent || 0),
         CreatedAt: t.createdAt,
       }))
     );
@@ -264,7 +276,6 @@ const Reports = () => {
       <div className="filters-row">
         <select onChange={(e) => setCompanyFilter(e.target.value)}>
           <option value="">Company</option>
-
           {uniqueCompanies.map((company, i) => (
             <option key={i} value={company}>
               {company}
@@ -280,9 +291,9 @@ const Reports = () => {
       </div>
 
       <div className="summary-box">
-        <p><strong>Total Tasks:</strong> {totalTasks}</p>
-        <p><strong>Total Hours:</strong> {totalHours} hrs</p>
-        <p><strong>Most Common Task:</strong> {mostCommonTask}</p>
+        <p><strong>Total Tasks:</strong> {summary.totalTasks}</p>
+        <p><strong>Total Time:</strong> {formatMinutesToText(summary.totalMinutes)}</p>
+        <p><strong>Most Common Task:</strong> {summary.mostCommonTask}</p>
       </div>
 
       <div className="charts-row">

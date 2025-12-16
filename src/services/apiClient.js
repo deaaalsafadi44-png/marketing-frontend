@@ -1,105 +1,79 @@
 import axios from "axios";
 
 /* =========================================
-   1️⃣ Server Selection (Local / Online)
-   ========================================= */
+   1️⃣ Environment Detection
+========================================= */
 
-// ✅ الرابط الصحيح الجديد للباك (Render)
+const isProd = import.meta.env.MODE === "production";
+
+/* =========================================
+   2️⃣ API URLs
+========================================= */
+
 const ONLINE_API = "https://marketing-backend-1-db4i.onrender.com";
-
-// 🔹 السيرفر المحلي
 const LOCAL_API = "http://localhost:5000";
 
-// 🔹 الافتراضي: أونلاين
-let API_URL = ONLINE_API;
+const API_URL = isProd ? ONLINE_API : LOCAL_API;
 
-// 🔹 تبديل يدوي (للتطوير)
-const mode = localStorage.getItem("api_mode");
-if (mode === "local") API_URL = LOCAL_API;
-if (mode === "online") API_URL = ONLINE_API;
-
-console.log("🌐 API Running On:", API_URL);
+if (!isProd) {
+  console.log("🧪 DEV MODE → API:", API_URL);
+}
 
 /* =========================================
-   2️⃣ Token Helpers
-   ========================================= */
-const getAccessToken = () => localStorage.getItem("accessToken");
-const getRefreshToken = () => localStorage.getItem("refreshToken");
-const saveAccessToken = (token) => localStorage.setItem("accessToken", token);
+   3️⃣ Axios Instance (Cookies Enabled)
+========================================= */
 
-/* =========================================
-   3️⃣ Axios Instance
-   ========================================= */
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true, // ✅ HttpOnly Cookies
 });
 
 /* =========================================
-   4️⃣ Attach Access Token
-   ========================================= */
-api.interceptors.request.use((config) => {
-  const token = getAccessToken();
-  if (token) config.headers.Authorization = "Bearer " + token;
-  return config;
-});
+   4️⃣ Refresh Token Handler (HttpOnly)
+========================================= */
 
-/* =========================================
-   5️⃣ Refresh Token Handler
-   ========================================= */
 let isRefreshing = false;
 let failedQueue = [];
 
+const processQueue = (error = null) => {
+  failedQueue.forEach((p) => {
+    error ? p.reject(error) : p.resolve();
+  });
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
-  (res) => res,
+  (response) => response,
   async (error) => {
-    const original = error.config;
+    const originalRequest = error.config;
 
     if (
       error.response?.status === 401 &&
-      !original._retry &&
-      !original.url.includes("/login")
+      !originalRequest._retry &&
+      !originalRequest.url.includes("/login") &&
+      !originalRequest.url.includes("/refresh") &&
+      !originalRequest.url.includes("/auth/me")
     ) {
-      original._retry = true;
-
-      const refreshToken = getRefreshToken();
-      if (!refreshToken) {
-        localStorage.clear();
-        window.location.href = "/login";
-        return Promise.reject(error);
-      }
+      originalRequest._retry = true;
 
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then((token) => {
-          original.headers.Authorization = "Bearer " + token;
-          return api(original);
-        });
+        }).then(() => api(originalRequest));
       }
 
       isRefreshing = true;
 
       try {
-        const res = await api.post("/refresh", { refreshToken });
-
-        const newAccessToken = res.data.accessToken;
-        saveAccessToken(newAccessToken);
-
-        failedQueue.forEach((p) => p.resolve(newAccessToken));
-        failedQueue = [];
-        isRefreshing = false;
-
-        original.headers.Authorization = "Bearer " + newAccessToken;
-        return api(original);
-
+        await api.post("/refresh");
+        processQueue();
+        return api(originalRequest);
       } catch (err) {
-        failedQueue.forEach((p) => p.reject(err));
-        failedQueue = [];
-        isRefreshing = false;
-
-        localStorage.clear();
+        processQueue(err);
         window.location.href = "/login";
         return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
       }
     }
 

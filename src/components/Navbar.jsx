@@ -1,23 +1,32 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { logoutUser } from "../services/usersService";
 import "./Navbar.css";
 import { useEffect, useState } from "react";
 import api from "../services/apiClient";
+import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
   const navigate = useNavigate();
 
-  const user = JSON.parse(localStorage.getItem("user"));
-  const accessToken = localStorage.getItem("accessToken");
+  /* =========================
+     AUTH CONTEXT
+  ========================= */
+  const { user, logout, loading } = useAuth();
 
-  if (!user || !accessToken) return null;
+  // أثناء التحقق من الجلسة
+  if (loading) return null;
 
-  // ================================
-  // ⭐ تحميل اسم السيستم بشكل ديناميكي
-  // ================================
+  // لا يوجد مستخدم → لا Navbar
+  if (!user) return null;
+
+  /* ================================
+     ⭐ اسم السيستم
+  ================================ */
   const [systemName, setSystemName] = useState("System");
 
   useEffect(() => {
+    // 🔒 لا نطلب الإعدادات إلا من Admin
+    if (user.role !== "Admin") return;
+
     const loadSystemName = async () => {
       try {
         const res = await api.get("/settings");
@@ -28,37 +37,45 @@ function Navbar() {
     };
 
     loadSystemName();
-  }, []);
+  }, [user.role]);
 
+  /* ================================
+     🚪 Logout
+  ================================ */
   const handleLogout = async () => {
-    try {
-      await logoutUser();
-    } catch (err) {}
-
-    localStorage.clear();
+    await logout();
     navigate("/login");
   };
 
   return (
     <nav className="top-navbar">
       <div className="nav-left">
-        {/* ⭐ هنا الاسم الديناميكي */}
         <h2 className="system-title">{systemName}</h2>
       </div>
 
       <div className="nav-right">
+        <NavLink to="/" end className="nav-link">
+          Dashboard
+        </NavLink>
 
-        <NavLink to="/" end className="nav-link">Dashboard</NavLink>
-        <NavLink to="/tasks" className="nav-link">Tasks</NavLink>
+        <NavLink to="/tasks" className="nav-link">
+          Tasks
+        </NavLink>
 
         {(user.role === "Admin" || user.role === "Manager") && (
-          <NavLink to="/reports" className="nav-link">Reports</NavLink>
+          <NavLink to="/reports" className="nav-link">
+            Reports
+          </NavLink>
         )}
 
         {user.role === "Admin" && (
           <>
-            <NavLink to="/users" className="nav-link">Users</NavLink>
-            <NavLink to="/settings" className="nav-link">Settings</NavLink>
+            <NavLink to="/users" className="nav-link">
+              Users
+            </NavLink>
+            <NavLink to="/settings" className="nav-link">
+              Settings
+            </NavLink>
           </>
         )}
 
@@ -71,3 +88,4 @@ function Navbar() {
 }
 
 export default Navbar;
+  

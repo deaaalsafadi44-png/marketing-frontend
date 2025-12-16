@@ -1,0 +1,115 @@
+{
+  "hash": "c06c8dfd",
+  "configHash": "98809a39",
+  "lockfileHash": "1ce7bcd1",
+  "browserHash": "2f4a7195",
+  "optimized": {
+    "react": {
+      "src": "../../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "6dc26b8c",
+      "needsInterop": true
+    },
+    "react-dom": {
+      "src": "../../../node_modules/react-dom/index.js",
+      "file": "react-dom.js",
+      "fileHash": "12ed36b1",
+      "needsInterop": true
+    },
+    "react/jsx-dev-runtime": {
+      "src": "../../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "e5d68733",
+      "needsInterop": true
+    },
+    "react/jsx-runtime": {
+      "src": "../../../node_modules/react/jsx-runtime.js",
+      "file": "react_jsx-runtime.js",
+      "fileHash": "d840088b",
+      "needsInterop": true
+    },
+    "axios": {
+      "src": "../../../node_modules/axios/index.js",
+      "file": "axios.js",
+      "fileHash": "6bc69342",
+      "needsInterop": false
+    },
+    "chart.js": {
+      "src": "../../../node_modules/chart.js/dist/chart.js",
+      "file": "chart__js.js",
+      "fileHash": "2c4ba0e0",
+      "needsInterop": false
+    },
+    "file-saver": {
+      "src": "../../../node_modules/file-saver/dist/FileSaver.min.js",
+      "file": "file-saver.js",
+      "fileHash": "d7033378",
+      "needsInterop": true
+    },
+    "jspdf": {
+      "src": "../../../node_modules/jspdf/dist/jspdf.es.min.js",
+      "file": "jspdf.js",
+      "fileHash": "b8f7880a",
+      "needsInterop": false
+    },
+    "jspdf-autotable": {
+      "src": "../../../node_modules/jspdf-autotable/dist/jspdf.plugin.autotable.mjs",
+      "file": "jspdf-autotable.js",
+      "fileHash": "ed8e099a",
+      "needsInterop": false
+    },
+    "react-chartjs-2": {
+      "src": "../../../node_modules/react-chartjs-2/dist/index.js",
+      "file": "react-chartjs-2.js",
+      "fileHash": "382ada62",
+      "needsInterop": false
+    },
+    "react-dom/client": {
+      "src": "../../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "888c9973",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../../node_modules/react-router-dom/dist/index.mjs",
+      "file": "react-router-dom.js",
+      "fileHash": "a40a033e",
+      "needsInterop": false
+    },
+    "xlsx": {
+      "src": "../../../node_modules/xlsx/xlsx.mjs",
+      "file": "xlsx.js",
+      "fileHash": "abf779d3",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "html2canvas.esm-IOJUNZK4": {
+      "file": "html2canvas__esm-IOJUNZK4.js"
+    },
+    "purify.es-K45Y4LNH": {
+      "file": "purify__es-K45Y4LNH.js"
+    },
+    "index.es-35FOOVBE": {
+      "file": "index__es-35FOOVBE.js"
+    },
+    "chunk-JRJ5JSPZ": {
+      "file": "chunk-JRJ5JSPZ.js"
+    },
+    "chunk-7MO5NKND": {
+      "file": "chunk-7MO5NKND.js"
+    },
+    "chunk-6HLOPVHF": {
+      "file": "chunk-6HLOPVHF.js"
+    },
+    "chunk-OB5EBMVE": {
+      "file": "chunk-OB5EBMVE.js"
+    },
+    "chunk-KPZN2OWV": {
+      "file": "chunk-KPZN2OWV.js"
+    },
+    "chunk-G3PMV62Z": {
+      "file": "chunk-G3PMV62Z.js"
+    }
+  }
+}

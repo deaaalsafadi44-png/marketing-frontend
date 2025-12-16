@@ -1,14 +1,15 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Unauthorized = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleGoBack = () => {
-    // إذا كان هناك سجل تنقل داخل نفس التبويب
-    if (window.history.state && window.history.state.idx > 0) {
-      navigate(-1);
+    // 🔁 إعادة توجيه ذكية حسب الدور
+    if (user?.role === "Admin") {
+      navigate("/", { replace: true });
     } else {
-      // إذا دخل مباشرة للصفحة → أعده لصفحة ثابتة
       navigate("/tasks", { replace: true });
     }
   };

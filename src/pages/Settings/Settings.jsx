@@ -1,26 +1,19 @@
 import "./settings.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import api from "../../services/apiClient";
+import { useAuth } from "../../context/AuthContext";
 
 const Settings = () => {
-  const navigate = useNavigate();
-
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth();
 
   const [systemName, setSystemName] = useState("");
+  const [saving, setSaving] = useState(false);
 
+  /* =========================
+     LOAD SETTINGS
+  ========================= */
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    setUser(storedUser);
-
-    if (storedUser && storedUser.role !== "Admin") {
-      alert("❌ Only Admin can access System Settings");
-      navigate("/");
-      return;
-    }
-
     const loadSettings = async () => {
       try {
         const res = await api.get("/settings");
@@ -28,31 +21,39 @@ const Settings = () => {
       } catch (err) {
         console.error("Failed to load settings:", err);
       }
-
-      setLoading(false);
     };
 
-    loadSettings();
-  }, [navigate]);
+    if (user) {
+      loadSettings();
+    }
+  }, [user]);
 
-  if (!user || loading) return <div className="loading">Loading...</div>;
+  /* =========================
+     LOADING STATE
+  ========================= */
+  if (loading || !user) {
+    return <div className="loading">Loading...</div>;
+  }
 
+  /* =========================
+     SAVE
+  ========================= */
   const handleSave = async () => {
+    setSaving(true);
     try {
       await api.put("/settings", { systemName });
       alert("Settings saved!");
     } catch (err) {
       console.error(err);
       alert("Failed to save.");
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
     <div className="settings-wrapper">
-
-      {/* 🟦 كل شيء داخل بوكس واحد */}
       <div className="settings-big-card">
-
         <div className="settings-top-row">
           <h1 className="settings-title">System Settings</h1>
 
@@ -80,11 +81,14 @@ const Settings = () => {
             />
           </div>
 
-          <button className="save-btn" onClick={handleSave}>
-            Save Settings
+          <button
+            className="save-btn"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? "Saving..." : "Save Settings"}
           </button>
         </div>
-
       </div>
     </div>
   );
