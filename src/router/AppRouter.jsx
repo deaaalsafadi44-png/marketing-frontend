@@ -34,14 +34,12 @@ import Login from "../pages/Login/Login";
 ================================ */
 const RoleBasedHome = () => {
   const { user, loading } = useAuth();
-
   if (loading) return null;
 
   if (user?.role === "Admin") {
     return <Dashboard />;
   }
 
-  // Manager + User
   return <Navigate to="/tasks" replace />;
 };
 
@@ -59,19 +57,14 @@ const ErrorPage = () => (
    ROUTER
 ================================ */
 export const router = createBrowserRouter([
-  // Login
   {
     path: "/login",
     element: <Login />,
   },
-
-  // Unauthorized
   {
     path: "/unauthorized",
     element: <Unauthorized />,
   },
-
-  // Protected App
   {
     path: "/",
     element: (
@@ -82,7 +75,6 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
 
     children: [
-      // ✅ الصفحة الافتراضية حسب الدور
       {
         index: true,
         element: <RoleBasedHome />,
@@ -92,7 +84,7 @@ export const router = createBrowserRouter([
       {
         path: "settings",
         element: (
-          <PrivateRoute role="Admin">
+          <PrivateRoute roles={["Admin"]}>
             <Settings />
           </PrivateRoute>
         ),
@@ -100,13 +92,13 @@ export const router = createBrowserRouter([
       {
         path: "settings/options",
         element: (
-          <PrivateRoute role="Admin">
+          <PrivateRoute roles={["Admin"]}>
             <ManageOptions />
           </PrivateRoute>
         ),
       },
 
-      // Tasks (الجميع)
+      // Tasks
       {
         path: "tasks",
         children: [
@@ -121,7 +113,7 @@ export const router = createBrowserRouter([
           {
             path: "add",
             element: (
-              <PrivateRoute role="Admin">
+              <PrivateRoute roles={["Admin", "Manager"]}>
                 <Add />
               </PrivateRoute>
             ),
@@ -137,7 +129,7 @@ export const router = createBrowserRouter([
           {
             path: "edit/:id",
             element: (
-              <PrivateRoute role={["Admin", "Manager"]}>
+              <PrivateRoute roles={["Admin", "Manager"]}>
                 <EditTask />
               </PrivateRoute>
             ),
@@ -145,21 +137,21 @@ export const router = createBrowserRouter([
         ],
       },
 
-      // Reports (Admin + Manager)
+      // Reports
       {
         path: "reports",
         element: (
-          <PrivateRoute role={["Admin", "Manager"]}>
+          <PrivateRoute roles={["Admin", "Manager"]}>
             <Reports />
           </PrivateRoute>
         ),
       },
 
-      // Users (Admin فقط)
+      // Users
       {
         path: "users",
         element: (
-          <PrivateRoute role="Admin">
+          <PrivateRoute roles={["Admin"]}>
             <Users />
           </PrivateRoute>
         ),
@@ -167,7 +159,7 @@ export const router = createBrowserRouter([
       {
         path: "users/add",
         element: (
-          <PrivateRoute role="Admin">
+          <PrivateRoute roles={["Admin"]}>
             <AddUser />
           </PrivateRoute>
         ),
@@ -175,7 +167,7 @@ export const router = createBrowserRouter([
       {
         path: "users/edit/:id",
         element: (
-          <PrivateRoute role="Admin">
+          <PrivateRoute roles={["Admin"]}>
             <EditUser />
           </PrivateRoute>
         ),
