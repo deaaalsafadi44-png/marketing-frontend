@@ -14,11 +14,11 @@ const PrivateRoute = ({ children, roles }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // توحيد role
+  // ✅ توحيد role (بدون تغيير منطق)
   const userRole =
     typeof user.role === "string"
       ? user.role.toLowerCase().trim()
-      : user.role?.name?.toLowerCase().trim();
+      : (user.role?.name || user.role?.role)?.toLowerCase().trim();
 
   // التحقق من الصلاحيات
   if (roles && !roles.map(r => r.toLowerCase()).includes(userRole)) {
