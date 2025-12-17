@@ -12,7 +12,7 @@ const PrivateRoute = ({ children, roles }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // ✅ FIX: استخراج role بجميع الحالات
+  // استخراج الدور بجميع الحالات
   let userRole = null;
 
   if (typeof user.role === "string") {
@@ -24,14 +24,14 @@ const PrivateRoute = ({ children, roles }) => {
   const normalizedUserRole = userRole?.toLowerCase().trim();
   const allowedRoles = roles?.map(r => r.toLowerCase().trim());
 
-  // 🔍 DEBUG (اختياري)
   console.log("PRIVATE ROUTE CHECK 👉", {
     normalizedUserRole,
     allowedRoles,
     originalRole: user.role,
   });
 
-  if (roles && !allowedRoles.includes(normalizedUserRole)) {
+  // ✅ FIX النهائي: إذا لم تُحدّد roles → السماح
+  if (Array.isArray(allowedRoles) && !allowedRoles.includes(normalizedUserRole)) {
     return <Navigate to="/unauthorized" replace />;
   }
 
