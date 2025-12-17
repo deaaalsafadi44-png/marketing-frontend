@@ -8,10 +8,12 @@ import "./add.css";
 const AddTask = () => {
   const navigate = useNavigate();
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
   const [options, setOptions] = useState({
     priority: [],
     status: [],
-    companies: []
+    companies: [],
   });
 
   const [users, setUsers] = useState([]);
@@ -29,6 +31,20 @@ const AddTask = () => {
   const [loading, setLoading] = useState(true);
 
   // =============================
+  // Role Guard (Admin + Manager)
+  // =============================
+  useEffect(() => {
+    const role =
+      typeof user?.role === "string"
+        ? user.role.toLowerCase().trim()
+        : user?.role?.name?.toLowerCase().trim();
+
+    if (!["admin", "manager"].includes(role)) {
+      navigate("/unauthorized");
+    }
+  }, [navigate, user]);
+
+  // =============================
   // Load Users + Options
   // =============================
   useEffect(() => {
@@ -39,26 +55,23 @@ const AddTask = () => {
         setOptions({
           priority: ops.data.priority || [],
           status: ops.data.status || [],
-          companies: ops.data.companies || [],   // ⬅️ الشركات الجديدة
+          companies: ops.data.companies || [],
         });
 
         const u = await getUsers();
         setUsers(u.data);
-
       } catch (err) {
         console.error("Error loading form data:", err);
 
-        if (err?.response?.status === 403) {
-          alert("❌ فقط الأدمن يمكنه الوصول إلى صفحة إضافة مهمة");
-          navigate("/tasks");
-        }
+        alert("❌ لا يمكن تحميل بيانات النموذج");
+        navigate("/tasks");
       }
 
       setLoading(false);
     };
 
     load();
-  }, []);
+  }, [navigate]);
 
   const handleChange = (e) => {
     setTask({ ...task, [e.target.name]: e.target.value });
@@ -73,22 +86,21 @@ const AddTask = () => {
     try {
       await addTaskApi(task);
 
-      alert("Task Added Successfully!");
+      alert("✅ Task Added Successfully!");
       navigate("/tasks");
     } catch (err) {
       console.error("Error adding task:", err);
-
-      if (err?.response?.status === 403) {
-        alert("❌ فقط الأدمن يمكنه إضافة المهام!");
-        return;
-      }
 
       alert("❌ Failed to add task. Please try again.");
     }
   };
 
   if (loading) {
-    return <h2 style={{ textAlign: "center", marginTop: "40px" }}>Loading...</h2>;
+    return (
+      <h2 style={{ textAlign: "center", marginTop: "40px" }}>
+        Loading...
+      </h2>
+    );
   }
 
   return (
@@ -97,7 +109,6 @@ const AddTask = () => {
         <h2 className="card-title">📝 Add New Task</h2>
 
         <form onSubmit={handleSubmit}>
-
           {/* Title */}
           <div className="form-group">
             <label>Task Title</label>
@@ -118,13 +129,15 @@ const AddTask = () => {
             />
           </div>
 
-          {/* Company (DROP-DOWN OPTION) */}
+          {/* Company */}
           <div className="form-group">
             <label>Company</label>
             <select name="company" required onChange={handleChange}>
               <option value="">Select Company</option>
               {options.companies.map((c, i) => (
-                <option key={i} value={c}>{c}</option>
+                <option key={i} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
           </div>

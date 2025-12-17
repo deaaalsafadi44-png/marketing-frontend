@@ -1,36 +1,27 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const PrivateRoute = ({ children, role }) => {
+const PrivateRoute = ({ children, roles }) => {
   const { user, loading, isAuthenticated } = useAuth();
 
-  /* =========================
-     WAIT FOR AUTH CHECK
-  ========================= */
+  // انتظر تحميل حالة التوثيق
   if (loading) {
     return null; // أو Spinner
   }
 
-  /* =========================
-     NOT AUTHENTICATED
-  ========================= */
-  if (!isAuthenticated) {
+  // غير مسجّل
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 
-  /* =========================
-     ROLE CHECK
-  ========================= */
-  const allowedRoles = Array.isArray(role)
-    ? role
-    : role
-    ? [role]
-    : [];
+  // توحيد role
+  const userRole =
+    typeof user.role === "string"
+      ? user.role.toLowerCase().trim()
+      : user.role?.name?.toLowerCase().trim();
 
-  if (
-    allowedRoles.length > 0 &&
-    (!user || !allowedRoles.includes(user.role))
-  ) {
+  // التحقق من الصلاحيات
+  if (roles && !roles.map(r => r.toLowerCase()).includes(userRole)) {
     return <Navigate to="/unauthorized" replace />;
   }
 

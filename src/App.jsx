@@ -4,17 +4,17 @@
     {/* صفحة تسجيل الدخول بدون حماية */}
     <Route path="/login" element={<Login />} />
 
-    {/* صفحة Dashboard (Admin فقط) */}
+    {/* Dashboard (Admin فقط) */}
     <Route
       path="/dashboard"
       element={
-        <PrivateRoute role="Admin">
+        <PrivateRoute roles={["Admin"]}>
           <Dashboard />
         </PrivateRoute>
       }
     />
 
-    {/* صفحة Tasks (جميع المستخدمين) */}
+    {/* Tasks (أي مستخدم مسجّل) */}
     <Route
       path="/tasks"
       element={
@@ -24,11 +24,21 @@
       }
     />
 
-    {/* صفحة Users (Admin فقط) */}
+    {/* Add Task (Admin + Manager) */}
+    <Route
+      path="/tasks/add"
+      element={
+        <PrivateRoute roles={["Admin", "Manager"]}>
+          <AddTask />
+        </PrivateRoute>
+      }
+    />
+
+    {/* Users (Admin فقط) */}
     <Route
       path="/users"
       element={
-        <PrivateRoute role="Admin">
+        <PrivateRoute roles={["Admin"]}>
           <Users />
         </PrivateRoute>
       }
