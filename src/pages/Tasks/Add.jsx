@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { addTaskApi, getOptions } from "../../services/tasksService";
 import { getUsers } from "../../services/usersService";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 import "./add.css";
 
 const AddTask = () => {
   const navigate = useNavigate();
-
-  const user = JSON.parse(localStorage.getItem("user"));
+  const { user } = useAuth(); // ✅ المصدر الصحيح
 
   const [options, setOptions] = useState({
     priority: [],
@@ -34,10 +34,12 @@ const AddTask = () => {
   // Role Guard (Admin + Manager)
   // =============================
   useEffect(() => {
+    if (!user) return;
+
     const role =
-      typeof user?.role === "string"
+      typeof user.role === "string"
         ? user.role.toLowerCase().trim()
-        : user?.role?.name?.toLowerCase().trim();
+        : user.role?.name?.toLowerCase().trim();
 
     if (!["admin", "manager"].includes(role)) {
       navigate("/unauthorized");
@@ -62,7 +64,6 @@ const AddTask = () => {
         setUsers(u.data);
       } catch (err) {
         console.error("Error loading form data:", err);
-
         alert("❌ لا يمكن تحميل بيانات النموذج");
         navigate("/tasks");
       }
@@ -85,22 +86,16 @@ const AddTask = () => {
 
     try {
       await addTaskApi(task);
-
       alert("✅ Task Added Successfully!");
       navigate("/tasks");
     } catch (err) {
       console.error("Error adding task:", err);
-
       alert("❌ Failed to add task. Please try again.");
     }
   };
 
   if (loading) {
-    return (
-      <h2 style={{ textAlign: "center", marginTop: "40px" }}>
-        Loading...
-      </h2>
-    );
+    return <h2 style={{ textAlign: "center", marginTop: 40 }}>Loading...</h2>;
   }
 
   return (
@@ -109,13 +104,11 @@ const AddTask = () => {
         <h2 className="card-title">📝 Add New Task</h2>
 
         <form onSubmit={handleSubmit}>
-          {/* Title */}
           <div className="form-group">
             <label>Task Title</label>
             <input type="text" name="title" required onChange={handleChange} />
           </div>
 
-          {/* Description */}
           <div className="form-group">
             <label>Description</label>
             <textarea
@@ -125,11 +118,9 @@ const AddTask = () => {
               onChange={(e) =>
                 setTask({ ...task, description: e.target.value })
               }
-              placeholder="Enter task description..."
             />
           </div>
 
-          {/* Company */}
           <div className="form-group">
             <label>Company</label>
             <select name="company" required onChange={handleChange}>
@@ -142,13 +133,11 @@ const AddTask = () => {
             </select>
           </div>
 
-          {/* Type */}
           <div className="form-group">
             <label>Task Type</label>
             <input type="text" name="type" required onChange={handleChange} />
           </div>
 
-          {/* Assigned User */}
           <div className="form-group">
             <label>Assigned User</label>
             <select name="workerId" required onChange={handleChange}>
@@ -161,7 +150,6 @@ const AddTask = () => {
             </select>
           </div>
 
-          {/* Priority */}
           <div className="form-group">
             <label>Priority</label>
             <select name="priority" required onChange={handleChange}>
@@ -174,7 +162,6 @@ const AddTask = () => {
             </select>
           </div>
 
-          {/* Status */}
           <div className="form-group">
             <label>Status</label>
             <select name="status" required onChange={handleChange}>
