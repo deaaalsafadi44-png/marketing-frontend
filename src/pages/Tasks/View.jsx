@@ -15,6 +15,10 @@ const ViewTask = () => {
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
+  // ✅ ADDED (upload states)
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
+
   /* ================= LOAD TASK ================= */
 
   useEffect(() => {
@@ -106,16 +110,15 @@ const ViewTask = () => {
     const totalMinutes = Math.floor(seconds / 60);
 
     try {
-     const res = await api.put(`/tasks/${id}/time`, {
-  timeSpent: totalMinutes,
-});
+      const res = await api.put(`/tasks/${id}/time`, {
+        timeSpent: totalMinutes,
+      });
 
-// تحديث التاسك مباشرة من السيرفر
-setTask((prev) => ({
-  ...prev,
-  timeSpent: res.data.timeSpent,
-}));
-
+      // تحديث التاسك مباشرة من السيرفر
+      setTask((prev) => ({
+        ...prev,
+        timeSpent: res.data.timeSpent,
+      }));
 
       alert("✅ Task finished! Time saved: " + totalMinutes + " min");
 
@@ -126,6 +129,44 @@ setTask((prev) => ({
     } catch (err) {
       alert("❌ Error saving time");
       console.error(err);
+    }
+  };
+
+  /* ================= UPLOAD DELIVERABLES (ADDED) ================= */
+
+  const handleFileChange = (e) => {
+    setSelectedFiles(Array.from(e.target.files));
+  };
+
+  const uploadDeliverables = async () => {
+    if (!selectedFiles.length) {
+      alert("❌ اختر ملفات أولاً");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("taskId", id);
+
+      selectedFiles.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      await api.post("/deliverables", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      alert("✅ تم رفع مخرجات المهمة بنجاح");
+      setSelectedFiles([]);
+    } catch (err) {
+      console.error(err);
+      alert("❌ حدث خطأ أثناء رفع الملفات");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -141,17 +182,16 @@ setTask((prev) => ({
       .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-const formatStoredTime = (minutes) => {
-  if (!minutes || minutes <= 0) return "—";
+  const formatStoredTime = (minutes) => {
+    if (!minutes || minutes <= 0) return "—";
 
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
 
-  if (h > 0 && m > 0) return `${h}h ${m}m`;
-  if (h > 0) return `${h}h`;
-  return `${m} min`;
-};
-
+    if (h > 0 && m > 0) return `${h}h ${m}m`;
+    if (h > 0) return `${h}h`;
+    return `${m} min`;
+  };
 
   /* ================= RENDER ================= */
 
@@ -188,6 +228,22 @@ const formatStoredTime = (minutes) => {
 
           <button className="timer-btn finish" onClick={finishTask}>
             ✔ Finish
+          </button>
+
+          {/* ✅ ADDED UPLOAD UI */}
+          <input
+            type="file"
+            multiple
+            onChange={handleFileChange}
+            style={{ marginTop: "10px" }}
+          />
+
+          <button
+            className="timer-btn"
+            onClick={uploadDeliverables}
+            disabled={uploading}
+          >
+            📤 رفع مخرجات المهمة
           </button>
         </div>
 

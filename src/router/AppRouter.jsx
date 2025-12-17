@@ -29,6 +29,9 @@ import ManageOptions from "../pages/Settings/ManageOptions";
 
 import Login from "../pages/Login/Login";
 
+// ✅ ADDED
+import DeliverablesBoard from "../pages/deliverables/DeliverablesBoard";
+
 /* ===============================
    ROLE BASED HOME
 ================================ */
@@ -78,6 +81,16 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <RoleBasedHome />,
+      },
+
+      // ✅ ADDED – Deliverables Board
+      {
+        path: "deliverables",
+        element: (
+          <PrivateRoute>
+            <DeliverablesBoard />
+          </PrivateRoute>
+        ),
       },
 
       // Settings (Admin فقط)

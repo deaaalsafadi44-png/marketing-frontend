@@ -58,6 +58,11 @@ function Navbar() {
           Dashboard
         </NavLink>
 
+        {/* ✅ ADDED */}
+        <NavLink to="/deliverables" className="nav-link">
+          Submissions
+        </NavLink>
+
         <NavLink to="/tasks" className="nav-link">
           Tasks
         </NavLink>
@@ -88,4 +93,3 @@ function Navbar() {
 }
 
 export default Navbar;
-  
