@@ -21,7 +21,10 @@ export const logoutUser = async () => {
 /* ===============================
    USERS CRUD
 ================================ */
-export const getUsers = () => api.get("/users");
+export const getUsers = () => {
+  console.log("api called")
+  return api.get("/users")
+};
 
 export const getUserById = (id) => api.get(`/users/${id}`);
 

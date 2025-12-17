@@ -11,15 +11,14 @@ const AuthContext = createContext();
 ========================= */
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-
-  // 🔐 مهم جدًا: نمنع أي render قبل انتهاء التحقق
   const [loading, setLoading] = useState(true);
 
   /* =========================
      CHECK AUTH (ON FIRST LOAD)
+     GET /auth/me
   ========================= */
   useEffect(() => {
-    let isMounted = true; // 🛡️ يمنع state update بعد unmount
+    let isMounted = true;
 
     const checkAuth = async () => {
       try {
@@ -47,22 +46,26 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   /* =========================
-     LOGIN
+     LOGIN ✅
+     POST /auth/login
   ========================= */
   const login = async (email, password) => {
-    const res = await api.post("/login", { email, password });
+    const res = await api.post("/auth/login", {
+      email,
+      password,
+    });
 
-    // السيرفر يعيد user فقط (Cookies محفوظة)
     setUser(res.data.user);
     return res.data.user;
   };
 
   /* =========================
-     LOGOUT
+     LOGOUT ✅
+     POST /auth/logout
   ========================= */
   const logout = async () => {
     try {
-      await api.post("/logout");
+      await api.post("/auth/logout");
     } catch (err) {
       // ignore
     }
@@ -83,7 +86,6 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {/* 🔒 لا نسمح بعرض أي شيء قبل انتهاء التحقق */}
       {!loading && children}
     </AuthContext.Provider>
   );
