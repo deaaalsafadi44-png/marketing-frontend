@@ -1,0 +1,96 @@
+/* ===============================
+   Deliverables Board Styles
+   Safe UI-only styles
+================================ */
+
+/* Page wrapper */
+.deliverables-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Grid of boxes */
+.deliverables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Single deliverable box */
+.deliverable-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.deliverable-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Header */
+.deliverable-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.deliverable-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.deliverable-user {
+  font-size: 13px;
+  color: #777;
+}
+
+/* Notes / description */
+.deliverable-notes {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+/* Files list */
+.deliverable-files {
+  margin-top: 8px;
+}
+
+.deliverable-file {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: #0066cc;
+  text-decoration: none;
+  margin-bottom: 6px;
+}
+
+.deliverable-file:hover {
+  text-decoration: underline;
+}
+
+/* Media preview (images/videos later) */
+.deliverable-media {
+  margin-top: 10px;
+}
+
+.deliverable-media img,
+.deliverable-media video {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+/* Empty state */
+.deliverables-empty {
+  text-align: center;
+  color: #777;
+  margin-top: 60px;
+  font-size: 15px;
+}
