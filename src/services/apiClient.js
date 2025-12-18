@@ -10,7 +10,7 @@ const isProd = import.meta.env.MODE === "production";
    2️⃣ API URLs
 ========================================= */
 
-const ONLINE_API = "https://marketing-backend-1-db4i.onrender.com";
+const ONLINE_API = "https://marketing-backend-1-db41.onrender.com";
 const LOCAL_API = "http://localhost:5000";
 
 const API_URL = isProd ? ONLINE_API : LOCAL_API;
