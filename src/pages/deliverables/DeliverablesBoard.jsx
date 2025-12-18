@@ -12,7 +12,12 @@ const DeliverablesBoard = () => {
     try {
       setLoading(true);
       const res = await api.get("/deliverables");
-      setItems(res.data || []);
+
+      // 🔍 للتأكد أثناء التطوير
+      console.log("DELIVERABLES RESPONSE:", res.data);
+
+      // ✅ التصحيح المهم
+      setItems(res.data?.data || []);
     } catch (err) {
       console.error("Failed to load deliverables:", err);
     } finally {
@@ -20,7 +25,7 @@ const DeliverablesBoard = () => {
     }
   };
 
-  // 🔥 يعاد التنفيذ كل مرة تدخل الصفحة
+  // 🔥 يعاد التحميل كل مرة تدخل صفحة Submissions
   useEffect(() => {
     loadDeliverables();
   }, [location.pathname]);
@@ -62,11 +67,7 @@ const DeliverablesBoard = () => {
                 {item.files && item.files.length > 0 ? (
                   item.files.map((file, i) => (
                     <div key={i} className="file-item">
-                      <a
-                        href={file.url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
+                      <a href={file.url} target="_blank" rel="noreferrer">
                         {file.originalName || "File"}
                       </a>
                     </div>
