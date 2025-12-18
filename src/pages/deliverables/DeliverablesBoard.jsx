@@ -17,7 +17,8 @@ const DeliverablesBoard = () => {
       console.log("DELIVERABLES RESPONSE:", res.data);
 
       // ✅ التصحيح المهم
-      setItems(res.data?.data || []);
+    setItems(Array.isArray(res.data) ? res.data : res.data?.data || []);
+
     } catch (err) {
       console.error("Failed to load deliverables:", err);
     } finally {
