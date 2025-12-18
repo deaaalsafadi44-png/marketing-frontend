@@ -1,25 +1,29 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import api from "../../services/apiClient";
 import "./deliverables.css";
 
 const DeliverablesBoard = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
+  const loadDeliverables = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/deliverables");
+      setItems(res.data || []);
+    } catch (err) {
+      console.error("Failed to load deliverables:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔥 يعاد التنفيذ كل مرة تدخل الصفحة
   useEffect(() => {
-    const loadDeliverables = async () => {
-      try {
-        const res = await api.get("/deliverables");
-        setItems(res.data || []);
-      } catch (err) {
-        console.error("Failed to load deliverables:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadDeliverables();
-  }, []);
+  }, [location.pathname]);
 
   if (loading) {
     return <div className="loading">Loading submissions...</div>;
@@ -33,8 +37,8 @@ const DeliverablesBoard = () => {
         <p style={{ textAlign: "center" }}>No submissions yet.</p>
       ) : (
         <div className="deliverables-list">
-          {items.map((item, index) => (
-            <div key={index} className="deliverable-card">
+          {items.map((item) => (
+            <div key={item._id} className="deliverable-card">
               <h3>Task #{item.taskId}</h3>
 
               <p>
@@ -48,7 +52,7 @@ const DeliverablesBoard = () => {
                   : "—"}
               </p>
 
-              {item.notes && (
+              {item.notes && item.notes.trim() !== "" && (
                 <p>
                   <strong>Notes:</strong> {item.notes}
                 </p>
@@ -58,8 +62,12 @@ const DeliverablesBoard = () => {
                 {item.files && item.files.length > 0 ? (
                   item.files.map((file, i) => (
                     <div key={i} className="file-item">
-                      <a href={file.url} target="_blank" rel="noreferrer">
-                        {file.originalName}
+                      <a
+                        href={file.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {file.originalName || "File"}
                       </a>
                     </div>
                   ))
