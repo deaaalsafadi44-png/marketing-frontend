@@ -6,7 +6,7 @@ import {
 } from "../../services/tasksService";
 import { getUsers } from "../../services/usersService";
 import { useParams, useNavigate } from "react-router-dom";
-import "./edit.css";
+
 
 const EditTask = () => {
   const { id } = useParams();
