@@ -6,7 +6,12 @@ const MainLayout = () => {
   const location = useLocation();
 
   // صفحات بخلفية كاملة
-  const fullBgPages = ["/users/add", "/login","/edit"];
+  const fullBgPages = [
+  "/users/add",
+  "/users/edit",
+  "/login"
+];
+
 
   const isFullBg = fullBgPages.some((path) =>
     location.pathname.startsWith(path)
