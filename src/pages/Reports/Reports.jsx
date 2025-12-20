@@ -59,7 +59,7 @@ const Reports = () => {
   const [dateTo, setDateTo] = useState("");
 
   /* =============================
-     LOAD TASKS (مرة واحدة)
+     LOAD TASKS
   ============================= */
   useEffect(() => {
     const loadTasks = async () => {
@@ -76,7 +76,7 @@ const Reports = () => {
   }, []);
 
   /* =============================
-     LOAD SUMMARY (يتغير مع الفلاتر)
+     LOAD SUMMARY
   ============================= */
   useEffect(() => {
     const loadSummary = async () => {
@@ -109,7 +109,7 @@ const Reports = () => {
   if (!summary) return <div className="loading">Preparing summary...</div>;
 
   /* =============================
-     FILTER TASKS (للرسوم فقط)
+     FILTER TASKS
   ============================= */
   const filteredTasks = tasks.filter((task) => {
     if (!task.createdAt) return false;
@@ -129,7 +129,7 @@ const Reports = () => {
   });
 
   /* =============================
-     CHARTS: COMPANY
+     CHART DATA
   ============================= */
   const uniqueCompanies = [...new Set(filteredTasks.map((t) => t.company))];
 
@@ -158,9 +158,6 @@ const Reports = () => {
     ],
   };
 
-  /* =============================
-     CHARTS: TYPE
-  ============================= */
   const typeCounts = filteredTasks.reduce((acc, t) => {
     acc[t.type] = (acc[t.type] || 0) + 1;
     return acc;
@@ -177,9 +174,6 @@ const Reports = () => {
     ],
   };
 
-  /* =============================
-     CHARTS: MONTHLY HOURS
-  ============================= */
   const monthlyHours = Array(12).fill(0);
   filteredTasks.forEach((task) => {
     const month = new Date(task.createdAt).getMonth();
@@ -197,14 +191,13 @@ const Reports = () => {
         data: monthlyHours,
         borderColor: "#2e7d32",
         backgroundColor: "#2e7d32",
-        fill: false,
         tension: 0.3,
       },
     ],
   };
 
   /* =============================
-     EXPORT PDF
+     EXPORTS
   ============================= */
   const exportPDF = () => {
     const doc = new jsPDF();
@@ -240,9 +233,6 @@ const Reports = () => {
     doc.save("Tasks_Report.pdf");
   };
 
-  /* =============================
-     EXPORT EXCEL
-  ============================= */
   const exportExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
       filteredTasks.map((t) => ({
@@ -269,17 +259,20 @@ const Reports = () => {
     );
   };
 
+  /* =============================
+     RENDER
+  ============================= */
   return (
-    <div className="reports-container">
+    <div className="reports-page">
+
       <h1 className="reports-title">Reports</h1>
 
-      <div className="filters-row">
+      {/* ===== Filters ===== */}
+      <div className="reports-card filters-card">
         <select onChange={(e) => setCompanyFilter(e.target.value)}>
           <option value="">Company</option>
           {uniqueCompanies.map((company, i) => (
-            <option key={i} value={company}>
-              {company}
-            </option>
+            <option key={i} value={company}>{company}</option>
           ))}
         </select>
 
@@ -290,27 +283,42 @@ const Reports = () => {
         <button className="export-btn" onClick={exportExcel}>Export Excel</button>
       </div>
 
-      <div className="summary-box">
-        <p><strong>Total Tasks:</strong> {summary.totalTasks}</p>
-        <p><strong>Total Time:</strong> {formatMinutesToText(summary.totalMinutes)}</p>
-        <p><strong>Most Common Task:</strong> {summary.mostCommonTask}</p>
+      {/* ===== Summary ===== */}
+      <div className="reports-summary">
+        <div className="summary-item">
+          <span>Total Tasks</span>
+          <strong>{summary.totalTasks}</strong>
+        </div>
+
+        <div className="summary-item">
+          <span>Total Time</span>
+          <strong>{formatMinutesToText(summary.totalMinutes)}</strong>
+        </div>
+
+        <div className="summary-item">
+          <span>Most Common Task</span>
+          <strong>{summary.mostCommonTask}</strong>
+        </div>
       </div>
 
-      <div className="charts-row">
-        <div className="chart-box">
+      {/* ===== Charts ===== */}
+      <div className="reports-charts">
+
+        <div className="reports-card">
           <h3>Tasks by Type</h3>
           <Bar data={barData} />
         </div>
 
-        <div className="chart-box">
+        <div className="reports-card">
           <h3>Tasks by Company</h3>
           <Pie data={pieData} />
         </div>
-      </div>
 
-      <div className="chart-box" style={{ marginTop: "30px" }}>
-        <h3>Hours Over Months</h3>
-        <Line data={lineData} />
+        <div className="reports-card full">
+          <h3>Hours Over Months</h3>
+          <Line data={lineData} />
+        </div>
+
       </div>
     </div>
   );

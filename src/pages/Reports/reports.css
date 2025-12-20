@@ -1,51 +1,74 @@
-.reports-container {
-  width: 100%;
+.reports-page {
+  padding: 30px;
+  background: #f5f7fa;
+  min-height: 100vh;
 }
 
-.reports-filters {
-  display: flex;
-  gap: 25px;
-  margin-bottom: 20px;
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
-}
-
-.reports-filters select,
-.reports-filters input {
-  padding: 7px;
-  border-radius: 6px;
-  border: 1px solid #bbb;
-}
-
-.report-summary {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
+.reports-title {
+  font-size: 28px;
+  font-weight: 700;
   margin-bottom: 25px;
-  line-height: 1.7;
+  color: #111827;
 }
 
+/* ===== Cards ===== */
+.reports-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
+/* ===== Filters ===== */
+.filters-card {
+  margin-bottom: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+}
+
+/* ===== Summary ===== */
+.reports-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 35px;
+}
+
+.summary-item {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+}
+
+.summary-item span {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.summary-item strong {
+  display: block;
+  font-size: 24px;
+  margin-top: 8px;
+  color: #111827;
+}
+
+/* ===== Charts ===== */
 .reports-charts {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 25px;
 }
 
-.chart-box {
-  background: white;
-  padding: 20px;
-  width: 50%;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-
-  /* ⭐ إضافات مهمة لإصلاح تشوّه الرسم */
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.reports-card.full {
+  grid-column: span 2;
 }
 
-/* ⭐ إصلاح تمدد الدائرة داخل الكانفاس */
-.chart-box canvas {
-  max-width: 100%;
-  max-height: 350px;
+/* Chart titles inside */
+.reports-card h3 {
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
 }
