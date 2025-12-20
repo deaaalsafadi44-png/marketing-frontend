@@ -3,6 +3,12 @@
   min-height: 100vh;
 }
 
+/* الوضع الافتراضي لكل الصفحات */
 .page-content {
   padding: 35px;
+}
+
+/* ✨ صفحات خاصة (Full Width) */
+.page-content.full-bg {
+  padding: 0;
 }
