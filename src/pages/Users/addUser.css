@@ -1,20 +1,20 @@
 /* ===============================
-   PAGE BACKGROUND (SAME AS LOGIN)
+   PAGE BACKGROUND (FULL SCREEN)
 =============================== */
 .add-user-wrapper {
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   background: linear-gradient(135deg, #2563eb, #1e40af);
-  padding: 20px;
-}
-.add-user-wrapper {
-  margin: -20px; /* نفس قيمة padding في layout */
 }
 
 /* ===============================
-   CARD (SAME STYLE)
+   CARD (SAME STYLE AS LOGIN)
 =============================== */
 .add-user-card {
   width: 100%;
