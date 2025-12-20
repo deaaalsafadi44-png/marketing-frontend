@@ -43,12 +43,10 @@
   font-size: 16px;
   font-weight: 600;
   color: #374151;
-  margin-bottom: 12px;
-  text-align: center;
+  margin-bottom: 16px;
 }
 
 /* محتوى الرسم */
-.chart-content {
+.chart-box > div {
   flex: 1;
-  position: relative;
 }
