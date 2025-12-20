@@ -72,6 +72,33 @@
 }
 
 /* ===============================
+   PASSWORD FIELD (EYE ICON)
+=============================== */
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 45px;
+}
+
+.toggle-pass {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.toggle-pass:hover {
+  opacity: 1;
+}
+
+/* ===============================
    BUTTON
 =============================== */
 .login-btn {
@@ -86,6 +113,9 @@
   background: linear-gradient(135deg, #2563eb, #1e40af);
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .login-btn:hover {
@@ -99,8 +129,26 @@
 }
 
 /* ===============================
-   ANIMATION
+   LOADER SPINNER
 =============================== */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255,255,255,0.4);
+  border-top: 3px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ===============================
+   ANIMATIONS
+=============================== */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @keyframes fadeScale {
   from {
     opacity: 0;

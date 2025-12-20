@@ -9,6 +9,7 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // 👁️
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,9 +19,7 @@ const Login = () => {
     setError("");
 
     try {
-      const user = await login(email, password);
-
-      // ⏭️ redirect واحد فقط
+      await login(email, password);
       navigate("/");
     } catch (err) {
       if (err?.response?.status === 401) {
@@ -40,6 +39,7 @@ const Login = () => {
 
         {error && <p className="error-text">{error}</p>}
 
+        {/* Email */}
         <input
           type="email"
           placeholder="Email"
@@ -51,19 +51,30 @@ const Login = () => {
           required
         />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            setError("");
-          }}
-          required
-        />
+        {/* Password with eye */}
+        <div className="password-field">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError("");
+            }}
+            required
+          />
 
+          <span
+            className="toggle-pass"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? "🙈" : "👁️"}
+          </span>
+        </div>
+
+        {/* Button + Spinner */}
         <button type="submit" className="login-btn" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
+          {loading ? <span className="spinner"></span> : "Login"}
         </button>
       </form>
     </div>
