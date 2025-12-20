@@ -1,222 +1,159 @@
-/* الشكل العام */
 .tasks-container {
-  padding: 20px;
+  padding: 30px;
+  background: #f5f7fa;
+  min-height: 100vh;
 }
 
 .tasks-title {
-  font-size: 26px;
-  margin-bottom: 20px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 24px;
 }
 
+/* =========================
+   Filters
+========================= */
 .filters-row {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 14px;
   display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
 }
 
 .filters-row select,
 .filters-row input {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+}
+
+.filters-row input[type="text"] {
+  min-width: 180px;
 }
 
 .add-task-btn {
-  background: #2e7d32;
-  color: white;
-  padding: 10px 15px;
-  border-radius: 6px;
-  font-weight: bold;
+  margin-left: auto;
+  background: #16a34a;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.add-task-btn:hover {
+  background: #15803d;
+}
+
+/* =========================
+   Table
+========================= */
+.tasks-table {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 14px;
+  border-collapse: collapse;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.tasks-table thead {
+  background: #f9fafb;
+}
+
+.tasks-table th {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  padding: 14px;
+}
+
+.tasks-table td {
+  padding: 14px;
+  font-size: 14px;
+  color: #111827;
+  border-top: 1px solid #e5e7eb;
+}
+
+.tasks-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* =========================
+   Tags
+========================= */
+.tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.tag-new {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.tag-urgent {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.tag-normal {
+  background: #ecfeff;
+  color: #0f766e;
+}
+
+/* =========================
+   Status Select
+========================= */
+.tasks-table select {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* =========================
+   Actions
+========================= */
+.view-link,
+.edit-link,
+.delete-link {
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
   text-decoration: none;
 }
 
-.tasks-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 10px;
+.view-link {
+  color: #2563eb;
 }
 
-.tasks-table th,
-.tasks-table td {
-  padding: 12px;
-  border-bottom: 1px solid #eee;
+.edit-link {
+  color: #059669;
 }
 
-/* ألوان الأولوية */
-.tag {
-  padding: 4px 10px;
-  border-radius: 6px;
-  color: white;
-  font-size: 12px;
+.delete-link {
+  color: #dc2626;
 }
 
-.tag-high { background: #c62828; }
-.tag-normal { background: gray; }
-.tag-urgent { background: orange; }
-
-/* ------------------------------- */
-/*   تصميم قائمة الحالات Status   */
-/* ------------------------------- */
-
-/* ====== تصميم القائمة الأساسية ====== */
-.status-dropdown {
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 600;
-  color: #fff;        /* النص أبيض */
-  cursor: pointer;
+.view-link:hover,
+.edit-link:hover,
+.delete-link:hover {
+  text-decoration: underline;
 }
-
-/* القيم داخل القائمة تظهر بخلفية بيضاء ونص أسود */
-.status-dropdown option {
-  background: #fff !important;
-  color: #000 !important;
-}
-
-
-.status-dropdown option {
-  color: #000 !important; /* النص داخل القائمة أسود */
-}
-
-/* NEW */
-.status-New,
-.status-new {
-  background-color: #2196f3 !important; /* أزرق */
-  color: #fff !important;
-}
-
-/* ACCEPTED */
-.status-Accebted,
-.status-accebted {
-  background-color: #9c27b0 !important; /* بنفسجي */
-  color: #fff !important;
-}
-
-/* IN PROGRESS */
-.status-In-Progress,
-.status-in-progress,
-.status-In-progress {
-  background-color: #fbc02d !important; /* أصفر */
-  color: #fff !important;
-}
-
-/* UNDER REVIEW */
-.status-Under-Review,
-.status-under-review,
-.status-Under-review {
-  background-color: #ff9800 !important; /* برتقالي */
-  color: #fff !important;
-}
-
-/* APPROVED */
-.status-Approved,
-.status-approved {
-  background-color: #4caf50 !important; /* أخضر */
-  color: #fff !important;
-}
-.play-btn {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(0, 0, 0, 0.35);
-  color: white;
-  font-size: 40px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.play-btn:hover {
-  background: rgba(0, 0, 0, 0.45);
-}
-.priority-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-}
-
-.priority-label {
-  font-size: 12px;
-  color: #666;
-  font-weight: bold;
-}
-
-.priority-badge {
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  color: #fff;
-  font-weight: 600;
-}
-
-/* Different colors for priority levels */
-.priority-badge.low {
-  background: #4caf50;
-}
-
-.priority-badge.medium {
-  background: #ff9800;
-}
-
-.priority-badge.high {
-  background: #f44336;
-}
-
-.priority-badge.urgent {
-  background: #d32f2f;
-}
-.tasks-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.tasks-table th,
-.tasks-table td {
-  padding: 12px;
-  vertical-align: middle;
-  text-align: left;
-  white-space: nowrap;
-}
-
-.tasks-table td select {
-  height: 36px;
-  padding: 4px 8px;
-}
-.tag {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: white;
-}
-
-.tag-low {
-  background: #4caf50;
-}
-
-.tag-medium {
-  background: #ff9800;
-}
-
-.tag-high {
-  background: #f44336;
-}
-/* fallback لون افتراضي لأي Priority غير معرفة */
-.tag[class*="tag-"] {
-  background: #607d8b; /* رمادي */
-  color: white;
-}
-
-/* ألوان محددة للمعروفة */
-.tag-low { background: #4caf50; }
-.tag-medium { background: #ff9800; }
-.tag-high { background: #f44336; }
