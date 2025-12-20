@@ -2,19 +2,13 @@
   background: #f4f6fa;
   min-height: 100vh;
 }
-/* ===============================
-   REMOVE LAYOUT PADDING
-=============================== */
-.page-content {
-  padding: 0 !important;
-}
 
 /* الوضع الافتراضي لكل الصفحات */
 .page-content {
   padding: 35px;
 }
 
-/* ✨ صفحات خاصة (Full Width) */
+/* ✨ صفحات خاصة (Full Width / Full Background) */
 .page-content.full-bg {
   padding: 0;
 }
