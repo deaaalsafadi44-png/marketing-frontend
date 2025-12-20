@@ -185,10 +185,25 @@ const ViewTask = () => {
             </button>
           </div>
 
+          {/* ===== UPLOAD (CUSTOM UI) ===== */}
           <div className="upload-section">
-            <input type="file" multiple onChange={handleFileChange} />
+            <label className="upload-label">
+              📁 Choose files
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+              />
+            </label>
+
+            <span className="upload-info">
+              {selectedFiles.length > 0
+                ? `${selectedFiles.length} file(s) selected`
+                : "No files selected"}
+            </span>
+
             <button
-              className="timer-btn"
+              className="timer-btn upload-btn"
               onClick={uploadDeliverables}
               disabled={uploading}
             >
