@@ -2,15 +2,12 @@
   min-height: 100vh;
 }
 
-/* الوضع الافتراضي لبقية الصفحات */
 .page-content {
   padding: 35px;
   background: #f4f6fa;
 }
 
-/* الصفحات ذات الخلفية الكاملة */
 .page-content.full-bg {
   padding: 0;
-  margin-top: 65px; /* نفس ارتفاع Navbar */
-  background: linear-gradient(135deg, #2563eb, #1e40af);
+  background: transparent;
 }
