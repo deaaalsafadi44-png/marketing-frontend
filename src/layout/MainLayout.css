@@ -2,6 +2,12 @@
   background: #f4f6fa;
   min-height: 100vh;
 }
+/* ===============================
+   REMOVE LAYOUT PADDING
+=============================== */
+.page-content {
+  padding: 0 !important;
+}
 
 /* الوضع الافتراضي لكل الصفحات */
 .page-content {
