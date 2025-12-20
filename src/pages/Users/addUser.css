@@ -111,21 +111,15 @@
    BUTTON
 =============================== */
 .btn-save {
-  position: relative;
   width: 100%;
-  height: 52px;              /* ✅ تثبيت الارتفاع */
+  height: 52px;
   border-radius: 16px;
   border: none;
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
   background: linear-gradient(135deg, #2563eb, #1e40af);
   cursor: pointer;
   transition: all 0.2s ease;
-
-  display: flex;             /* ✅ تثبيت المحتوى */
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .btn-save:hover {
@@ -139,21 +133,29 @@
 }
 
 /* ===============================
-   BUTTON TEXT
+   BUTTON CONTENT (KEY 🔑)
 =============================== */
-.btn-save span {
-  line-height: 1;
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
 }
 
 /* ===============================
    LOADING STATE
 =============================== */
-.btn-save.loading span {
-  visibility: hidden;        /* ❗ لا display:none */
+.btn-save.loading .btn-content {
+  visibility: hidden;
 }
 
 /* ===============================
-   SPINNER
+   SPINNER (ABSOLUTE CENTER ✅)
 =============================== */
 .btn-save.loading::after {
   content: "";
@@ -176,6 +178,7 @@
     transform: translate(-50%, -50%) rotate(360deg);
   }
 }
+
 
 
 

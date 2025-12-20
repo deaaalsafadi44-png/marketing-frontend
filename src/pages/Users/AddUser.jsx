@@ -151,13 +151,16 @@ const AddUser = () => {
               <option value="Finance">Finance</option>
             </select>
 
-  <button
+<button
   type="submit"
   className={`btn-save ${loading ? "loading" : ""}`}
   disabled={loading}
 >
-  <span>{loading ? "Saving..." : "Add User"}</span>
+  <span className="btn-content">
+    {loading ? "Saving..." : "Add User"}
+  </span>
 </button>
+
 
 
           </form>
