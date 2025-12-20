@@ -9,6 +9,9 @@
   background: linear-gradient(135deg, #2563eb, #1e40af);
   padding: 20px;
 }
+.add-user-wrapper {
+  margin: -20px; /* نفس قيمة padding في layout */
+}
 
 /* ===============================
    CARD (SAME STYLE)
