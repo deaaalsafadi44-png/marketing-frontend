@@ -22,7 +22,6 @@ const EditTask = () => {
 
   const [users, setUsers] = useState([]);
 
-  // ✅ تهيئة task بقيم افتراضية ثابتة
   const [task, setTask] = useState({
     title: "",
     description: "",
@@ -34,14 +33,12 @@ const EditTask = () => {
   });
 
   useEffect(() => {
-    // 🔒 منع الموظف
     if (user && user.role === "Employee") {
       alert("❌ غير مسموح للموظف تعديل المهام");
       navigate("/tasks");
       return;
     }
 
-    // 🛡️ تحقق من ID
     if (!id || isNaN(Number(id))) {
       navigate("/tasks");
       return;
@@ -56,7 +53,6 @@ const EditTask = () => {
             ?.replace(/<[^>]+>/g, "")
             .trim() || "";
 
-        // ✅ تحميل البيانات مرة واحدة فقط
         setTask({
           title: taskRes.data.title || "",
           description: cleanDescription,
@@ -88,7 +84,6 @@ const EditTask = () => {
     };
 
     loadData();
-  // ✅ مهم جدًا: لا تضف user أو navigate
   }, [id]);
 
   const handleChange = (e) => {
@@ -105,7 +100,6 @@ const EditTask = () => {
 
     try {
       await updateTaskApi(id, task);
-
       alert("✅ Task updated successfully!");
       navigate(`/tasks/view/${id}`);
     } catch (err) {
@@ -121,12 +115,11 @@ const EditTask = () => {
   };
 
   return (
-    <div className="edit-page">
-      <div className="edit-card">
+    <div className="add-page">
+      <div className="add-card">
         <h2 className="card-title">✏️ Edit Task</h2>
 
         <form onSubmit={handleSave}>
-          {/* Title */}
           <div className="form-group">
             <label>Task Title</label>
             <input
@@ -138,19 +131,16 @@ const EditTask = () => {
             />
           </div>
 
-          {/* Description */}
           <div className="form-group">
             <label>Description</label>
             <textarea
-              className="simple-textarea"
               name="description"
+              className="description-box"
               value={task.description}
               onChange={handleChange}
-              rows="6"
             />
           </div>
 
-          {/* Company */}
           <div className="form-group">
             <label>Company</label>
             <select
@@ -168,7 +158,6 @@ const EditTask = () => {
             </select>
           </div>
 
-          {/* Type */}
           <div className="form-group">
             <label>Task Type</label>
             <input
@@ -180,7 +169,6 @@ const EditTask = () => {
             />
           </div>
 
-          {/* Assigned User */}
           <div className="form-group">
             <label>Assigned User</label>
             <select
@@ -198,7 +186,6 @@ const EditTask = () => {
             </select>
           </div>
 
-          {/* Priority */}
           <div className="form-group">
             <label>Priority</label>
             <select
@@ -215,7 +202,6 @@ const EditTask = () => {
             </select>
           </div>
 
-          {/* Status */}
           <div className="form-group">
             <label>Status</label>
             <select
@@ -232,7 +218,9 @@ const EditTask = () => {
             </select>
           </div>
 
-          <button className="save-btn">Save Changes</button>
+          <button type="submit" className="submit-btn">
+            Save Changes
+          </button>
         </form>
       </div>
     </div>
