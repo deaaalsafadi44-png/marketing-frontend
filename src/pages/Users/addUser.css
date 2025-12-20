@@ -2,9 +2,8 @@
    PAGE BACKGROUND (UNDER NAVBAR)
 =============================== */
 .add-user-wrapper {
-  min-height: calc(100vh - 64px); /* ارتفاع الـ Navbar */
-  margin-top: 64px;
-
+  min-height: calc(100vh - 64px); /* ارتفاع الـ Navbar فقط */
+  
   display: flex;
   align-items: center;
   justify-content: center;
