@@ -5,9 +5,12 @@ import "./MainLayout.css";
 const MainLayout = () => {
   const location = useLocation();
 
-  const fullBgPages = ["/users/add"];
+  // صفحات بخلفية كاملة
+  const fullBgPages = ["/users/add", "/login"];
 
-  const isFullBg = fullBgPages.includes(location.pathname);
+  const isFullBg = fullBgPages.some((path) =>
+    location.pathname.startsWith(path)
+  );
 
   return (
     <div className="layout-container">

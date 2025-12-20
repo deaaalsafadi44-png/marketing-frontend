@@ -2,13 +2,14 @@
   min-height: 100vh;
 }
 
+/* الوضع الافتراضي */
 .page-content {
   padding: 35px;
+  background: #f4f6fa;
 }
 
+/* صفحات بخلفية كاملة */
 .page-content.full-bg {
   padding: 0;
-}
-.page-content.full-bg {
-  background: red;
+  background: transparent;
 }
