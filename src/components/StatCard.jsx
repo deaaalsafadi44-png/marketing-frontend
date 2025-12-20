@@ -1,19 +1,15 @@
-import "./StatCard.css";
+    import "./StatCard.css";
 
 const StatCard = ({ title, value, color, border }) => {
   return (
-    <div
-      className="stat-card"
-      style={{ borderLeft: `5px solid ${border}` }}
-    >
-      <div className="stat-content">
-        <span className="stat-title">{title}</span>
-        <span className="stat-value" style={{ color }}>
-          {value}
-        </span>
-      </div>
+    <div className="stat-card" style={{ borderBottom: `5px solid ${border}` }}>
+      <span className="stat-value" style={{ color: color }}>
+        {value}
+      </span>
+      <span className="stat-title">{title}</span>
     </div>
   );
 };
 
-export default StatCard;
+export default StatCard;      
+ 
