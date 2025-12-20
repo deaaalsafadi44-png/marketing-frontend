@@ -112,6 +112,7 @@
    BUTTON
 =============================== */
 .btn-save {
+  position: relative; /* 🔴 مهم جدًا */
   width: 100%;
   padding: 14px;
   margin-top: 10px;
@@ -131,8 +132,32 @@
 }
 
 .btn-save:disabled {
-  opacity: 0.7;
+  opacity: 0.8;
   cursor: not-allowed;
+}
+
+/* ===============================
+   BUTTON SPINNER (FIXED ✅)
+=============================== */
+.btn-save.loading {
+  pointer-events: none;
+  color: transparent; /* إخفاء النص */
+}
+
+.btn-save.loading::after {
+  content: "";
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+
+  animation: spin 0.8s linear infinite;
 }
 
 /* ===============================
@@ -148,34 +173,9 @@
     transform: scale(1) translateY(0);
   }
 }
-/* ===============================
-   BUTTON SPINNER
-=============================== */
-.btn-save.loading::after {
-  content: "";
-  width: 22px;
-  height: 22px;
-  border: 3px solid rgba(255, 255, 255, 0.4);
-  border-top-color: #fff;
-  border-radius: 50%;
 
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.btn-save.loading::before {
-  content: "";
-  width: 22px;
-  height: 22px;
-  border: 3px solid transparent;
-  border-top-color: #fff;
-  border-radius: 50%;
-
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: spin 0.8s linear infinite;
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
 }
