@@ -27,9 +27,6 @@ ChartJS.register(
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  // -----------------------------
-  // LOAD TASKS
-  // -----------------------------
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,14 +38,12 @@ const Dashboard = () => {
       } catch (err) {
         console.error("Error loading tasks:", err);
 
-        // ❗ إذا حدث خطأ 401 → انتهاء التوكن
         if (err?.response?.status === 401) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           navigate("/login");
         }
       }
-
       setLoading(false);
     };
 
@@ -59,9 +54,9 @@ const Dashboard = () => {
     return <h2 style={{ textAlign: "center", marginTop: "40px" }}>Loading...</h2>;
   }
 
-  // -----------------------------
-  // CALCULATE STATISTICS
-  // -----------------------------
+  /* =====================
+     STATISTICS
+  ===================== */
   const total = tasks.length;
 
   const inProgress = tasks.filter(
@@ -77,25 +72,25 @@ const Dashboard = () => {
       t.status === "Under Review"
   ).length;
 
-  // -----------------------------
-  // COMPANY COUNTS — ديناميكي
-  // -----------------------------
+  /* =====================
+     COMPANY COUNTS
+  ===================== */
   const companyCounts = {};
   tasks.forEach((t) => {
     companyCounts[t.company] = (companyCounts[t.company] || 0) + 1;
   });
 
-  // -----------------------------
-  // TYPE COUNTS — ديناميكي
-  // -----------------------------
+  /* =====================
+     TYPE COUNTS
+  ===================== */
   const typeCounts = {};
   tasks.forEach((t) => {
     typeCounts[t.type] = (typeCounts[t.type] || 0) + 1;
   });
 
-  // -----------------------------
-  // PIE CHART DATA
-  // -----------------------------
+  /* =====================
+     PIE DATA
+  ===================== */
   const pieData = {
     labels: Object.keys(companyCounts),
     datasets: [
@@ -104,7 +99,6 @@ const Dashboard = () => {
         data: Object.values(companyCounts),
         backgroundColor: ["#1976d2", "#26a69a", "#ffca28", "#ef5350", "#8e24aa"],
         borderWidth: 1,
-        radius: 120,
       },
     ],
   };
@@ -112,13 +106,20 @@ const Dashboard = () => {
   const pieOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { position: "top" } },
-    layout: { padding: 10 },
+    plugins: {
+      legend: {
+        position: "bottom",
+        labels: {
+          boxWidth: 12,
+          padding: 12,
+        },
+      },
+    },
   };
 
-  // -----------------------------
-  // BAR CHART DATA
-  // -----------------------------
+  /* =====================
+     BAR DATA
+  ===================== */
   const barData = {
     labels: Object.keys(typeCounts),
     datasets: [
@@ -133,8 +134,16 @@ const Dashboard = () => {
   const barOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { position: "top" } },
-    scales: { y: { beginAtZero: true } },
+    plugins: {
+      legend: {
+        position: "top",
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
   };
 
   return (
@@ -153,14 +162,14 @@ const Dashboard = () => {
       <div className="charts-row">
         <div className="chart-box">
           <h3 className="chart-title">توزيع المهام حسب الشركة</h3>
-          <div style={{ width: "100%", height: "350px" }}>
+          <div className="chart-content">
             <Pie data={pieData} options={pieOptions} />
           </div>
         </div>
 
         <div className="chart-box">
           <h3 className="chart-title">إحصائيات المهام حسب النوع</h3>
-          <div style={{ width: "100%", height: "350px" }}>
+          <div className="chart-content">
             <Bar data={barData} options={barOptions} />
           </div>
         </div>
