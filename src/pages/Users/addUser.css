@@ -1,55 +1,26 @@
 /* ===============================
-   PAGE BACKGROUND (UNDER NAVBAR)
+   PAGE BACKGROUND
 =============================== */
 .add-user-wrapper {
-  min-height: calc(100vh - 65px); /* نفس ارتفاع الـ Navbar */
+  min-height: calc(100vh - 65px);
   margin-top: 65px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   background: linear-gradient(135deg, #2563eb, #1e40af);
 }
 
 /* ===============================
-   CARD (SAME STYLE AS LOGIN)
+   CARD
 =============================== */
 .add-user-card {
   width: 100%;
   max-width: 420px;
   background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(12px);
   border-radius: 22px;
   padding: 32px 28px;
   box-shadow: 0 30px 60px rgba(0,0,0,0.25);
   animation: fadeScale 0.4s ease;
-}
-
-/* ===============================
-   TITLE
-=============================== */
-.add-user-card .title {
-  text-align: center;
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 25px;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
-/* ===============================
-   ERROR
-=============================== */
-.error-box {
-  background: #fee2e2;
-  color: #b91c1c;
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 14px;
-  margin-bottom: 15px;
-  text-align: center;
 }
 
 /* ===============================
@@ -70,21 +41,11 @@
   margin-bottom: 15px;
   border-radius: 14px;
   border: 1px solid #d1d5db;
-  font-size: 15px;
   background: #f9fafb;
-  transition: all 0.2s ease;
-}
-
-.add-user-form input:focus,
-.add-user-form select:focus {
-  outline: none;
-  border-color: #2563eb;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(37,99,235,0.2);
 }
 
 /* ===============================
-   PASSWORD FIELD
+   PASSWORD
 =============================== */
 .password-box {
   position: relative;
@@ -100,12 +61,6 @@
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  font-size: 18px;
-  opacity: 0.6;
-}
-
-.eye-icon:hover {
-  opacity: 1;
 }
 
 /* ===============================
@@ -118,96 +73,39 @@
   border: none;
   background: linear-gradient(135deg, #2563eb, #1e40af);
   cursor: pointer;
-  transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
 }
 
-/* ✅ Hover يعمل فقط إذا لم يكن Loading */
 .btn-save:not(.loading):hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(37,99,235,0.4);
 }
 
-.btn-save:disabled {
-  opacity: 0.8;
-  cursor: not-allowed;
-}
-
-/* ===============================
-   BUTTON CONTENT
-=============================== */
-.btn-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-}
-
-/* ===============================
-   LOADING STATE
-=============================== */
 .btn-save.loading .btn-content {
   visibility: hidden;
 }
 
 /* ===============================
-   SPINNER (FIXED CENTER ✅)
+   SPINNER (FINAL – ثابت 100%)
 =============================== */
 .btn-save.loading::after {
   content: "";
   width: 22px;
   height: 22px;
-  border: 3px solid rgba(255, 255, 255, 0.35);
+  border: 3px solid rgba(255,255,255,0.35);
   border-top-color: #fff;
   border-radius: 50%;
-
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-  animation: spin 0.8s linear infinite;
-}
-
-/* ===============================
-   ANIMATIONS
-=============================== */
-/* ===============================
-   SPINNER (FIXED 100%)
-=============================== */
-.btn-save.loading::after {
-  content: "";
-  width: 22px;
-  height: 22px;
-  border: 3px solid rgba(255, 255, 255, 0.35);
-  border-top-color: #fff;
-  border-radius: 50%;
-
-  position: absolute;
-  inset: 0;          /* 🔥 أهم سطر */
-  margin: auto;      /* 🔥 أهم سطر */
-
+  inset: 0;
+  margin: auto;
   animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  to {
-    rotate: 360deg;  /* 🔥 بدون transform */
-  }
+  to { rotate: 360deg; }
 }
 
 @keyframes fadeScale {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
 }
