@@ -1,74 +1,148 @@
+/* ===============================
+   PAGE BACKGROUND (SAME AS LOGIN)
+=============================== */
 .add-user-wrapper {
+  min-height: 100vh;
   display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 40px;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  padding: 20px;
 }
 
+/* ===============================
+   CARD (SAME STYLE)
+=============================== */
 .add-user-card {
-  width: 500px;
-  background: #fff;
-  padding: 35px;
-  border-radius: 14px;
-  box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  border-radius: 22px;
+  padding: 32px 28px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+  animation: fadeScale 0.4s ease;
 }
 
-.title {
+/* ===============================
+   TITLE
+=============================== */
+.add-user-card .title {
   text-align: center;
+  font-size: 28px;
+  font-weight: 800;
   margin-bottom: 25px;
-  font-size: 26px;
-  font-weight: bold;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
+/* ===============================
+   ERROR
+=============================== */
+.error-box {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+/* ===============================
+   FORM
+=============================== */
 .add-user-form label {
+  font-size: 14px;
   font-weight: 600;
-  margin-top: 10px;
+  margin-bottom: 6px;
+  display: block;
+  color: #374151;
 }
 
 .add-user-form input,
 .add-user-form select {
   width: 100%;
-  margin-top: 5px;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  padding: 14px 16px;
+  margin-bottom: 15px;
+  border-radius: 14px;
+  border: 1px solid #d1d5db;
   font-size: 15px;
+  background: #f9fafb;
+  transition: all 0.2s ease;
 }
 
+.add-user-form input:focus,
+.add-user-form select:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.2);
+}
+
+/* ===============================
+   PASSWORD FIELD
+=============================== */
 .password-box {
   position: relative;
+}
+
+.password-box input {
+  padding-right: 45px;
 }
 
 .eye-icon {
   position: absolute;
   right: 14px;
-  top: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
+  opacity: 0.6;
 }
 
+.eye-icon:hover {
+  opacity: 1;
+}
+
+/* ===============================
+   BUTTON
+=============================== */
 .btn-save {
-  margin-top: 20px;
   width: 100%;
   padding: 14px;
-  background: #1976d2;
-  color: white;
+  margin-top: 10px;
+  border-radius: 16px;
   border: none;
-  border-radius: 8px;
-  font-size: 17px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s ease;
 }
 
 .btn-save:hover {
-  background: #125a9c;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(37,99,235,0.4);
 }
 
-.error-box {
-  background: #ffdddd;
-  border: 1px solid #ff5b5b;
-  color: #b30000;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  font-weight: bold;
+.btn-save:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ===============================
+   ANIMATION
+=============================== */
+@keyframes fadeScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
