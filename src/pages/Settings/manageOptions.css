@@ -1,89 +1,140 @@
-.opt-container {
-  padding: 30px;
-  max-width: 900px;
-  margin: auto;
-}
-
-.opt-title {
-  text-align: center;
-  margin-bottom: 30px;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.opt-box {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-  margin-bottom: 30px;
-}
-
-.opt-box h2 {
-  margin-bottom: 15px;
-}
-
-.opt-form {
+/* ===============================
+   PAGE WRAPPER
+=============================== */
+.options-wrapper {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 40px 20px;
   display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+  justify-content: center;
 }
 
-.opt-form input {
+/* ===============================
+   MAIN CONTAINER
+=============================== */
+.options-container {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* ===============================
+   CARD
+=============================== */
+.option-card {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 26px 28px;
+  box-shadow: 0 16px 35px rgba(0,0,0,0.08);
+  animation: fadeUp 0.3s ease;
+}
+
+/* ===============================
+   CARD TITLE
+=============================== */
+.option-card h2 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 18px;
+  color: #111827;
+}
+
+/* ===============================
+   ADD ROW
+=============================== */
+.add-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.add-row input {
   flex: 1;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  background: #f9fafb;
+  transition: all 0.2s ease;
 }
 
-.opt-form button {
-  padding: 10px 18px;
-  background: #1976d2;
-  color: white;
+.add-row input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  background: #fff;
+}
+
+.add-row button {
+  padding: 0 20px;
+  border-radius: 14px;
   border: none;
-  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.opt-form button:hover {
-  background: #125aaa;
+.add-row button:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
 }
 
-.opt-list {
-  list-style: none;
-  padding: 0;
+/* ===============================
+   OPTIONS LIST
+=============================== */
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.opt-list li {
+/* ===============================
+   OPTION ITEM
+=============================== */
+.option-item {
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
-  background: #f4f4f4;
-  padding: 10px;
-  margin-bottom: 8px;
-  border-radius: 6px;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
 }
 
-.del-btn {
-  background: red;
+/* ===============================
+   DELETE BUTTON
+=============================== */
+.option-item button {
+  background: #fee2e2;
+  color: #b91c1c;
   border: none;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 14px;
   cursor: pointer;
-}
-  
-.del-btn:hover {
-  background: darkred;
+  transition: all 0.2s ease;
 }
 
-/* ------------------------------
-   NEW: Companies Box styling  
-   ------------------------------ */
-
-.opt-box.companies-box {
-  border-left: 5px solid #4caf50;
+.option-item button:hover {
+  background: #fecaca;
 }
 
-.opt-box.companies-box h2 {
-  color: #4caf50;
+/* ===============================
+   ANIMATION
+=============================== */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
