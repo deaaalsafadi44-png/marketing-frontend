@@ -62,12 +62,21 @@ function Navbar() {
           Tasks
         </NavLink>
 
+        {/* ✅ Admin + Manager */}
         {(user.role === "Admin" || user.role === "Manager") && (
-          <NavLink to="/reports" className="nav-link">
-            Reports
-          </NavLink>
+          <>
+            <NavLink to="/reports" className="nav-link">
+              Reports
+            </NavLink>
+
+            {/* ⭐ Submissions / Deliverables */}
+            <NavLink to="/submissions" className="nav-link">
+              Submissions
+            </NavLink>
+          </>
         )}
 
+        {/* ✅ Admin فقط */}
         {user.role === "Admin" && (
           <>
             <NavLink to="/users" className="nav-link">
@@ -88,4 +97,3 @@ function Navbar() {
 }
 
 export default Navbar;
-  
