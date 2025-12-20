@@ -8,7 +8,7 @@ import "./add.css";
 
 const AddTask = () => {
   const navigate = useNavigate();
-  const { user } = useAuth(); // ✅ المصدر الصحيح
+  const { user } = useAuth();
 
   const [options, setOptions] = useState({
     priority: [],
@@ -30,9 +30,7 @@ const AddTask = () => {
 
   const [loading, setLoading] = useState(true);
 
-  // =============================
-  // Role Guard (Admin + Manager)
-  // =============================
+  /* ================= ROLE GUARD ================= */
   useEffect(() => {
     if (!user) return;
 
@@ -46,14 +44,11 @@ const AddTask = () => {
     }
   }, [navigate, user]);
 
-  // =============================
-  // Load Users + Options
-  // =============================
+  /* ================= LOAD DATA ================= */
   useEffect(() => {
     const load = async () => {
       try {
         const ops = await getOptions();
-
         setOptions({
           priority: ops.data.priority || [],
           status: ops.data.status || [],
@@ -67,7 +62,6 @@ const AddTask = () => {
         alert("❌ لا يمكن تحميل بيانات النموذج");
         navigate("/tasks");
       }
-
       setLoading(false);
     };
 
@@ -78,9 +72,7 @@ const AddTask = () => {
     setTask({ ...task, [e.target.name]: e.target.value });
   };
 
-  // =============================
-  // Submit New Task
-  // =============================
+  /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -104,11 +96,14 @@ const AddTask = () => {
         <h2 className="card-title">📝 Add New Task</h2>
 
         <form onSubmit={handleSubmit}>
+
+          {/* ===== TITLE ===== */}
           <div className="form-group">
             <label>Task Title</label>
             <input type="text" name="title" required onChange={handleChange} />
           </div>
 
+          {/* ===== DESCRIPTION (FULL WIDTH) ===== */}
           <div className="form-group">
             <label>Description</label>
             <textarea
@@ -121,59 +116,63 @@ const AddTask = () => {
             />
           </div>
 
-          <div className="form-group">
-            <label>Company</label>
-            <select name="company" required onChange={handleChange}>
-              <option value="">Select Company</option>
-              {options.companies.map((c, i) => (
-                <option key={i} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+          {/* ===== GRID FIELDS ===== */}
+          <div className="form-grid">
+            <div className="form-group">
+              <label>Company</label>
+              <select name="company" required onChange={handleChange}>
+                <option value="">Select Company</option>
+                {options.companies.map((c, i) => (
+                  <option key={i} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Task Type</label>
+              <input type="text" name="type" required onChange={handleChange} />
+            </div>
+
+            <div className="form-group">
+              <label>Assigned User</label>
+              <select name="workerId" required onChange={handleChange}>
+                <option value="">Select User</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} — {u.role}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Priority</label>
+              <select name="priority" required onChange={handleChange}>
+                <option value="">Select Priority</option>
+                {options.priority.map((p, i) => (
+                  <option key={i} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Status</label>
+              <select name="status" required onChange={handleChange}>
+                <option value="">Select Status</option>
+                {options.status.map((s, i) => (
+                  <option key={i} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className="form-group">
-            <label>Task Type</label>
-            <input type="text" name="type" required onChange={handleChange} />
-          </div>
-
-          <div className="form-group">
-            <label>Assigned User</label>
-            <select name="workerId" required onChange={handleChange}>
-              <option value="">Select User</option>
-              {users.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name} — {u.role}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Priority</label>
-            <select name="priority" required onChange={handleChange}>
-              <option value="">Select Priority</option>
-              {options.priority.map((p, i) => (
-                <option key={i} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Status</label>
-            <select name="status" required onChange={handleChange}>
-              <option value="">Select Status</option>
-              {options.status.map((s, i) => (
-                <option key={i} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
-
+          {/* ===== SUBMIT ===== */}
           <button type="submit" className="submit-btn">
             + Add Task
           </button>

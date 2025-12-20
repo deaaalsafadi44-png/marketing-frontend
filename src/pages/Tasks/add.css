@@ -1,28 +1,32 @@
+/* ================= PAGE ================= */
 .add-page {
   display: flex;
   justify-content: center;
-  padding-top: 40px;
+  padding: 50px 0;
+  background: #f5f7fa;
+  min-height: 100vh;
 }
 
+/* ================= CARD ================= */
 .add-card {
-  width: 780px;
-  background: white;
+  width: 820px;
+  background: #ffffff;
   border-radius: 20px;
-  padding: 28px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-  animation: fadeIn 0.3s ease;
+  padding: 36px 40px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  animation: fadeIn 0.35s ease;
 }
 
+/* ================= TITLE ================= */
 .card-title {
-  background: linear-gradient(135deg, #7B2FFF, #3B82F6);
-  -webkit-background-clip: text;
-  color: transparent;
-  font-size: 30px;
-  font-weight: 800;
+  font-size: 28px;
+  font-weight: 700;
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
+  color: #111827;
 }
 
+/* ================= FORM ================= */
 .form-group {
   margin-bottom: 18px;
 }
@@ -31,60 +35,92 @@
   font-weight: 600;
   margin-bottom: 6px;
   display: block;
-  font-size: 15px;
-  color: #333;
+  font-size: 14px;
+  color: #374151;
 }
 
-input, select {
+/* ================= GRID ================= */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px 20px;
+  margin-top: 5px;
+}
+
+/* ================= INPUTS ================= */
+input,
+select,
+textarea {
   width: 100%;
-  padding: 11px;
+  padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid #ddd;
-  font-size: 16px;
-  background: #fafafa;
+  border: 1px solid #d1d5db;
+  font-size: 15px;
+  background: #f9fafb;
+  transition: all 0.2s ease;
 }
 
-input:focus, select:focus {
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
-  border-color: #7B2FFF;
-  box-shadow: 0 0 4px rgba(123,47,255,0.3);
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+/* ================= DESCRIPTION ================= */
+.description-box {
+  min-height: 170px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+/* ================= SUBMIT ================= */
 .submit-btn {
   width: 100%;
   padding: 14px;
-  font-size: 18px;
-  margin-top: 15px;
-  background: linear-gradient(135deg, #7B2FFF, #3B82F6);
-  color: white;
+  font-size: 17px;
+  margin-top: 22px;
+  background: #2563eb;
+  color: #ffffff;
   border: none;
   border-radius: 14px;
   cursor: pointer;
-  font-weight: bold;
-  transition: 0.2s;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .submit-btn:hover {
-  opacity: 0.85;
+  background: #1d4ed8;
+  transform: translateY(-1px);
 }
 
+/* ================= ANIMATION ================= */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.description-box {
-  width: 100%;
-  min-height: 180px;
-  padding: 14px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-size: 15px;
-  resize: vertical;
-  outline: none;
-  background: #fff;
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.description-box:focus {
-  border-color: #6c63ff;
-  box-shadow: 0 0 5px rgba(108, 99, 255, 0.3);
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .add-card {
+    width: 95%;
+    padding: 28px 24px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
 }
