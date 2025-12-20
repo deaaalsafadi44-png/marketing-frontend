@@ -1,26 +1,113 @@
+/* ===============================
+   PAGE BACKGROUND
+=============================== */
 .login-container {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  background: #f4f6fa;
+  justify-content: center;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  padding: 20px;
 }
 
+/* ===============================
+   LOGIN BOX
+=============================== */
 .login-box {
-  background: white;
-  width: 350px;
-  padding: 30px;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  border-radius: 22px;
+  padding: 32px 28px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+  animation: fadeScale 0.4s ease;
 }
 
+/* ===============================
+   TITLE
+=============================== */
+.login-box h2 {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 25px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* ===============================
+   ERROR
+=============================== */
+.error-text {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+/* ===============================
+   INPUTS
+=============================== */
+.login-box input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 15px;
+  border-radius: 14px;
+  border: 1px solid #d1d5db;
+  font-size: 15px;
+  background: #f9fafb;
+  transition: all 0.2s ease;
+}
+
+.login-box input:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.2);
+}
+
+/* ===============================
+   BUTTON
+=============================== */
 .login-btn {
-  background: #1976d2;
-  padding: 10px;
-  color: white;
-  border-radius: 6px;
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  border-radius: 16px;
   border: none;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(37,99,235,0.4);
+}
+
+.login-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ===============================
+   ANIMATION
+=============================== */
+@keyframes fadeScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
