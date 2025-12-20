@@ -107,17 +107,20 @@
 .eye-icon:hover {
   opacity: 1;
 }
-
 /* ===============================
    BUTTON
 =============================== */
 .btn-save {
   position: relative;
   width: 100%;
-  padding: 14px;
-  margin-top: 10px;
+  height: 52px;              /* تثبيت الارتفاع */
   border-radius: 16px;
   border: none;
+
+  display: flex;             /* 🔑 الحل */
+  align-items: center;
+  justify-content: center;
+
   font-size: 16px;
   font-weight: 700;
   color: #fff;
@@ -132,33 +135,33 @@
 }
 
 .btn-save:disabled {
-  opacity: 0.8;
+  opacity: 0.85;
   cursor: not-allowed;
 }
 
 /* ===============================
-   BUTTON SPINNER (FINAL FIX ✅)
+   BUTTON SPINNER (NO SHAKE ✅)
 =============================== */
 .btn-save.loading {
   pointer-events: none;
-  color: transparent; /* إخفاء النص */
+}
+
+.btn-save.loading span {
+  visibility: hidden; /* إخفاء النص بدون كسر الـ layout */
 }
 
 .btn-save.loading::after {
   content: "";
   width: 22px;
   height: 22px;
-  border: 3px solid rgba(255, 255, 255, 0.35);
-  border-top-color: #ffffff;
+  border: 3px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
   border-radius: 50%;
 
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
   animation: spin 0.8s linear infinite;
 }
+
 
 /* ===============================
    ANIMATIONS
