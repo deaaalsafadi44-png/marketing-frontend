@@ -6,13 +6,25 @@ import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
   const navigate = useNavigate();
+
+  /* =========================
+     AUTH CONTEXT
+  ========================= */
   const { user, logout, loading } = useAuth();
 
-  if (loading || !user) return null;
+  // أثناء التحقق من الجلسة
+  if (loading) return null;
 
+  // لا يوجد مستخدم → لا Navbar
+  if (!user) return null;
+
+  /* ================================
+     ⭐ اسم السيستم
+  ================================ */
   const [systemName, setSystemName] = useState("System");
 
   useEffect(() => {
+    // 🔒 لا نطلب الإعدادات إلا من Admin
     if (user.role !== "Admin") return;
 
     const loadSystemName = async () => {
@@ -27,6 +39,9 @@ function Navbar() {
     loadSystemName();
   }, [user.role]);
 
+  /* ================================
+     🚪 Logout
+  ================================ */
   const handleLogout = async () => {
     await logout();
     navigate("/login");
@@ -35,16 +50,12 @@ function Navbar() {
   return (
     <nav className="top-navbar">
       <div className="nav-left">
-        <span className="system-title">{systemName}</span>
+        <h2 className="system-title">{systemName}</h2>
       </div>
 
-      <div className="nav-center">
+      <div className="nav-right">
         <NavLink to="/" end className="nav-link">
           Dashboard
-        </NavLink>
-
-        <NavLink to="/deliverables" className="nav-link">
-          Submissions
         </NavLink>
 
         <NavLink to="/tasks" className="nav-link">
@@ -67,9 +78,7 @@ function Navbar() {
             </NavLink>
           </>
         )}
-      </div>
 
-      <div className="nav-right">
         <button onClick={handleLogout} className="logout-btn">
           Logout
         </button>
@@ -79,3 +88,4 @@ function Navbar() {
 }
 
 export default Navbar;
+  
