@@ -23,8 +23,6 @@ const Users = () => {
       console.error("Error loading users:", err);
 
       if (err?.response?.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
         navigate("/login");
         return;
       }
@@ -46,17 +44,20 @@ const Users = () => {
   // ===============================
   // Filters
   // ===============================
-  const filtered = users.filter((u) => {
-    return (
-      (deptFilter === "" || u.dept === deptFilter) &&
-      u.name.toLowerCase().includes(search.toLowerCase())
-    );
-  });
+  const filtered = users.filter((u) =>
+    (deptFilter === "" || u.dept === deptFilter) &&
+    u.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   // ===============================
-  // Delete User ✅ FIXED
+  // Delete User ✅ FINAL FIX
   // ===============================
   const handleDelete = async (_id) => {
+    if (!_id) {
+      console.error("❌ Missing user _id");
+      return;
+    }
+
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
@@ -64,19 +65,6 @@ const Users = () => {
       loadUsers();
     } catch (err) {
       console.error("Delete user error:", err);
-
-      if (err?.response?.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        navigate("/login");
-        return;
-      }
-
-      if (err?.response?.status === 403) {
-        alert("❌ Only Admin can delete users!");
-        return;
-      }
-
       alert("❌ Failed to delete user. Try again.");
     }
   };
@@ -112,7 +100,7 @@ const Users = () => {
         </select>
       </div>
 
-      {/* Users Table */}
+      {/* Table */}
       <table className="users-table">
         <thead>
           <tr>
