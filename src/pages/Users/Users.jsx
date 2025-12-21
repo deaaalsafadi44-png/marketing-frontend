@@ -142,7 +142,7 @@ const Users = () => {
                 |{" "}
                 <span
                   className="delete-link"
-onClick={() => handleDelete(u._id)}
+                  onClick={() => handleDelete(u.id)}
                 >
                   Delete
                 </span>
