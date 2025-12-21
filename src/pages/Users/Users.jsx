@@ -50,18 +50,18 @@ const Users = () => {
   );
 
   // ===============================
-  // Delete User ✅ FINAL FIX
+  // Delete User ✅ FINAL
   // ===============================
-  const handleDelete = async (_id) => {
-    if (!_id) {
-      console.error("❌ Missing user _id");
+  const handleDelete = async (id) => {
+    if (!id) {
+      console.error("❌ Missing user id");
       return;
     }
 
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
-      await deleteUserApi(_id);
+      await deleteUserApi(id);
       loadUsers();
     } catch (err) {
       console.error("Delete user error:", err);
@@ -115,20 +115,20 @@ const Users = () => {
 
         <tbody>
           {filtered.map((u) => (
-            <tr key={u._id}>
-              <td>{u._id}</td>
+            <tr key={u.id}>
+              <td>{u.id}</td>
               <td>{u.name}</td>
               <td>{u.email}</td>
               <td>{u.role}</td>
               <td>{u.dept}</td>
               <td>
-                <Link to={`/users/edit/${u._id}`} className="edit-link">
+                <Link to={`/users/edit/${u.id}`} className="edit-link">
                   Edit
                 </Link>{" "}
                 |{" "}
                 <span
                   className="delete-link"
-                  onClick={() => handleDelete(u._id)}
+                  onClick={() => handleDelete(u.id)}
                 >
                   Delete
                 </span>
