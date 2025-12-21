@@ -2,12 +2,16 @@
   min-height: 100vh;
 }
 
+/* كل الصفحات العادية */
 .page-content {
   padding: 35px;
+  padding-top: calc(35px + 65px); /* 🔥 يعوّض ارتفاع Navbar */
   background: #f4f6fa;
 }
 
+/* صفحات Full Background */
 .page-content.full-bg {
   padding: 0;
+  padding-top: 65px; /* 🔥 نفس ارتفاع Navbar */
   background: transparent;
 }
