@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getUserById, updateUserApi } from "../../services/usersService";
 import { useNavigate, useParams } from "react-router-dom";
-import "./editUser.css";
+
 
 const EditUser = () => {
   const { id } = useParams(); // Mongo _id
