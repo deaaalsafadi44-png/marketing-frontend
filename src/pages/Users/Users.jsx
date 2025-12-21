@@ -128,7 +128,7 @@ const Users = () => {
         </thead>
 
         <tbody>
-          {filtered.map((user) => (
+          {filtered.map((u) => (
             <tr key={u.id}>
               <td>{u.id}</td>
               <td>{u.name}</td>
@@ -142,7 +142,7 @@ const Users = () => {
                 |{" "}
                 <span
                   className="delete-link"
-onClick={() => handleDelete(user._id)}
+onClick={() => handleDelete(u._id)}
                 >
                   Delete
                 </span>
