@@ -183,7 +183,7 @@ const Users = () => {
 
                       <button
                         className="action-delete"
-                        onClick={() => handleDelete(u.id)}
+onClick={() => handleDelete(user._id)}
                       >
                         Delete
                       </button>
