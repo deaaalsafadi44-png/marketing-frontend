@@ -31,11 +31,18 @@ const DeliverablesBoard = () => {
   return (
     <div className="deliverables-page">
       <div className="deliverables-card">
+        {/* HEADER */}
         <div className="deliverables-header">
-          <h1>📦 Task Submissions</h1>
-          <p>All submitted work from team members</p>
+          <div>
+            <h1>Task Submissions</h1>
+            <p>All submitted work from team members</p>
+          </div>
+          <span className="submissions-count">
+            {items.length} Submissions
+          </span>
         </div>
 
+        {/* EMPTY */}
         {items.length === 0 ? (
           <div className="empty-state">
             <span>📭</span>
@@ -45,8 +52,11 @@ const DeliverablesBoard = () => {
           <div className="deliverables-grid">
             {items.map((item) => (
               <div key={item._id} className="deliverable-item">
+                {/* TOP */}
                 <div className="deliverable-top">
-                  <span className="task-badge">Task #{item.taskId}</span>
+                  <span className="task-badge">
+                    Task #{item.taskId}
+                  </span>
                   <span className="date">
                     {item.createdAt
                       ? new Date(item.createdAt).toLocaleDateString()
@@ -54,12 +64,19 @@ const DeliverablesBoard = () => {
                   </span>
                 </div>
 
-                <h3>{item.submittedByName}</h3>
+                {/* USER */}
+                <div className="deliverable-user">
+                  👤 {item.submittedByName || "Unknown User"}
+                </div>
 
+                {/* NOTES */}
                 {item.notes && (
-                  <p className="notes">{item.notes}</p>
+                  <p className="notes">
+                    {item.notes}
+                  </p>
                 )}
 
+                {/* FILES */}
                 <div className="files">
                   {item.files && item.files.length > 0 ? (
                     item.files.map((file, i) => (
@@ -74,7 +91,7 @@ const DeliverablesBoard = () => {
                       </a>
                     ))
                   ) : (
-                    <span className="no-files">No files</span>
+                    <span className="no-files">No files attached</span>
                   )}
                 </div>
               </div>
