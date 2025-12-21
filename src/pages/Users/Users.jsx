@@ -8,36 +8,18 @@ const Users = () => {
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [search, setSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("");
 
-  // ===============================
-  // Load Users (Protected)
-  // ===============================
   const loadUsers = async () => {
     try {
       const res = await getUsers();
       setUsers(res.data);
     } catch (err) {
-      console.error("Error loading users:", err);
-
-      // ❌ التوكن انتهى
       if (err?.response?.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
         navigate("/login");
-        return;
-      }
-
-      // ❌ لا يوجد صلاحية
-      if (err?.response?.status === 403) {
-        alert("❌ Only Admin can access users list!");
-        navigate("/");
-        return;
       }
     }
-
     setLoading(false);
   };
 
@@ -45,112 +27,119 @@ const Users = () => {
     loadUsers();
   }, []);
 
-  // ===============================
-  // Filters
-  // ===============================
-  const filtered = users.filter((u) => {
-    return (
+  const filtered = users.filter(
+    (u) =>
       (deptFilter === "" || u.dept === deptFilter) &&
       u.name.toLowerCase().includes(search.toLowerCase())
-    );
-  });
+  );
 
-  // ===============================
-  // Delete User
-  // ===============================
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
-
-    try {
-      await deleteUserApi(id);
-      loadUsers();
-    } catch (err) {
-      console.error("Delete user error:", err);
-
-      if (err?.response?.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        navigate("/login");
-        return;
-      }
-
-      if (err?.response?.status === 403) {
-        alert("❌ Only Admin can delete users!");
-        return;
-      }
-
-      alert("❌ Failed to delete user. Try again.");
-    }
+    if (!window.confirm("Are you sure?")) return;
+    await deleteUserApi(id);
+    loadUsers();
   };
 
   if (loading) {
-    return <h2 style={{ textAlign: "center", marginTop: "30px" }}>Loading...</h2>;
+    return <div className="users-loading">Loading...</div>;
   }
 
   return (
-    <div className="users-container">
-      <div className="users-header">
-        <h1>Users Management</h1>
-        <Link to="/users/add" className="add-user-btn">
-          + Add User
-        </Link>
+    <div className="users-page">
+      <div className="users-card">
+        {/* Header */}
+        <div className="users-header">
+          <div>
+            <h1 className="users-title">Users Management</h1>
+            <p className="users-subtitle">
+              Manage system users, roles and departments
+            </p>
+          </div>
+
+          <Link to="/users/add" className="add-user-btn">
+            + Add User
+          </Link>
+        </div>
+
+        {/* Toolbar */}
+        <div className="users-toolbar">
+          <input
+            type="text"
+            placeholder="Search by name..."
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
+          <select onChange={(e) => setDeptFilter(e.target.value)}>
+            <option value="">All Departments</option>
+            <option>Design</option>
+            <option>Content</option>
+            <option>Marketing</option>
+            <option>Finance</option>
+            <option>Video</option>
+          </select>
+        </div>
+
+        {/* Table */}
+        <div className="users-table-wrapper">
+          <table className="users-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Department</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="no-data">
+                    No users found
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((u) => (
+                  <tr key={u.id}>
+                    <td>{u.id}</td>
+                    <td className="user-name">{u.name}</td>
+                    <td>{u.email}</td>
+
+                    <td>
+                      <span
+                        className={`role-badge role-${u.role.toLowerCase()}`}
+                      >
+                        {u.role}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span className="dept-badge">{u.dept}</span>
+                    </td>
+
+                    <td className="actions-cell">
+                      <Link
+                        to={`/users/edit/${u.id}`}
+                        className="action-edit"
+                      >
+                        Edit
+                      </Link>
+
+                      <button
+                        className="action-delete"
+                        onClick={() => handleDelete(u.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-
-      {/* Filters */}
-      <div className="users-filters">
-        <input
-          type="text"
-          placeholder="Search by name..."
-          onChange={(e) => setSearch(e.target.value)}
-        />
-
-        <select onChange={(e) => setDeptFilter(e.target.value)}>
-          <option value="">Department</option>
-          <option>Design</option>
-          <option>Content</option>
-          <option>Marketing</option>
-          <option>Finance</option>
-          <option>Video</option>
-        </select>
-      </div>
-
-      {/* Users Table */}
-      <table className="users-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Department</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {filtered.map((u) => (
-            <tr key={u.id}>
-              <td>{u.id}</td>
-              <td>{u.name}</td>
-              <td>{u.email}</td>
-              <td>{u.role}</td>
-              <td>{u.dept}</td>
-              <td>
-                <Link to={`/users/edit/${u.id}`} className="edit-link">
-                  Edit
-                </Link>{" "}
-                |{" "}
-                <span
-                  className="delete-link"
-                  onClick={() => handleDelete(u.id)}
-                >
-                  Delete
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 };
