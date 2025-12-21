@@ -1,96 +1,151 @@
 /* ===============================
-   Deliverables Board Styles
-   Safe UI-only styles
-================================ */
-
-/* Page wrapper */
+   PAGE
+=============================== */
 .deliverables-page {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
 }
 
-/* Grid of boxes */
+.deliverables-card {
+  width: 100%;
+  max-width: 1200px;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 32px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+/* ===============================
+   HEADER
+=============================== */
+.deliverables-header {
+  margin-bottom: 30px;
+}
+
+.deliverables-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.deliverables-header p {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* ===============================
+   GRID
+=============================== */
 .deliverables-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  gap: 22px;
 }
 
-/* Single deliverable box */
-.deliverable-card {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* ===============================
+   ITEM CARD
+=============================== */
+.deliverable-item {
+  background: #f9fafb;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+  transition: all 0.2s ease;
 }
 
-.deliverable-card:hover {
+.deliverable-item:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
 }
 
-/* Header */
-.deliverable-header {
+/* ===============================
+   TOP ROW
+=============================== */
+.deliverable-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
-.deliverable-title {
-  font-size: 16px;
+.task-badge {
+  background: #2563eb;
+  color: #fff;
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 999px;
   font-weight: 600;
-  color: #333;
 }
 
-.deliverable-user {
-  font-size: 13px;
-  color: #777;
+.date {
+  font-size: 12px;
+  color: #6b7280;
 }
 
-/* Notes / description */
-.deliverable-notes {
+/* ===============================
+   CONTENT
+=============================== */
+.deliverable-item h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #111827;
+}
+
+.notes {
   font-size: 14px;
-  color: #555;
+  color: #374151;
   margin-bottom: 12px;
-  line-height: 1.5;
 }
 
-/* Files list */
-.deliverable-files {
-  margin-top: 8px;
-}
-
-.deliverable-file {
+/* ===============================
+   FILES
+=============================== */
+.files {
   display: flex;
-  align-items: center;
-  font-size: 13px;
-  color: #0066cc;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.file-chip {
+  background: #e5e7eb;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 12px;
   text-decoration: none;
-  margin-bottom: 6px;
+  color: #111827;
+  transition: 0.2s;
 }
 
-.deliverable-file:hover {
-  text-decoration: underline;
+.file-chip:hover {
+  background: #d1d5db;
 }
 
-/* Media preview (images/videos later) */
-.deliverable-media {
-  margin-top: 10px;
+.no-files {
+  font-size: 12px;
+  color: #9ca3af;
 }
 
-.deliverable-media img,
-.deliverable-media video {
-  max-width: 100%;
-  border-radius: 8px;
-}
-
-/* Empty state */
-.deliverables-empty {
+/* ===============================
+   EMPTY / LOADING
+=============================== */
+.empty-state {
   text-align: center;
-  color: #777;
+  padding: 60px 0;
+  color: #6b7280;
+}
+
+.empty-state span {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.deliverables-loading {
+  text-align: center;
+  font-size: 18px;
   margin-top: 60px;
-  font-size: 15px;
+  color: #555;
 }
