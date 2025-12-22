@@ -31,7 +31,7 @@
 }
 
 /* ===============================
-   🔥 FILTER BAR (NEW)
+   FILTER BAR
 =============================== */
 .deliverables-filters {
   width: 100%;
@@ -44,36 +44,6 @@
   gap: 12px;
   flex-wrap: wrap;
   box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  min-width: 140px;
-}
-
-.filter-group label {
-  font-size: 12px;
-  color: #6b7280;
-  font-weight: 600;
-}
-
-.filter-group input {
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
-  font-size: 14px;
-  background: #f9fafb;
-  transition: 0.2s;
-}
-
-.filter-group input:focus {
-  outline: none;
-  border-color: #2563eb;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
 }
 
 /* ===============================
@@ -96,11 +66,20 @@
   padding: 18px;
   box-shadow: 0 12px 30px rgba(0,0,0,0.06);
   transition: 0.2s ease;
+  cursor: pointer;
 }
 
 .submission-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+}
+
+/* 🔥 TASK TITLE (NEW) */
+.submission-task-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 10px;
 }
 
 /* ===============================
@@ -156,63 +135,10 @@
   border-radius: 12px;
   font-size: 14px;
   color: #374151;
-  margin-bottom: 12px;
 }
 
 /* ===============================
-   FILES
-=============================== */
-.submission-files {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.file-preview {
-  background: #e5e7eb;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  color: #111827;
-  text-decoration: none;
-  border: none;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.file-preview:hover {
-  background: #d1d5db;
-}
-
-.no-files {
-  font-size: 12px;
-  color: #9ca3af;
-}
-
-/* ===============================
-   EMPTY / LOADING
-=============================== */
-.empty-state {
-  text-align: center;
-  padding: 60px 0;
-  color: #6b7280;
-}
-
-.empty-state span {
-  font-size: 48px;
-  display: block;
-  margin-bottom: 10px;
-}
-
-.deliverables-loading {
-  text-align: center;
-  font-size: 18px;
-  margin-top: 60px;
-  color: #555;
-}
-
-/* ===============================
-   FILE PREVIEW MODAL
+   MODAL OVERLAY
 =============================== */
 .file-modal-overlay {
   position: fixed;
@@ -225,43 +151,6 @@
   z-index: 9999;
 }
 
-.file-modal {
-  background: #ffffff;
-  width: 90%;
-  max-width: 760px;
-  max-height: 85vh;
-  border-radius: 18px;
-  padding: 20px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.close-modal {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  background: #e5e7eb;
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.modal-image {
-  width: 100%;
-  max-height: 65vh;
-  object-fit: contain;
-}
-
-.modal-pdf {
-  width: 100%;
-  height: 65vh;
-  border: none;
-}
 /* ===============================
    TASK DETAILS MODAL
 =============================== */
@@ -276,7 +165,16 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-  overflow: hidden;
+  overflow-y: auto;
+}
+
+/* Smooth scroll */
+.task-details-modal::-webkit-scrollbar {
+  width: 6px;
+}
+.task-details-modal::-webkit-scrollbar-thumb {
+  background: #c7d2fe;
+  border-radius: 10px;
 }
 
 /* Header */
@@ -284,38 +182,68 @@
   margin: 0;
   font-size: 22px;
 }
-
 .task-modal-header p {
   font-size: 13px;
   color: #6b7280;
 }
 
-/* Description */
+/* ===============================
+   META INFO GRID (NEW)
+=============================== */
+.task-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.task-meta-grid div {
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-meta-grid span {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.task-meta-grid strong {
+  font-size: 14px;
+  color: #111827;
+}
+
+/* ===============================
+   DESCRIPTION
+=============================== */
 .task-description-box {
   background: #f9fafb;
   border-radius: 14px;
   padding: 14px;
 }
 
-.task-description-box h4 {
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
 .task-description-scroll {
-  max-height: 160px;
+  max-height: 180px;
   overflow-y: auto;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.7;
   color: #374151;
   padding-right: 6px;
 }
 
-/* Files */
-.task-files-section h4 {
-  margin-bottom: 10px;
+.task-description-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.task-description-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
 }
 
+/* ===============================
+   FILES GRID
+=============================== */
 .task-files-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -327,15 +255,13 @@
   border-radius: 12px;
   cursor: pointer;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   height: 110px;
   transition: 0.2s;
+  position: relative;
 }
 
 .task-file-card:hover {
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
 .task-file-card img,
@@ -345,8 +271,45 @@
   object-fit: cover;
 }
 
+/* Video hint */
+.task-file-card video::after {
+  content: "▶";
+}
+
+/* Generic file */
 .file-generic {
   font-size: 13px;
   padding: 10px;
   text-align: center;
+  color: #374151;
+}
+
+/* ===============================
+   CLOSE BUTTON
+=============================== */
+.close-modal {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #e5e7eb;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
+/* ===============================
+   EMPTY / LOADING
+=============================== */
+.empty-state {
+  text-align: center;
+  padding: 60px 0;
+  color: #6b7280;
+}
+.deliverables-loading {
+  text-align: center;
+  font-size: 18px;
+  margin-top: 60px;
+  color: #555;
 }

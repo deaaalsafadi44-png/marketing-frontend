@@ -40,7 +40,7 @@ const DeliverablesBoard = () => {
     loadDeliverables();
   }, [location.pathname]);
 
-  // Load task details
+  // Load task details when modal opens
   useEffect(() => {
     if (!selectedItem?.taskId) return;
 
@@ -66,15 +66,16 @@ const DeliverablesBoard = () => {
 
   const filteredItems = items.filter((item) => {
     const itemDate = item.createdAt ? new Date(item.createdAt) : null;
+
     if (fromDate && itemDate < new Date(fromDate)) return false;
     if (toDate && itemDate > new Date(toDate + "T23:59:59")) return false;
+
     if (
       searchName &&
-      !item.submittedByName
-        ?.toLowerCase()
-        .includes(searchName.toLowerCase())
+      !item.submittedByName?.toLowerCase().includes(searchName.toLowerCase())
     )
       return false;
+
     return true;
   });
 
@@ -86,6 +87,7 @@ const DeliverablesBoard = () => {
           <p>Live activity from your team</p>
         </div>
 
+        {/* Filters */}
         <div className="deliverables-filters">
           <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
           <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
@@ -113,6 +115,11 @@ const DeliverablesBoard = () => {
                   setTaskDetails(null);
                 }}
               >
+                {/* ✅ TASK TITLE */}
+                <h4 className="submission-task-title">
+                  {taskDetails?.title || `Task #${item.taskId}`}
+                </h4>
+
                 <div className="submission-header">
                   <div className="avatar">
                     {item.submittedByName?.charAt(0)?.toUpperCase() || "U"}
@@ -120,7 +127,7 @@ const DeliverablesBoard = () => {
 
                   <div className="user-info">
                     <strong>{item.submittedByName || "Unknown"}</strong>
-                    <span>submitted to Task #{item.taskId}</span>
+                    <span>submitted this task</span>
                   </div>
 
                   <div className="date">
@@ -140,7 +147,7 @@ const DeliverablesBoard = () => {
       </div>
 
       {/* ===============================
-          TASK DETAILS MODAL (ENHANCED)
+          TASK DETAILS MODAL
       =============================== */}
       {selectedItem && (
         <div className="file-modal-overlay" onClick={() => setSelectedItem(null)}>
@@ -150,14 +157,32 @@ const DeliverablesBoard = () => {
             </button>
 
             <div className="task-modal-header">
-              <h2>Task #{selectedItem.taskId}</h2>
+              <h2>{taskDetails?.title || `Task #${selectedItem.taskId}`}</h2>
               <p>
                 Submitted by <strong>{selectedItem.submittedByName}</strong> •{" "}
                 {new Date(selectedItem.createdAt).toLocaleString()}
               </p>
             </div>
 
-            {/* Description */}
+            {/* META INFO */}
+            {taskDetails && (
+              <div className="task-meta-grid">
+                <div>
+                  <span>⏱ Duration</span>
+                  <strong>{taskDetails.duration || "—"}</strong>
+                </div>
+                <div>
+                  <span>🏢 Company</span>
+                  <strong>{taskDetails.company || "—"}</strong>
+                </div>
+                <div>
+                  <span>📌 Type</span>
+                  <strong>{taskDetails.type || "—"}</strong>
+                </div>
+              </div>
+            )}
+
+            {/* DESCRIPTION */}
             {taskLoading ? (
               <p>Loading task details...</p>
             ) : taskDetails?.description ? (
@@ -171,12 +196,12 @@ const DeliverablesBoard = () => {
               <p className="no-files">No description</p>
             )}
 
-            {/* Notes */}
+            {/* NOTES */}
             {selectedItem.notes && (
               <div className="submission-notes">{selectedItem.notes}</div>
             )}
 
-            {/* Files */}
+            {/* FILES */}
             <div className="task-files-section">
               <h4>Attachments</h4>
 
@@ -211,9 +236,7 @@ const DeliverablesBoard = () => {
         </div>
       )}
 
-      {/* ===============================
-          FILE PREVIEW MODAL (UNCHANGED)
-      =============================== */}
+      {/* FILE PREVIEW MODAL (unchanged) */}
       {selectedFile && (
         <div className="file-modal-overlay" onClick={() => setSelectedFile(null)}>
           <div className="file-modal" onClick={(e) => e.stopPropagation()}>
