@@ -85,7 +85,7 @@ export const router = createBrowserRouter([
 
       // ✅ ADDED – Deliverables Board
       {
-        path: "deliverables",
+        path: "submissions",
         element: (
           <PrivateRoute>
             <DeliverablesBoard />
