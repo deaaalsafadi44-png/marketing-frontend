@@ -6,6 +6,10 @@ import "./deliverables.css";
 const DeliverablesBoard = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // ✅ NEW: Modal state
+  const [selectedFile, setSelectedFile] = useState(null);
+
   const location = useLocation();
 
   const loadDeliverables = async () => {
@@ -29,71 +33,117 @@ const DeliverablesBoard = () => {
   }
 
   return (
-    <div className="deliverables-feed-page">
-      <div className="deliverables-feed-header">
-        <h1>Task Submissions</h1>
-        <p>Live activity from your team</p>
+    <>
+      <div className="deliverables-feed-page">
+        <div className="deliverables-feed-header">
+          <h1>Task Submissions</h1>
+          <p>Live activity from your team</p>
+        </div>
+
+        {items.length === 0 ? (
+          <div className="empty-state">
+            <span>📭</span>
+            <p>No submissions yet</p>
+          </div>
+        ) : (
+          <div className="deliverables-feed">
+            {items.map((item) => (
+              <div key={item._id} className="submission-card">
+                {/* Header */}
+                <div className="submission-header">
+                  <div className="avatar">
+                    {item.submittedByName?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+
+                  <div className="user-info">
+                    <strong>{item.submittedByName || "Unknown"}</strong>
+                    <span>submitted to Task #{item.taskId}</span>
+                  </div>
+
+                  <div className="date">
+                    {item.createdAt
+                      ? new Date(item.createdAt).toLocaleDateString()
+                      : "—"}
+                  </div>
+                </div>
+
+                {/* Notes */}
+                {item.notes && (
+                  <div className="submission-notes">{item.notes}</div>
+                )}
+
+                {/* Files */}
+                <div className="submission-files">
+                  {item.files && item.files.length > 0 ? (
+                    item.files.map((file, i) => (
+                      <button
+                        key={i}
+                        className="file-preview"
+                        onClick={() => setSelectedFile(file)}
+                      >
+                        📎 {file.originalName || "File"}
+                      </button>
+                    ))
+                  ) : (
+                    <span className="no-files">No files attached</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {items.length === 0 ? (
-        <div className="empty-state">
-          <span>📭</span>
-          <p>No submissions yet</p>
-        </div>
-      ) : (
-        <div className="deliverables-feed">
-          {items.map((item) => (
-            <div key={item._id} className="submission-card">
-              {/* Header */}
-              <div className="submission-header">
-                <div className="avatar">
-                  {item.submittedByName?.charAt(0)?.toUpperCase() || "U"}
-                </div>
+      {/* ===============================
+          ✅ FILE PREVIEW MODAL
+      =============================== */}
+      {selectedFile && (
+        <div
+          className="file-modal-overlay"
+          onClick={() => setSelectedFile(null)}
+        >
+          <div
+            className="file-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="close-modal"
+              onClick={() => setSelectedFile(null)}
+            >
+              ✖
+            </button>
 
-                <div className="user-info">
-                  <strong>{item.submittedByName || "Unknown"}</strong>
-                  <span>
-                    submitted to Task #{item.taskId}
-                  </span>
-                </div>
+            <h3>{selectedFile.originalName || "File Preview"}</h3>
 
-                <div className="date">
-                  {item.createdAt
-                    ? new Date(item.createdAt).toLocaleDateString()
-                    : "—"}
-                </div>
-              </div>
-
-              {/* Notes */}
-              {item.notes && (
-                <div className="submission-notes">
-                  {item.notes}
-                </div>
-              )}
-
-              {/* Files */}
-              <div className="submission-files">
-                {item.files && item.files.length > 0 ? (
-                  item.files.map((file, i) => (
-                    <a
-                      key={i}
-                      href={file.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="file-preview"
-                    >
-                      📎 {file.originalName || "File"}
-                    </a>
-                  ))
-                ) : (
-                  <span className="no-files">No files attached</span>
-                )}
-              </div>
-            </div>
-          ))}
+            {/* Image Preview */}
+            {selectedFile.url &&
+            selectedFile.url.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+              <img
+                src={selectedFile.url}
+                alt="preview"
+                className="modal-image"
+              />
+            ) : selectedFile.url &&
+              selectedFile.url.match(/\.pdf$/i) ? (
+              <iframe
+                src={selectedFile.url}
+                title="PDF Preview"
+                className="modal-pdf"
+              />
+            ) : (
+              <a
+                href={selectedFile.url}
+                target="_blank"
+                rel="noreferrer"
+                className="download-link"
+              >
+                Download file
+              </a>
+            )}
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
