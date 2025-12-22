@@ -13,9 +13,12 @@ const DeliverablesBoard = () => {
   // Submission modal
   const [selectedItem, setSelectedItem] = useState(null);
 
-  // Task details
+  // Task details (for modal)
   const [taskDetails, setTaskDetails] = useState(null);
   const [taskLoading, setTaskLoading] = useState(false);
+
+  // 🔥 Task titles cache (for list)
+  const [taskTitles, setTaskTitles] = useState({});
 
   // Filters
   const [fromDate, setFromDate] = useState("");
@@ -40,7 +43,37 @@ const DeliverablesBoard = () => {
     loadDeliverables();
   }, [location.pathname]);
 
-  // Load task details when modal opens
+  // ===============================
+  // 🔥 Load task titles (list view)
+  // ===============================
+  useEffect(() => {
+    const loadTitles = async () => {
+      const missingIds = items
+        .map((i) => i.taskId)
+        .filter((id) => id && !taskTitles[id]);
+
+      if (!missingIds.length) return;
+
+      const newTitles = {};
+
+      for (const id of missingIds) {
+        try {
+          const res = await api.get(`/tasks/${id}`);
+          newTitles[id] = res.data?.title || `Task #${id}`;
+        } catch {
+          newTitles[id] = `Task #${id}`;
+        }
+      }
+
+      setTaskTitles((prev) => ({ ...prev, ...newTitles }));
+    };
+
+    if (items.length) loadTitles();
+  }, [items, taskTitles]);
+
+  // ===============================
+  // Load task details (modal)
+  // ===============================
   useEffect(() => {
     if (!selectedItem?.taskId) return;
 
@@ -66,19 +99,19 @@ const DeliverablesBoard = () => {
 
   const filteredItems = items.filter((item) => {
     const itemDate = item.createdAt ? new Date(item.createdAt) : null;
-
     if (fromDate && itemDate < new Date(fromDate)) return false;
     if (toDate && itemDate > new Date(toDate + "T23:59:59")) return false;
-
     if (
       searchName &&
       !item.submittedByName?.toLowerCase().includes(searchName.toLowerCase())
     )
       return false;
-
     return true;
   });
 
+  // ===============================
+  // UI
+  // ===============================
   return (
     <>
       <div className="deliverables-feed-page">
@@ -87,7 +120,6 @@ const DeliverablesBoard = () => {
           <p>Live activity from your team</p>
         </div>
 
-        {/* Filters */}
         <div className="deliverables-filters">
           <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
           <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
@@ -99,51 +131,44 @@ const DeliverablesBoard = () => {
           />
         </div>
 
-        {filteredItems.length === 0 ? (
-          <div className="empty-state">
-            <span>📭</span>
-            <p>No submissions found</p>
-          </div>
-        ) : (
-          <div className="deliverables-feed">
-            {filteredItems.map((item) => (
-              <div
-                key={item._id}
-                className="submission-card"
-                onClick={() => {
-                  setSelectedItem(item);
-                  setTaskDetails(null);
-                }}
-              >
-                {/* ✅ TASK TITLE */}
-                <h4 className="submission-task-title">
-                  {taskDetails?.title || `Task #${item.taskId}`}
-                </h4>
+        <div className="deliverables-feed">
+          {filteredItems.map((item) => (
+            <div
+              key={item._id}
+              className="submission-card"
+              onClick={() => {
+                setSelectedItem(item);
+                setTaskDetails(null);
+              }}
+            >
+              {/* 🔥 TASK TITLE */}
+              <h4 className="submission-task-title">
+                {taskTitles[item.taskId] || `Task #${item.taskId}`}
+              </h4>
 
-                <div className="submission-header">
-                  <div className="avatar">
-                    {item.submittedByName?.charAt(0)?.toUpperCase() || "U"}
-                  </div>
-
-                  <div className="user-info">
-                    <strong>{item.submittedByName || "Unknown"}</strong>
-                    <span>submitted this task</span>
-                  </div>
-
-                  <div className="date">
-                    {item.createdAt
-                      ? new Date(item.createdAt).toLocaleDateString()
-                      : "—"}
-                  </div>
+              <div className="submission-header">
+                <div className="avatar">
+                  {item.submittedByName?.charAt(0)?.toUpperCase() || "U"}
                 </div>
 
-                {item.notes && (
-                  <div className="submission-notes">{item.notes}</div>
-                )}
+                <div className="user-info">
+                  <strong>{item.submittedByName || "Unknown"}</strong>
+                  <span>submitted this task</span>
+                </div>
+
+                <div className="date">
+                  {item.createdAt
+                    ? new Date(item.createdAt).toLocaleDateString()
+                    : "—"}
+                </div>
               </div>
-            ))}
-          </div>
-        )}
+
+              {item.notes && (
+                <div className="submission-notes">{item.notes}</div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ===============================
@@ -156,20 +181,21 @@ const DeliverablesBoard = () => {
               ✖
             </button>
 
-            <div className="task-modal-header">
-              <h2>{taskDetails?.title || `Task #${selectedItem.taskId}`}</h2>
-              <p>
-                Submitted by <strong>{selectedItem.submittedByName}</strong> •{" "}
-                {new Date(selectedItem.createdAt).toLocaleString()}
-              </p>
-            </div>
+            <h2>{taskDetails?.title || `Task #${selectedItem.taskId}`}</h2>
+            <p className="task-meta-line">
+              Submitted by <strong>{selectedItem.submittedByName}</strong> •{" "}
+              {new Date(selectedItem.createdAt).toLocaleString()}
+            </p>
 
-            {/* META INFO */}
             {taskDetails && (
               <div className="task-meta-grid">
                 <div>
-                  <span>⏱ Duration</span>
-                  <strong>{taskDetails.duration || "—"}</strong>
+                  <span>⏱ Time Spent</span>
+                  <strong>
+                    {taskDetails.timeSpent
+                      ? `${taskDetails.timeSpent} min`
+                      : "—"}
+                  </strong>
                 </div>
                 <div>
                   <span>🏢 Company</span>
@@ -182,61 +208,23 @@ const DeliverablesBoard = () => {
               </div>
             )}
 
-            {/* DESCRIPTION */}
             {taskLoading ? (
               <p>Loading task details...</p>
-            ) : taskDetails?.description ? (
-              <div className="task-description-box">
-                <h4>Description</h4>
-                <div className="task-description-scroll">
-                  {taskDetails.description}
-                </div>
-              </div>
             ) : (
-              <p className="no-files">No description</p>
-            )}
-
-            {/* NOTES */}
-            {selectedItem.notes && (
-              <div className="submission-notes">{selectedItem.notes}</div>
-            )}
-
-            {/* FILES */}
-            <div className="task-files-section">
-              <h4>Attachments</h4>
-
-              {selectedItem.files?.length ? (
-                <div className="task-files-grid">
-                  {selectedItem.files.map((file, i) => {
-                    const isImage = file.url?.match(/\.(jpg|jpeg|png|gif)$/i);
-                    const isVideo = file.url?.match(/\.(mp4|webm|ogg)$/i);
-
-                    return (
-                      <div
-                        key={i}
-                        className="task-file-card"
-                        onClick={() => setSelectedFile(file)}
-                      >
-                        {isImage && <img src={file.url} alt="preview" />}
-                        {isVideo && <video src={file.url} muted />}
-                        {!isImage && !isVideo && (
-                          <div className="file-generic">
-                            📎 {file.originalName || "File"}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+              taskDetails?.description && (
+                <div className="task-description-box">
+                  <h4>Description</h4>
+                  <div className="task-description-scroll">
+                    {taskDetails.description}
+                  </div>
                 </div>
-              ) : (
-                <span className="no-files">No files attached</span>
-              )}
-            </div>
+              )
+            )}
           </div>
         </div>
       )}
 
-      {/* FILE PREVIEW MODAL (unchanged) */}
+      {/* FILE PREVIEW MODAL */}
       {selectedFile && (
         <div className="file-modal-overlay" onClick={() => setSelectedFile(null)}>
           <div className="file-modal" onClick={(e) => e.stopPropagation()}>
