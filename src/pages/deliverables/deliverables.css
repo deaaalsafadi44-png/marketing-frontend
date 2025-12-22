@@ -16,7 +16,7 @@
 .deliverables-feed-header {
   width: 100%;
   max-width: 720px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .deliverables-feed-header h1 {
@@ -28,6 +28,52 @@
 .deliverables-feed-header p {
   font-size: 14px;
   color: #6b7280;
+}
+
+/* ===============================
+   🔥 FILTER BAR (NEW)
+=============================== */
+.deliverables-filters {
+  width: 100%;
+  max-width: 720px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.filter-group input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  background: #f9fafb;
+  transition: 0.2s;
+}
+
+.filter-group input:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
 }
 
 /* ===============================
@@ -165,9 +211,9 @@
   color: #555;
 }
 
-/* =====================================================
-   🔥 FILE PREVIEW MODAL (NEW)
-===================================================== */
+/* ===============================
+   FILE PREVIEW MODAL
+=============================== */
 .file-modal-overlay {
   position: fixed;
   inset: 0;
@@ -177,7 +223,6 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  animation: fadeIn 0.2s ease;
 }
 
 .file-modal {
@@ -191,16 +236,8 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  animation: scaleIn 0.25s ease;
 }
 
-.file-modal h3 {
-  font-size: 16px;
-  font-weight: 700;
-  color: #111827;
-}
-
-/* Close button */
 .close-modal {
   position: absolute;
   top: 14px;
@@ -212,51 +249,16 @@
   height: 32px;
   font-size: 16px;
   cursor: pointer;
-  transition: 0.2s;
 }
 
-.close-modal:hover {
-  background: #d1d5db;
-}
-
-/* Image */
 .modal-image {
   width: 100%;
   max-height: 65vh;
   object-fit: contain;
-  border-radius: 12px;
 }
 
-/* PDF */
 .modal-pdf {
   width: 100%;
   height: 65vh;
   border: none;
-  border-radius: 12px;
-}
-
-/* Download link */
-.download-link {
-  margin-top: 20px;
-  background: #2563eb;
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 10px;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
-  width: fit-content;
-}
-
-/* ===============================
-   ANIMATIONS
-=============================== */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes scaleIn {
-  from { transform: scale(0.95); }
-  to { transform: scale(1); }
 }

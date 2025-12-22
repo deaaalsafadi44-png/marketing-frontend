@@ -7,8 +7,13 @@ const DeliverablesBoard = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ NEW: Modal state
+  // ✅ Modal state
   const [selectedFile, setSelectedFile] = useState(null);
+
+  // ✅ Filters state
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [searchName, setSearchName] = useState("");
 
   const location = useLocation();
 
@@ -32,6 +37,28 @@ const DeliverablesBoard = () => {
     return <div className="deliverables-loading">Loading submissions...</div>;
   }
 
+  // ===============================
+  // ✅ APPLY FILTERS
+  // ===============================
+  const filteredItems = items.filter((item) => {
+    const itemDate = item.createdAt ? new Date(item.createdAt) : null;
+
+    // Date filter
+    if (fromDate && itemDate < new Date(fromDate)) return false;
+    if (toDate && itemDate > new Date(toDate + "T23:59:59")) return false;
+
+    // Name filter
+    if (
+      searchName &&
+      !item.submittedByName
+        ?.toLowerCase()
+        .includes(searchName.toLowerCase())
+    )
+      return false;
+
+    return true;
+  });
+
   return (
     <>
       <div className="deliverables-feed-page">
@@ -40,14 +67,38 @@ const DeliverablesBoard = () => {
           <p>Live activity from your team</p>
         </div>
 
-        {items.length === 0 ? (
+        {/* ===============================
+            ✅ FILTER BAR
+        =============================== */}
+        <div className="deliverables-filters">
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+          />
+
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+          />
+
+          <input
+            type="text"
+            placeholder="Search by user name..."
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+          />
+        </div>
+
+        {filteredItems.length === 0 ? (
           <div className="empty-state">
             <span>📭</span>
-            <p>No submissions yet</p>
+            <p>No submissions found</p>
           </div>
         ) : (
           <div className="deliverables-feed">
-            {items.map((item) => (
+            {filteredItems.map((item) => (
               <div key={item._id} className="submission-card">
                 {/* Header */}
                 <div className="submission-header">
@@ -102,10 +153,7 @@ const DeliverablesBoard = () => {
           className="file-modal-overlay"
           onClick={() => setSelectedFile(null)}
         >
-          <div
-            className="file-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="file-modal" onClick={(e) => e.stopPropagation()}>
             <button
               className="close-modal"
               onClick={() => setSelectedFile(null)}
@@ -115,7 +163,6 @@ const DeliverablesBoard = () => {
 
             <h3>{selectedFile.originalName || "File Preview"}</h3>
 
-            {/* Image Preview */}
             {selectedFile.url &&
             selectedFile.url.match(/\.(jpg|jpeg|png|gif)$/i) ? (
               <img
