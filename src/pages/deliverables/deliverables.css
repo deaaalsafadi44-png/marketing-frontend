@@ -1,100 +1,113 @@
 /* ===============================
    PAGE
 =============================== */
-.deliverables-page {
+.deliverables-feed-page {
   min-height: 100vh;
   background: #f5f7fa;
-  padding: 40px 20px;
+  padding: 30px 16px;
   display: flex;
-  justify-content: center;
-}
-
-.deliverables-card {
-  width: 100%;
-  max-width: 1200px;
-  background: #ffffff;
-  border-radius: 22px;
-  padding: 32px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  flex-direction: column;
+  align-items: center;
 }
 
 /* ===============================
    HEADER
 =============================== */
-.deliverables-header {
-  margin-bottom: 30px;
+.deliverables-feed-header {
+  width: 100%;
+  max-width: 720px;
+  margin-bottom: 20px;
 }
 
-.deliverables-header h1 {
-  font-size: 28px;
+.deliverables-feed-header h1 {
+  font-size: 26px;
   font-weight: 800;
   color: #111827;
 }
 
-.deliverables-header p {
+.deliverables-feed-header p {
   font-size: 14px;
   color: #6b7280;
 }
 
 /* ===============================
-   GRID
+   FEED
 =============================== */
-.deliverables-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 22px;
-}
-
-/* ===============================
-   ITEM CARD
-=============================== */
-.deliverable-item {
-  background: #f9fafb;
-  border-radius: 18px;
-  padding: 20px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
-  transition: all 0.2s ease;
-}
-
-.deliverable-item:hover {
-  transform: translateY(-4px);
-}
-
-/* ===============================
-   TOP ROW
-=============================== */
-.deliverable-top {
+.deliverables-feed {
+  width: 100%;
+  max-width: 720px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.task-badge {
+/* ===============================
+   CARD
+=============================== */
+.submission-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+  transition: 0.2s ease;
+}
+
+.submission-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+}
+
+/* ===============================
+   HEADER ROW
+=============================== */
+.submission-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
   background: #2563eb;
   color: #fff;
-  font-size: 12px;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
 }
 
-.date {
+.user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-info strong {
+  font-size: 14px;
+  color: #111827;
+}
+
+.user-info span {
   font-size: 12px;
   color: #6b7280;
 }
 
-/* ===============================
-   CONTENT
-=============================== */
-.deliverable-item h3 {
-  font-size: 17px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #111827;
+.date {
+  font-size: 12px;
+  color: #9ca3af;
 }
 
-.notes {
+/* ===============================
+   NOTES
+=============================== */
+.submission-notes {
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 12px;
   font-size: 14px;
   color: #374151;
   margin-bottom: 12px;
@@ -103,23 +116,23 @@
 /* ===============================
    FILES
 =============================== */
-.files {
+.submission-files {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.file-chip {
+.file-preview {
   background: #e5e7eb;
-  padding: 6px 10px;
-  border-radius: 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
   font-size: 12px;
-  text-decoration: none;
   color: #111827;
+  text-decoration: none;
   transition: 0.2s;
 }
 
-.file-chip:hover {
+.file-preview:hover {
   background: #d1d5db;
 }
 
