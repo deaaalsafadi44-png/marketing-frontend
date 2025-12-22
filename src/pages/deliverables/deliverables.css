@@ -262,3 +262,91 @@
   height: 65vh;
   border: none;
 }
+/* ===============================
+   TASK DETAILS MODAL
+=============================== */
+.task-details-modal {
+  background: #fff;
+  width: 95%;
+  max-width: 900px;
+  max-height: 90vh;
+  border-radius: 20px;
+  padding: 24px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow: hidden;
+}
+
+/* Header */
+.task-modal-header h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.task-modal-header p {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Description */
+.task-description-box {
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.task-description-box h4 {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.task-description-scroll {
+  max-height: 160px;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #374151;
+  padding-right: 6px;
+}
+
+/* Files */
+.task-files-section h4 {
+  margin-bottom: 10px;
+}
+
+.task-files-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.task-file-card {
+  background: #f3f4f6;
+  border-radius: 12px;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 110px;
+  transition: 0.2s;
+}
+
+.task-file-card:hover {
+  transform: scale(1.03);
+}
+
+.task-file-card img,
+.task-file-card video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.file-generic {
+  font-size: 13px;
+  padding: 10px;
+  text-align: center;
+}

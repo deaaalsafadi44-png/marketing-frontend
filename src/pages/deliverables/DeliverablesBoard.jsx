@@ -40,7 +40,7 @@ const DeliverablesBoard = () => {
     loadDeliverables();
   }, [location.pathname]);
 
-  // Load task details when opening modal
+  // Load task details
   useEffect(() => {
     if (!selectedItem?.taskId) return;
 
@@ -66,10 +66,8 @@ const DeliverablesBoard = () => {
 
   const filteredItems = items.filter((item) => {
     const itemDate = item.createdAt ? new Date(item.createdAt) : null;
-
     if (fromDate && itemDate < new Date(fromDate)) return false;
     if (toDate && itemDate > new Date(toDate + "T23:59:59")) return false;
-
     if (
       searchName &&
       !item.submittedByName
@@ -77,7 +75,6 @@ const DeliverablesBoard = () => {
         .includes(searchName.toLowerCase())
     )
       return false;
-
     return true;
   });
 
@@ -89,7 +86,6 @@ const DeliverablesBoard = () => {
           <p>Live activity from your team</p>
         </div>
 
-        {/* Filters */}
         <div className="deliverables-filters">
           <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
           <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
@@ -144,49 +140,69 @@ const DeliverablesBoard = () => {
       </div>
 
       {/* ===============================
-          TASK DETAILS MODAL
+          TASK DETAILS MODAL (ENHANCED)
       =============================== */}
       {selectedItem && (
         <div className="file-modal-overlay" onClick={() => setSelectedItem(null)}>
-          <div className="file-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="task-details-modal" onClick={(e) => e.stopPropagation()}>
             <button className="close-modal" onClick={() => setSelectedItem(null)}>
               ✖
             </button>
 
-            <h2>Task #{selectedItem.taskId}</h2>
-            <p style={{ fontSize: 13, color: "#6b7280" }}>
-              Submitted by <strong>{selectedItem.submittedByName}</strong> •{" "}
-              {new Date(selectedItem.createdAt).toLocaleString()}
-            </p>
+            <div className="task-modal-header">
+              <h2>Task #{selectedItem.taskId}</h2>
+              <p>
+                Submitted by <strong>{selectedItem.submittedByName}</strong> •{" "}
+                {new Date(selectedItem.createdAt).toLocaleString()}
+              </p>
+            </div>
 
+            {/* Description */}
             {taskLoading ? (
               <p>Loading task details...</p>
-            ) : taskDetails ? (
-              <>
-                <h3>{taskDetails.title}</h3>
-                <p style={{ fontSize: 14, color: "#374151" }}>
-                  {taskDetails.description || "No description"}
-                </p>
-              </>
+            ) : taskDetails?.description ? (
+              <div className="task-description-box">
+                <h4>Description</h4>
+                <div className="task-description-scroll">
+                  {taskDetails.description}
+                </div>
+              </div>
             ) : (
-              <p style={{ color: "#9ca3af" }}>No task details available</p>
+              <p className="no-files">No description</p>
             )}
 
+            {/* Notes */}
             {selectedItem.notes && (
               <div className="submission-notes">{selectedItem.notes}</div>
             )}
 
-            <div className="submission-files">
+            {/* Files */}
+            <div className="task-files-section">
+              <h4>Attachments</h4>
+
               {selectedItem.files?.length ? (
-                selectedItem.files.map((file, i) => (
-                  <button
-                    key={i}
-                    className="file-preview"
-                    onClick={() => setSelectedFile(file)}
-                  >
-                    📎 {file.originalName || "File"}
-                  </button>
-                ))
+                <div className="task-files-grid">
+                  {selectedItem.files.map((file, i) => {
+                    const isImage = file.url?.match(/\.(jpg|jpeg|png|gif)$/i);
+                    const isVideo = file.url?.match(/\.(mp4|webm|ogg)$/i);
+
+                    return (
+                      <div
+                        key={i}
+                        className="task-file-card"
+                        onClick={() => setSelectedFile(file)}
+                      >
+                        {isImage && <img src={file.url} alt="preview" />}
+                        {isVideo && <video src={file.url} muted />}
+                        {!isImage && !isVideo && (
+                          <div className="file-generic">
+                            📎 {file.originalName || "File"}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               ) : (
                 <span className="no-files">No files attached</span>
               )}
@@ -196,7 +212,7 @@ const DeliverablesBoard = () => {
       )}
 
       {/* ===============================
-          FILE PREVIEW MODAL
+          FILE PREVIEW MODAL (UNCHANGED)
       =============================== */}
       {selectedFile && (
         <div className="file-modal-overlay" onClick={() => setSelectedFile(null)}>
