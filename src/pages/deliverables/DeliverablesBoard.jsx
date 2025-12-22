@@ -7,8 +7,11 @@ const DeliverablesBoard = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Modal state
+  // ✅ File modal
   const [selectedFile, setSelectedFile] = useState(null);
+
+  // ✅ NEW: Task details modal
+  const [selectedItem, setSelectedItem] = useState(null);
 
   // ✅ Filters state
   const [fromDate, setFromDate] = useState("");
@@ -38,16 +41,14 @@ const DeliverablesBoard = () => {
   }
 
   // ===============================
-  // ✅ APPLY FILTERS
+  // APPLY FILTERS
   // ===============================
   const filteredItems = items.filter((item) => {
     const itemDate = item.createdAt ? new Date(item.createdAt) : null;
 
-    // Date filter
     if (fromDate && itemDate < new Date(fromDate)) return false;
     if (toDate && itemDate > new Date(toDate + "T23:59:59")) return false;
 
-    // Name filter
     if (
       searchName &&
       !item.submittedByName
@@ -67,22 +68,18 @@ const DeliverablesBoard = () => {
           <p>Live activity from your team</p>
         </div>
 
-        {/* ===============================
-            ✅ FILTER BAR
-        =============================== */}
+        {/* FILTER BAR */}
         <div className="deliverables-filters">
           <input
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
           />
-
           <input
             type="date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
           />
-
           <input
             type="text"
             placeholder="Search by user name..."
@@ -99,8 +96,11 @@ const DeliverablesBoard = () => {
         ) : (
           <div className="deliverables-feed">
             {filteredItems.map((item) => (
-              <div key={item._id} className="submission-card">
-                {/* Header */}
+              <div
+                key={item._id}
+                className="submission-card"
+                onClick={() => setSelectedItem(item)}
+              >
                 <div className="submission-header">
                   <div className="avatar">
                     {item.submittedByName?.charAt(0)?.toUpperCase() || "U"}
@@ -118,19 +118,20 @@ const DeliverablesBoard = () => {
                   </div>
                 </div>
 
-                {/* Notes */}
                 {item.notes && (
                   <div className="submission-notes">{item.notes}</div>
                 )}
 
-                {/* Files */}
                 <div className="submission-files">
                   {item.files && item.files.length > 0 ? (
                     item.files.map((file, i) => (
                       <button
                         key={i}
                         className="file-preview"
-                        onClick={() => setSelectedFile(file)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedFile(file);
+                        }}
                       >
                         📎 {file.originalName || "File"}
                       </button>
@@ -146,7 +147,59 @@ const DeliverablesBoard = () => {
       </div>
 
       {/* ===============================
-          ✅ FILE PREVIEW MODAL
+          TASK DETAILS MODAL
+      =============================== */}
+      {selectedItem && (
+        <div
+          className="file-modal-overlay"
+          onClick={() => setSelectedItem(null)}
+        >
+          <div className="file-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="close-modal"
+              onClick={() => setSelectedItem(null)}
+            >
+              ✖
+            </button>
+
+            <h3>
+              Task #{selectedItem.taskId} —{" "}
+              {selectedItem.submittedByName || "Unknown"}
+            </h3>
+
+            <p style={{ fontSize: 13, color: "#6b7280" }}>
+              {selectedItem.createdAt
+                ? new Date(selectedItem.createdAt).toLocaleString()
+                : "—"}
+            </p>
+
+            {selectedItem.notes && (
+              <div className="submission-notes">
+                {selectedItem.notes}
+              </div>
+            )}
+
+            <div className="submission-files">
+              {selectedItem.files && selectedItem.files.length > 0 ? (
+                selectedItem.files.map((file, i) => (
+                  <button
+                    key={i}
+                    className="file-preview"
+                    onClick={() => setSelectedFile(file)}
+                  >
+                    📎 {file.originalName || "File"}
+                  </button>
+                ))
+              ) : (
+                <span className="no-files">No files attached</span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===============================
+          FILE PREVIEW MODAL
       =============================== */}
       {selectedFile && (
         <div
