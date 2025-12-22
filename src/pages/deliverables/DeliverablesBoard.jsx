@@ -7,13 +7,17 @@ const DeliverablesBoard = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ File modal
+  // File preview
   const [selectedFile, setSelectedFile] = useState(null);
 
-  // ✅ NEW: Task details modal
+  // Submission modal
   const [selectedItem, setSelectedItem] = useState(null);
 
-  // ✅ Filters state
+  // Task details
+  const [taskDetails, setTaskDetails] = useState(null);
+  const [taskLoading, setTaskLoading] = useState(false);
+
+  // Filters
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [searchName, setSearchName] = useState("");
@@ -36,13 +40,30 @@ const DeliverablesBoard = () => {
     loadDeliverables();
   }, [location.pathname]);
 
+  // Load task details when opening modal
+  useEffect(() => {
+    if (!selectedItem?.taskId) return;
+
+    const loadTaskDetails = async () => {
+      try {
+        setTaskLoading(true);
+        const res = await api.get(`/tasks/${selectedItem.taskId}`);
+        setTaskDetails(res.data);
+      } catch (err) {
+        console.error("Failed to load task details:", err);
+        setTaskDetails(null);
+      } finally {
+        setTaskLoading(false);
+      }
+    };
+
+    loadTaskDetails();
+  }, [selectedItem]);
+
   if (loading) {
     return <div className="deliverables-loading">Loading submissions...</div>;
   }
 
-  // ===============================
-  // APPLY FILTERS
-  // ===============================
   const filteredItems = items.filter((item) => {
     const itemDate = item.createdAt ? new Date(item.createdAt) : null;
 
@@ -68,18 +89,10 @@ const DeliverablesBoard = () => {
           <p>Live activity from your team</p>
         </div>
 
-        {/* FILTER BAR */}
+        {/* Filters */}
         <div className="deliverables-filters">
-          <input
-            type="date"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-          />
-          <input
-            type="date"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-          />
+          <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+          <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
           <input
             type="text"
             placeholder="Search by user name..."
@@ -99,7 +112,10 @@ const DeliverablesBoard = () => {
               <div
                 key={item._id}
                 className="submission-card"
-                onClick={() => setSelectedItem(item)}
+                onClick={() => {
+                  setSelectedItem(item);
+                  setTaskDetails(null);
+                }}
               >
                 <div className="submission-header">
                   <div className="avatar">
@@ -121,25 +137,6 @@ const DeliverablesBoard = () => {
                 {item.notes && (
                   <div className="submission-notes">{item.notes}</div>
                 )}
-
-                <div className="submission-files">
-                  {item.files && item.files.length > 0 ? (
-                    item.files.map((file, i) => (
-                      <button
-                        key={i}
-                        className="file-preview"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedFile(file);
-                        }}
-                      >
-                        📎 {file.originalName || "File"}
-                      </button>
-                    ))
-                  ) : (
-                    <span className="no-files">No files attached</span>
-                  )}
-                </div>
               </div>
             ))}
           </div>
@@ -150,37 +147,37 @@ const DeliverablesBoard = () => {
           TASK DETAILS MODAL
       =============================== */}
       {selectedItem && (
-        <div
-          className="file-modal-overlay"
-          onClick={() => setSelectedItem(null)}
-        >
+        <div className="file-modal-overlay" onClick={() => setSelectedItem(null)}>
           <div className="file-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="close-modal"
-              onClick={() => setSelectedItem(null)}
-            >
+            <button className="close-modal" onClick={() => setSelectedItem(null)}>
               ✖
             </button>
 
-            <h3>
-              Task #{selectedItem.taskId} —{" "}
-              {selectedItem.submittedByName || "Unknown"}
-            </h3>
-
+            <h2>Task #{selectedItem.taskId}</h2>
             <p style={{ fontSize: 13, color: "#6b7280" }}>
-              {selectedItem.createdAt
-                ? new Date(selectedItem.createdAt).toLocaleString()
-                : "—"}
+              Submitted by <strong>{selectedItem.submittedByName}</strong> •{" "}
+              {new Date(selectedItem.createdAt).toLocaleString()}
             </p>
 
+            {taskLoading ? (
+              <p>Loading task details...</p>
+            ) : taskDetails ? (
+              <>
+                <h3>{taskDetails.title}</h3>
+                <p style={{ fontSize: 14, color: "#374151" }}>
+                  {taskDetails.description || "No description"}
+                </p>
+              </>
+            ) : (
+              <p style={{ color: "#9ca3af" }}>No task details available</p>
+            )}
+
             {selectedItem.notes && (
-              <div className="submission-notes">
-                {selectedItem.notes}
-              </div>
+              <div className="submission-notes">{selectedItem.notes}</div>
             )}
 
             <div className="submission-files">
-              {selectedItem.files && selectedItem.files.length > 0 ? (
+              {selectedItem.files?.length ? (
                 selectedItem.files.map((file, i) => (
                   <button
                     key={i}
@@ -202,34 +199,18 @@ const DeliverablesBoard = () => {
           FILE PREVIEW MODAL
       =============================== */}
       {selectedFile && (
-        <div
-          className="file-modal-overlay"
-          onClick={() => setSelectedFile(null)}
-        >
+        <div className="file-modal-overlay" onClick={() => setSelectedFile(null)}>
           <div className="file-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="close-modal"
-              onClick={() => setSelectedFile(null)}
-            >
+            <button className="close-modal" onClick={() => setSelectedFile(null)}>
               ✖
             </button>
 
             <h3>{selectedFile.originalName || "File Preview"}</h3>
 
-            {selectedFile.url &&
-            selectedFile.url.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-              <img
-                src={selectedFile.url}
-                alt="preview"
-                className="modal-image"
-              />
-            ) : selectedFile.url &&
-              selectedFile.url.match(/\.pdf$/i) ? (
-              <iframe
-                src={selectedFile.url}
-                title="PDF Preview"
-                className="modal-pdf"
-              />
+            {selectedFile.url?.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+              <img src={selectedFile.url} alt="preview" className="modal-image" />
+            ) : selectedFile.url?.match(/\.pdf$/i) ? (
+              <iframe src={selectedFile.url} title="PDF Preview" className="modal-pdf" />
             ) : (
               <a
                 href={selectedFile.url}
