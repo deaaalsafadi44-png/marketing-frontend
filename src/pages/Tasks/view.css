@@ -401,3 +401,12 @@
 .desc-box * {
   max-width: 100%;
 }
+/* ===== FIX DELETE ICON INSIDE +40 MODAL ===== */
+
+.task-file-card {
+  position: relative;
+}
+
+.task-file-card:hover .remove-attachment {
+  opacity: 1;
+}
