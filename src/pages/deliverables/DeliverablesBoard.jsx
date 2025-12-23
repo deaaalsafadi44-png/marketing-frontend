@@ -37,7 +37,6 @@ const DeliverablesBoard = () => {
     loadDeliverables();
   }, [location.pathname]);
 
-  // Load task titles
   useEffect(() => {
     const loadTitles = async () => {
       const missingIds = items
@@ -63,7 +62,6 @@ const DeliverablesBoard = () => {
     if (items.length) loadTitles();
   }, [items, taskTitles]);
 
-  // Load task details (modal)
   useEffect(() => {
     if (!selectedItem?.taskId) return;
 
@@ -160,10 +158,7 @@ const DeliverablesBoard = () => {
       {/* TASK DETAILS MODAL */}
       {selectedItem && (
         <div className="file-modal-overlay" onClick={() => setSelectedItem(null)}>
-          <div
-            className="task-details-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="task-details-modal" onClick={(e) => e.stopPropagation()}>
             <button className="close-modal" onClick={() => setSelectedItem(null)}>
               ✖
             </button>
@@ -175,37 +170,6 @@ const DeliverablesBoard = () => {
               {new Date(selectedItem.createdAt).toLocaleString()}
             </p>
 
-            {taskDetails && (
-              <div className="task-meta-grid">
-                <div>
-                  <span>⏱ Time Spent</span>
-                  <strong>
-                    {taskDetails.timeSpent
-                      ? `${taskDetails.timeSpent} min`
-                      : "—"}
-                  </strong>
-                </div>
-                <div>
-                  <span>🏢 Company</span>
-                  <strong>{taskDetails.company || "—"}</strong>
-                </div>
-                <div>
-                  <span>📌 Type</span>
-                  <strong>{taskDetails.type || "—"}</strong>
-                </div>
-              </div>
-            )}
-
-            {taskDetails?.description && (
-              <div className="task-description-box">
-                <h4>Description</h4>
-                <div className="task-description-scroll">
-                  {taskDetails.description}
-                </div>
-              </div>
-            )}
-
-            {/* ✅ FILES */}
             <div className="task-files-section">
               <h4>Attachments</h4>
 
@@ -220,7 +184,7 @@ const DeliverablesBoard = () => {
                         key={i}
                         className="task-file-card"
                         onClick={(e) => {
-                          e.stopPropagation(); // 🔥 الحل
+                          e.stopPropagation();
                           setSelectedFile(file);
                         }}
                       >
@@ -243,7 +207,7 @@ const DeliverablesBoard = () => {
         </div>
       )}
 
-      {/* FILE PREVIEW MODAL */}
+      {/* FILE PREVIEW MODAL (✅ FIXED) */}
       {selectedFile && (
         <div className="file-modal-overlay" onClick={() => setSelectedFile(null)}>
           <div className="file-modal" onClick={(e) => e.stopPropagation()}>
@@ -252,29 +216,57 @@ const DeliverablesBoard = () => {
             </button>
 
             <h3>{selectedFile.originalName}</h3>
-{selectedFile.mimeType?.startsWith("image/") ? (
-  <img
-    src={selectedFile.url}
-    className="modal-image"
-    alt={selectedFile.originalName}
-  />
-) : selectedFile.mimeType === "application/pdf" ? (
-  <iframe
-    src={selectedFile.url}
-    className="modal-pdf"
-    title={selectedFile.originalName}
-  />
-) : (
-  <a
-    href={selectedFile.url}
-    target="_blank"
-    rel="noreferrer"
-    className="download-link"
-  >
-    Download file
-  </a>
-)}
 
+            {/* IMAGE */}
+            {selectedFile.url?.match(/\.(jpg|jpeg|png|gif)$/i) && (
+              <img
+                src={selectedFile.url}
+                alt={selectedFile.originalName}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "80vh",
+                  objectFit: "contain",
+                }}
+              />
+            )}
+
+            {/* VIDEO */}
+            {selectedFile.url?.match(/\.(mp4|webm|ogg)$/i) && (
+              <video
+                src={selectedFile.url}
+                controls
+                autoPlay
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "80vh",
+                }}
+              />
+            )}
+
+            {/* PDF */}
+            {selectedFile.url?.match(/\.pdf$/i) && (
+              <iframe
+                src={selectedFile.url}
+                title={selectedFile.originalName}
+                style={{
+                  width: "100%",
+                  height: "80vh",
+                  border: "none",
+                }}
+              />
+            )}
+
+            {/* OTHER FILES */}
+            {!selectedFile.url?.match(/\.(jpg|jpeg|png|gif|mp4|webm|ogg|pdf)$/i) && (
+              <a
+                href={selectedFile.url}
+                target="_blank"
+                rel="noreferrer"
+                className="download-link"
+              >
+                Download file
+              </a>
+            )}
           </div>
         </div>
       )}
