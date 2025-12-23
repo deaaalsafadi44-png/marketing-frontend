@@ -7,20 +7,14 @@ const DeliverablesBoard = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // File preview
   const [selectedFile, setSelectedFile] = useState(null);
-
-  // Submission modal
   const [selectedItem, setSelectedItem] = useState(null);
 
-  // Task details (for modal)
   const [taskDetails, setTaskDetails] = useState(null);
   const [taskLoading, setTaskLoading] = useState(false);
 
-  // Task titles cache (for list)
   const [taskTitles, setTaskTitles] = useState({});
 
-  // Filters
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [searchName, setSearchName] = useState("");
@@ -43,7 +37,7 @@ const DeliverablesBoard = () => {
     loadDeliverables();
   }, [location.pathname]);
 
-  // Load task titles (list)
+  // Load task titles
   useEffect(() => {
     const loadTitles = async () => {
       const missingIds = items
@@ -78,9 +72,6 @@ const DeliverablesBoard = () => {
         setTaskLoading(true);
         const res = await api.get(`/tasks/${selectedItem.taskId}`);
         setTaskDetails(res.data);
-
-        // ✅ الصحيح: الملفات هنا
-        console.log("FILES 👉", res.data?.files);
       } catch (err) {
         console.error("Failed to load task details:", err);
         setTaskDetails(null);
@@ -169,7 +160,10 @@ const DeliverablesBoard = () => {
       {/* TASK DETAILS MODAL */}
       {selectedItem && (
         <div className="file-modal-overlay" onClick={() => setSelectedItem(null)}>
-          <div className="task-details-modal" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="task-details-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button className="close-modal" onClick={() => setSelectedItem(null)}>
               ✖
             </button>
@@ -202,26 +196,22 @@ const DeliverablesBoard = () => {
               </div>
             )}
 
-            {taskLoading ? (
-              <p>Loading task details...</p>
-            ) : (
-              taskDetails?.description && (
-                <div className="task-description-box">
-                  <h4>Description</h4>
-                  <div className="task-description-scroll">
-                    {taskDetails.description}
-                  </div>
+            {taskDetails?.description && (
+              <div className="task-description-box">
+                <h4>Description</h4>
+                <div className="task-description-scroll">
+                  {taskDetails.description}
                 </div>
-              )
+              </div>
             )}
 
-            {/* ✅ FILES FROM taskDetails */}
+            {/* ✅ FILES */}
             <div className="task-files-section">
               <h4>Attachments</h4>
 
-              {taskDetails?.files?.length ? (
+              {selectedItem.files?.length ? (
                 <div className="task-files-grid">
-                  {taskDetails.files.map((file, i) => {
+                  {selectedItem.files.map((file, i) => {
                     const isImage = file.url?.match(/\.(jpg|jpeg|png|gif)$/i);
                     const isVideo = file.url?.match(/\.(mp4|webm|ogg)$/i);
 
@@ -229,13 +219,16 @@ const DeliverablesBoard = () => {
                       <div
                         key={i}
                         className="task-file-card"
-                        onClick={() => setSelectedFile(file)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // 🔥 الحل
+                          setSelectedFile(file);
+                        }}
                       >
-                        {isImage && <img src={file.url} alt="preview" />}
+                        {isImage && <img src={file.url} alt="" />}
                         {isVideo && <video src={file.url} muted />}
                         {!isImage && !isVideo && (
                           <div className="file-generic">
-                            📎 {file.originalName || "File"}
+                            📎 {file.originalName}
                           </div>
                         )}
                       </div>
@@ -258,12 +251,12 @@ const DeliverablesBoard = () => {
               ✖
             </button>
 
-            <h3>{selectedFile.originalName || "File Preview"}</h3>
+            <h3>{selectedFile.originalName}</h3>
 
             {selectedFile.url?.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-              <img src={selectedFile.url} alt="preview" className="modal-image" />
+              <img src={selectedFile.url} className="modal-image" />
             ) : selectedFile.url?.match(/\.pdf$/i) ? (
-              <iframe src={selectedFile.url} title="PDF Preview" className="modal-pdf" />
+              <iframe src={selectedFile.url} className="modal-pdf" />
             ) : (
               <a
                 href={selectedFile.url}
