@@ -97,6 +97,14 @@ const DeliverablesBoard = () => {
     return true;
   });
 
+  // ✅ Helper ذكي لتحديد نوع الملف
+  const getFileType = (file) => {
+    if (file.resource_type) return file.resource_type;
+    if (file.mimeType?.startsWith("image/")) return "image";
+    if (file.mimeType?.startsWith("video/")) return "video";
+    return "raw";
+  };
+
   return (
     <>
       <div className="deliverables-feed-page">
@@ -176,8 +184,7 @@ const DeliverablesBoard = () => {
               {selectedItem.files?.length ? (
                 <div className="task-files-grid">
                   {selectedItem.files.map((file, i) => {
-                    const isImage = file.mimeType?.startsWith("image/");
-                    const isVideo = file.mimeType?.startsWith("video/");
+                    const type = getFileType(file);
 
                     return (
                       <div
@@ -188,9 +195,9 @@ const DeliverablesBoard = () => {
                           setSelectedFile(file);
                         }}
                       >
-                        {isImage && <img src={file.url} alt="" />}
-                        {isVideo && <video src={file.url} muted />}
-                        {!isImage && !isVideo && (
+                        {type === "image" && <img src={file.url} alt="" />}
+                        {type === "video" && <video src={file.url} muted />}
+                        {type === "raw" && (
                           <div className="file-generic">
                             📎 {file.originalName}
                           </div>
@@ -217,7 +224,7 @@ const DeliverablesBoard = () => {
 
             <h3>{selectedFile.originalName}</h3>
 
-            {selectedFile.mimeType?.startsWith("image/") && (
+            {getFileType(selectedFile) === "image" && (
               <img
                 src={selectedFile.url}
                 alt={selectedFile.originalName}
@@ -225,7 +232,7 @@ const DeliverablesBoard = () => {
               />
             )}
 
-            {selectedFile.mimeType?.startsWith("video/") && (
+            {getFileType(selectedFile) === "video" && (
               <video
                 src={selectedFile.url}
                 controls
@@ -234,26 +241,16 @@ const DeliverablesBoard = () => {
               />
             )}
 
-            {selectedFile.mimeType === "application/pdf" && (
-              <iframe
-                src={selectedFile.url}
-                title={selectedFile.originalName}
-                style={{ width: "100%", height: "80vh", border: "none" }}
-              />
+            {getFileType(selectedFile) === "raw" && (
+              <a
+                href={selectedFile.url}
+                target="_blank"
+                rel="noreferrer"
+                className="download-link"
+              >
+                Download file
+              </a>
             )}
-
-            {!selectedFile.mimeType?.startsWith("image/") &&
-              !selectedFile.mimeType?.startsWith("video/") &&
-              selectedFile.mimeType !== "application/pdf" && (
-                <a
-                  href={selectedFile.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="download-link"
-                >
-                  Download file
-                </a>
-              )}
           </div>
         </div>
       )}
