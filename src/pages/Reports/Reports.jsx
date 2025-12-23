@@ -162,7 +162,6 @@ const Reports = () => {
     ],
   };
 
-  // ✅ الحل هنا فقط
   const barOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -206,6 +205,69 @@ const Reports = () => {
       },
     ],
   };
+
+  /* =============================
+     EXPORTS (الإضافة الوحيدة)
+  ============================= */
+  function exportPDF() {
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text("Tasks Report", 14, 20);
+
+    doc.setFontSize(12);
+    doc.text(
+      `Total Time: ${formatMinutesToText(summary.totalMinutes)}`,
+      14,
+      36
+    );
+
+    doc.text(`Most Common Task: ${summary.mostCommonTask}`, 14, 42);
+
+    autoTable(doc, {
+      startY: 50,
+      head: [[
+        "Company", "Type", "Priority",
+        "Status", "Time Spent", "Created At"
+      ]],
+      body: filteredTasks.map((t) => [
+        t.company,
+        t.type,
+        t.priority,
+        t.status,
+        formatMinutesToText(t.timeSpent || 0),
+        t.createdAt,
+      ]),
+    });
+
+    doc.save("Tasks_Report.pdf");
+  }
+
+  function exportExcel() {
+    const worksheet = XLSX.utils.json_to_sheet(
+      filteredTasks.map((t) => ({
+        Company: t.company,
+        Type: t.type,
+        Priority: t.priority,
+        Status: t.status,
+        TimeSpent: formatMinutesToText(t.timeSpent || 0),
+        CreatedAt: t.createdAt,
+      }))
+    );
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    saveAs(
+      new Blob([excelBuffer], { type: "application/octet-stream" }),
+      "Tasks_Report.xlsx"
+    );
+  }
 
   return (
     <div className="reports-page">
