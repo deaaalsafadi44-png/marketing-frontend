@@ -8,7 +8,6 @@ const DeliverablesBoard = () => {
   const [loading, setLoading] = useState(true);
 
   const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(null);
 
   const [taskTitles, setTaskTitles] = useState({});
 
@@ -23,8 +22,9 @@ const DeliverablesBoard = () => {
 
   /* ================= LOAD USER ================= */
   useEffect(() => {
-    api.get("/auth/me")
-      .then(res => setCurrentUser(res.data?.user))
+    api
+      .get("/auth/me")
+      .then((res) => setCurrentUser(res.data?.user))
       .catch(() => setCurrentUser(null));
   }, []);
 
@@ -52,8 +52,8 @@ const DeliverablesBoard = () => {
   useEffect(() => {
     const loadTitles = async () => {
       const missingIds = items
-        .map(i => i.taskId)
-        .filter(id => id && !taskTitles[id]);
+        .map((i) => i.taskId)
+        .filter((id) => id && !taskTitles[id]);
 
       if (!missingIds.length) return;
 
@@ -68,14 +68,14 @@ const DeliverablesBoard = () => {
         }
       }
 
-      setTaskTitles(prev => ({ ...prev, ...newTitles }));
+      setTaskTitles((prev) => ({ ...prev, ...newTitles }));
     };
 
     if (items.length) loadTitles();
   }, [items, taskTitles]);
 
   /* ================= FILTER ================= */
-  const filteredItems = items.filter(item => {
+  const filteredItems = items.filter((item) => {
     const itemDate = item.createdAt ? new Date(item.createdAt) : null;
     if (fromDate && itemDate < new Date(fromDate)) return false;
     if (toDate && itemDate > new Date(toDate + "T23:59:59")) return false;
@@ -91,7 +91,7 @@ const DeliverablesBoard = () => {
   const groupedItems = useMemo(() => {
     const map = {};
 
-    filteredItems.forEach(item => {
+    filteredItems.forEach((item) => {
       if (!map[item.taskId]) {
         map[item.taskId] = {
           deliverableId: item._id,
@@ -112,40 +112,36 @@ const DeliverablesBoard = () => {
   }, [filteredItems]);
 
   /* ================= RATE ================= */
- const handleRate = async (task, value) => {
-  if (!isAdminOrManager) return;
+  const handleRate = async (task, value) => {
+    if (!isAdminOrManager) return;
 
-  const newRating = task.rating === value ? value - 1 : value;
+    const newRating = task.rating === value ? value - 1 : value;
 
-  try {
-    await api.post(
-      `/deliverables/${task.deliverableId}/rate`,
-      { rating: newRating }
-    );
+    try {
+      await api.post(
+        `/deliverables/${task.deliverableId}/rate`,
+        { rating: newRating }
+      );
 
-    // ✅ تحديث كل Deliverables الخاصة بنفس التاسك
-    setItems(prev =>
-      prev.map(i =>
-        i.taskId === task.taskId
-          ? { ...i, rating: newRating }
-          : i
-      )
-    );
-  } catch (err) {
-    console.error("Rating failed", err);
-  }
-};
-
+      setItems((prev) =>
+        prev.map((i) =>
+          i.taskId === task.taskId ? { ...i, rating: newRating } : i
+        )
+      );
+    } catch (err) {
+      console.error("Rating failed", err);
+    }
+  };
 
   /* ================= HELPERS ================= */
-  const getFileType = file => {
+  const getFileType = (file) => {
     if (file.resource_type) return file.resource_type;
     if (file.mimeType?.startsWith("image/")) return "image";
     if (file.mimeType?.startsWith("video/")) return "video";
     return "raw";
   };
 
-  const decodeFileName = name => {
+  const decodeFileName = (name) => {
     try {
       return decodeURIComponent(escape(name));
     } catch {
@@ -166,7 +162,7 @@ const DeliverablesBoard = () => {
         </div>
 
         <div className="deliverables-feed">
-          {groupedItems.map(task => (
+          {groupedItems.map((task) => (
             <div key={task.taskId} className="submission-card">
               <h4 className="submission-task-title">
                 {taskTitles[task.taskId] || `Task #${task.taskId}`}
@@ -182,10 +178,13 @@ const DeliverablesBoard = () => {
 
                   {/* ⭐ STARS */}
                   <div className="rating-stars">
-                    {[1, 2, 3, 4, 5].map(n => (
+                    {[1, 2, 3, 4, 5].map((n) => (
                       <span
                         key={n}
-                        onClick={() => handleRate(task, n)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // ⭐ الحل النهائي
+                          handleRate(task, n);
+                        }}
                         style={{
                           cursor: isAdminOrManager ? "pointer" : "default",
                           color: task.rating >= n ? "#facc15" : "#d1d5db",
@@ -232,9 +231,15 @@ const DeliverablesBoard = () => {
 
       {/* FILE PREVIEW MODAL */}
       {selectedFile && (
-        <div className="file-modal-overlay" onClick={() => setSelectedFile(null)}>
-          <div className="file-modal" onClick={e => e.stopPropagation()}>
-            <button className="close-modal" onClick={() => setSelectedFile(null)}>
+        <div
+          className="file-modal-overlay"
+          onClick={() => setSelectedFile(null)}
+        >
+          <div className="file-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="close-modal"
+              onClick={() => setSelectedFile(null)}
+            >
               ✖
             </button>
 
