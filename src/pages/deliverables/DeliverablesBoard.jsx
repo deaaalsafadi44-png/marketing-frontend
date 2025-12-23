@@ -175,31 +175,29 @@ const DeliverablesBoard = () => {
 
               {selectedItem.files?.length ? (
                 <div className="task-files-grid">
-                  {selectedItem.files.map((file, i) => (
-                    <div
-                      key={i}
-                      className="task-file-card"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedFile(file);
-                      }}
-                    >
-                      {file.mimeType?.startsWith("image/") && (
-                        <img src={file.url} alt="" />
-                      )}
+                  {selectedItem.files.map((file, i) => {
+                    const isImage = file.mimeType?.startsWith("image/");
+                    const isVideo = file.mimeType?.startsWith("video/");
 
-                      {file.mimeType?.startsWith("video/") && (
-                        <video src={file.url} muted />
-                      )}
-
-                      {!file.mimeType?.startsWith("image/") &&
-                        !file.mimeType?.startsWith("video/") && (
+                    return (
+                      <div
+                        key={i}
+                        className="task-file-card"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedFile(file);
+                        }}
+                      >
+                        {isImage && <img src={file.url} alt="" />}
+                        {isVideo && <video src={file.url} muted />}
+                        {!isImage && !isVideo && (
                           <div className="file-generic">
                             📎 {file.originalName}
                           </div>
                         )}
-                    </div>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <span className="no-files">No files attached</span>
@@ -209,7 +207,7 @@ const DeliverablesBoard = () => {
         </div>
       )}
 
-      {/* FILE PREVIEW MODAL ✅ FINAL FIX */}
+      {/* FILE PREVIEW MODAL */}
       {selectedFile && (
         <div className="file-modal-overlay" onClick={() => setSelectedFile(null)}>
           <div className="file-modal" onClick={(e) => e.stopPropagation()}>
@@ -219,7 +217,6 @@ const DeliverablesBoard = () => {
 
             <h3>{selectedFile.originalName}</h3>
 
-            {/* IMAGE */}
             {selectedFile.mimeType?.startsWith("image/") && (
               <img
                 src={selectedFile.url}
@@ -228,7 +225,6 @@ const DeliverablesBoard = () => {
               />
             )}
 
-            {/* VIDEO */}
             {selectedFile.mimeType?.startsWith("video/") && (
               <video
                 src={selectedFile.url}
@@ -238,7 +234,6 @@ const DeliverablesBoard = () => {
               />
             )}
 
-            {/* PDF */}
             {selectedFile.mimeType === "application/pdf" && (
               <iframe
                 src={selectedFile.url}
@@ -247,17 +242,18 @@ const DeliverablesBoard = () => {
               />
             )}
 
-            {/* OTHER */}
-            {!selectedFile.mimeType && (
-              <a
-                href={selectedFile.url}
-                target="_blank"
-                rel="noreferrer"
-                className="download-link"
-              >
-                Download file
-              </a>
-            )}
+            {!selectedFile.mimeType?.startsWith("image/") &&
+              !selectedFile.mimeType?.startsWith("video/") &&
+              selectedFile.mimeType !== "application/pdf" && (
+                <a
+                  href={selectedFile.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="download-link"
+                >
+                  Download file
+                </a>
+              )}
           </div>
         </div>
       )}
