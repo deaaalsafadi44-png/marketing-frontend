@@ -97,12 +97,21 @@ const DeliverablesBoard = () => {
     return true;
   });
 
-  // ✅ Helper ذكي لتحديد نوع الملف
+  // ✅ Helper لتحديد نوع الملف (بدون تغيير منطقك)
   const getFileType = (file) => {
     if (file.resource_type) return file.resource_type;
     if (file.mimeType?.startsWith("image/")) return "image";
     if (file.mimeType?.startsWith("video/")) return "video";
     return "raw";
+  };
+
+  // ✅ Helper لإصلاح أسماء الملفات العربية
+  const decodeFileName = (name) => {
+    try {
+      return decodeURIComponent(escape(name));
+    } catch {
+      return name;
+    }
   };
 
   return (
@@ -199,7 +208,7 @@ const DeliverablesBoard = () => {
                         {type === "video" && <video src={file.url} muted />}
                         {type === "raw" && (
                           <div className="file-generic">
-                            📎 {file.originalName}
+                            📎 {decodeFileName(file.originalName)}
                           </div>
                         )}
                       </div>
@@ -222,7 +231,7 @@ const DeliverablesBoard = () => {
               ✖
             </button>
 
-            <h3>{selectedFile.originalName}</h3>
+            <h3>{decodeFileName(selectedFile.originalName)}</h3>
 
             {getFileType(selectedFile) === "image" && (
               <img
@@ -241,7 +250,15 @@ const DeliverablesBoard = () => {
               />
             )}
 
-            {getFileType(selectedFile) === "raw" && (
+            {getFileType(selectedFile) === "raw" && selectedFile.format === "pdf" && (
+              <iframe
+                src={selectedFile.url}
+                title={selectedFile.originalName}
+                style={{ width: "100%", height: "80vh", border: "none" }}
+              />
+            )}
+
+            {getFileType(selectedFile) === "raw" && selectedFile.format !== "pdf" && (
               <a
                 href={selectedFile.url}
                 target="_blank"
