@@ -18,6 +18,9 @@ const ViewTask = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
 
+  // ✅ NEW: deliverables state
+  const [deliverables, setDeliverables] = useState([]);
+
   /* ================= LOAD TASK ================= */
   useEffect(() => {
     if (!id || isNaN(Number(id))) {
@@ -44,6 +47,23 @@ const ViewTask = () => {
 
     loadTask();
   }, [id, navigate]);
+
+  /* ================= LOAD DELIVERABLES ================= */
+  // ✅ NEW: load deliverables for this task
+  useEffect(() => {
+    if (!id) return;
+
+    const loadDeliverables = async () => {
+      try {
+        const res = await api.get(`/deliverables?taskId=${id}`);
+        setDeliverables(res.data || []);
+      } catch (err) {
+        console.error("Failed to load deliverables", err);
+      }
+    };
+
+    loadDeliverables();
+  }, [id]);
 
   /* ================= TIMER ================= */
   useEffect(() => {
@@ -127,6 +147,20 @@ const ViewTask = () => {
 
       alert("✅ تم رفع مخرجات المهمة بنجاح");
       setSelectedFiles([]);
+
+      // ✅ NEW: polling to wait for Cloudinary update
+      let attempts = 0;
+      const interval = setInterval(async () => {
+        attempts++;
+        const res = await api.get(`/deliverables?taskId=${id}`);
+        const hasFiles = res.data?.some(d => d.files && d.files.length > 0);
+
+        if (hasFiles || attempts >= 5) {
+          setDeliverables(res.data || []);
+          clearInterval(interval);
+        }
+      }, 1500);
+
     } catch {
       alert("❌ حدث خطأ أثناء رفع الملفات");
     } finally {
@@ -185,15 +219,11 @@ const ViewTask = () => {
             </button>
           </div>
 
-          {/* ===== UPLOAD (CUSTOM UI) ===== */}
+          {/* ===== UPLOAD ===== */}
           <div className="upload-section">
             <label className="upload-label">
               📁 Choose files
-              <input
-                type="file"
-                multiple
-                onChange={handleFileChange}
-              />
+              <input type="file" multiple onChange={handleFileChange} />
             </label>
 
             <span className="upload-info">
@@ -210,6 +240,25 @@ const ViewTask = () => {
               📤 رفع مخرجات المهمة
             </button>
           </div>
+
+          {/* ===== NEW: DELIVERABLES VIEW (بدون لمس باقي الواجهة) ===== */}
+          {deliverables.length > 0 && (
+            <div className="deliverables-list">
+              {deliverables.flatMap((d, i) =>
+                d.files.map((file, idx) => (
+                  <a
+                    key={`${i}-${idx}`}
+                    href={file.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="deliverable-link"
+                  >
+                    📎 {file.originalName}
+                  </a>
+                ))
+              )}
+            </div>
+          )}
         </div>
 
         {/* ===== INFO GRID ===== */}
