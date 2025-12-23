@@ -21,7 +21,7 @@ const ViewTask = () => {
   const [deliverables, setDeliverables] = useState([]);
   const [uploadAttempted, setUploadAttempted] = useState(false);
 
-  // ✅ NEW STATES (عرض فقط)
+  // ✅ عرض فقط
   const [previewFile, setPreviewFile] = useState(null);
   const [showAllAttachments, setShowAllAttachments] = useState(false);
 
@@ -159,7 +159,6 @@ const ViewTask = () => {
     }
   };
 
-  /* ================= RENDER ================= */
   if (loading) return <div className="loading">Loading...</div>;
   if (notFound)
     return <h2 style={{ textAlign: "center" }}>❌ Task Not Found</h2>;
@@ -210,18 +209,33 @@ const ViewTask = () => {
               📤 رفع مخرجات المهمة
             </button>
           </div>
-
-          {/* ❌ تعطيل العرض القديم فقط */}
-          {false && deliverables.flatMap((d, i) =>
-            d.files.map((file, idx) => (
-              <a key={`${i}-${idx}`} href={file.url}>{file.originalName}</a>
-            ))
-          )}
         </div>
 
         {/* ===== INFO GRID ===== */}
         <div className="info-grid">
+
           <div className="info-item">
+            <h3>Company</h3>
+            <p>{task?.company || "—"}</p>
+          </div>
+
+          <div className="info-item">
+            <h3>Task Type</h3>
+            <p>{task?.type || "—"}</p>
+          </div>
+
+          <div className="info-item">
+            <h3>Assigned To</h3>
+            <p>{task?.workerName || "—"}</p>
+          </div>
+
+          <div className="info-item">
+            <h3>Created At</h3>
+            <p>{task?.createdAt ? new Date(task.createdAt).toLocaleString() : "—"}</p>
+          </div>
+
+          {/* ===== ATTACHMENTS ===== */}
+          <div className="info-item attachments">
             <h3>Attachments</h3>
 
             <div className="attachments-box">
@@ -231,6 +245,8 @@ const ViewTask = () => {
                   className="attachment-card"
                   onClick={() => setPreviewFile(file)}
                 >
+                  <span className="remove-attachment">✖</span>
+
                   {file.mimeType?.startsWith("image/") ? (
                     <img src={file.url} alt="" />
                   ) : file.mimeType?.startsWith("video/") ? (
@@ -249,7 +265,16 @@ const ViewTask = () => {
                   +{remainingCount}
                 </div>
               )}
+
+              {allFiles.length === 0 && (
+                <span className="no-attachments">No attachments</span>
+              )}
             </div>
+          </div>
+
+          <div className="info-item">
+            <h3>Time Spent</h3>
+            <p>{task?.timeSpent || "—"}</p>
           </div>
         </div>
 
