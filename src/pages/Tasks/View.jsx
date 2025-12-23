@@ -159,11 +159,43 @@ const ViewTask = () => {
     }
   };
 
+  /* ================= DELETE FILE ================= */
+  const handleDeleteFile = async (file) => {
+    if (!window.confirm("هل أنت متأكد من حذف هذا الملف؟")) return;
+
+    try {
+      await api.delete("/deliverables/file", {
+        data: {
+          deliverableId: file.deliverableId,
+          fileId: file._id,
+        },
+      });
+
+      setDeliverables((prev) =>
+        prev.map((d) =>
+          d._id === file.deliverableId
+            ? { ...d, files: d.files.filter((f) => f._id !== file._id) }
+            : d
+        )
+      );
+    } catch (err) {
+      alert("❌ فشل حذف الملف");
+      console.error(err);
+    }
+  };
+
   if (loading) return <div className="loading">Loading...</div>;
   if (notFound)
     return <h2 style={{ textAlign: "center" }}>❌ Task Not Found</h2>;
 
-  const allFiles = deliverables.flatMap((d) => d.files || []);
+  // ✅ إضافة deliverableId لكل ملف (مهم للحذف)
+  const allFiles = deliverables.flatMap((d) =>
+    (d.files || []).map((file) => ({
+      ...file,
+      deliverableId: d._id,
+    }))
+  );
+
   const visibleFiles = allFiles.slice(0, 2);
   const remainingCount = allFiles.length - 2;
 
@@ -233,16 +265,17 @@ const ViewTask = () => {
             <h3>Created At</h3>
             <p>{task?.createdAt ? new Date(task.createdAt).toLocaleString() : "—"}</p>
           </div>
-{/* ===== DESCRIPTION ===== */}
-<div className="desc-section">
-  <h2>Description</h2>
-  <div
-    className="desc-box"
-    dangerouslySetInnerHTML={{
-      __html: task?.description || "<i>No description</i>",
-    }}
-  />
-</div>
+
+          {/* ===== DESCRIPTION ===== */}
+          <div className="desc-section">
+            <h2>Description</h2>
+            <div
+              className="desc-box"
+              dangerouslySetInnerHTML={{
+                __html: task?.description || "<i>No description</i>",
+              }}
+            />
+          </div>
 
           {/* ===== ATTACHMENTS ===== */}
           <div className="info-item attachments">
@@ -255,7 +288,15 @@ const ViewTask = () => {
                   className="attachment-card"
                   onClick={() => setPreviewFile(file)}
                 >
-                  <span className="remove-attachment">✖</span>
+                  <span
+                    className="remove-attachment"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteFile(file);
+                    }}
+                  >
+                    ✖
+                  </span>
 
                   {file.mimeType?.startsWith("image/") ? (
                     <img src={file.url} alt="" />
