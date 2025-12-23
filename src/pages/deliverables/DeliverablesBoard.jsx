@@ -10,22 +10,33 @@ const DeliverablesBoard = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const [taskDetails, setTaskDetails] = useState(null);
-  const [taskLoading, setTaskLoading] = useState(false);
-
   const [taskTitles, setTaskTitles] = useState({});
 
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [searchName, setSearchName] = useState("");
 
+  /* 🆕 current user */
+  const [currentUser, setCurrentUser] = useState(null);
+
   const location = useLocation();
 
+  /* ================= LOAD USER ================= */
+  useEffect(() => {
+    api.get("/auth/me")
+      .then(res => setCurrentUser(res.data?.user))
+      .catch(() => setCurrentUser(null));
+  }, []);
+
+  const isAdminOrManager =
+    currentUser?.role === "admin" || currentUser?.role === "manager";
+
+  /* ================= LOAD DELIVERABLES ================= */
   const loadDeliverables = async () => {
     try {
       setLoading(true);
       const res = await api.get("/deliverables");
-      setItems(Array.isArray(res.data) ? res.data : res.data?.data || []);
+      setItems(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Failed to load deliverables:", err);
     } finally {
@@ -37,11 +48,12 @@ const DeliverablesBoard = () => {
     loadDeliverables();
   }, [location.pathname]);
 
+  /* ================= LOAD TASK TITLES ================= */
   useEffect(() => {
     const loadTitles = async () => {
       const missingIds = items
-        .map((i) => i.taskId)
-        .filter((id) => id && !taskTitles[id]);
+        .map(i => i.taskId)
+        .filter(id => id && !taskTitles[id]);
 
       if (!missingIds.length) return;
 
@@ -56,14 +68,14 @@ const DeliverablesBoard = () => {
         }
       }
 
-      setTaskTitles((prev) => ({ ...prev, ...newTitles }));
+      setTaskTitles(prev => ({ ...prev, ...newTitles }));
     };
 
     if (items.length) loadTitles();
   }, [items, taskTitles]);
 
   /* ================= FILTER ================= */
-  const filteredItems = items.filter((item) => {
+  const filteredItems = items.filter(item => {
     const itemDate = item.createdAt ? new Date(item.createdAt) : null;
     if (fromDate && itemDate < new Date(fromDate)) return false;
     if (toDate && itemDate > new Date(toDate + "T23:59:59")) return false;
@@ -79,38 +91,59 @@ const DeliverablesBoard = () => {
   const groupedItems = useMemo(() => {
     const map = {};
 
-    filteredItems.forEach((item) => {
+    filteredItems.forEach(item => {
       if (!map[item.taskId]) {
         map[item.taskId] = {
+          deliverableId: item._id,
           taskId: item.taskId,
           submittedByName: item.submittedByName,
           createdAt: item.createdAt,
           files: [],
-          notes: [],
+          rating: item.rating || 0,
         };
       }
 
       if (item.files?.length) {
         map[item.taskId].files.push(...item.files);
       }
-
-      if (item.notes) {
-        map[item.taskId].notes.push(item.notes);
-      }
     });
 
     return Object.values(map);
   }, [filteredItems]);
 
+  /* ================= RATE ================= */
+  const handleRate = async (task, value) => {
+    if (!isAdminOrManager) return;
+
+    const newRating = task.rating === value ? value - 1 : value;
+
+    try {
+      await api.post(
+        `/deliverables/${task.deliverableId}/rate`,
+        { rating: newRating }
+      );
+
+      setItems(prev =>
+        prev.map(i =>
+          i._id === task.deliverableId
+            ? { ...i, rating: newRating }
+            : i
+        )
+      );
+    } catch (err) {
+      console.error("Rating failed", err);
+    }
+  };
+
   /* ================= HELPERS ================= */
-  const getFileType = (file) => {
+  const getFileType = file => {
     if (file.resource_type) return file.resource_type;
     if (file.mimeType?.startsWith("image/")) return "image";
     if (file.mimeType?.startsWith("video/")) return "video";
     return "raw";
   };
 
-  const decodeFileName = (name) => {
+  const decodeFileName = name => {
     try {
       return decodeURIComponent(escape(name));
     } catch {
@@ -130,24 +163,9 @@ const DeliverablesBoard = () => {
           <p>Live activity from your team</p>
         </div>
 
-        <div className="deliverables-filters">
-          <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
-          <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
-          <input
-            type="text"
-            placeholder="Search by user name..."
-            value={searchName}
-            onChange={(e) => setSearchName(e.target.value)}
-          />
-        </div>
-
         <div className="deliverables-feed">
-          {groupedItems.map((task) => (
-            <div
-              key={task.taskId}
-              className="submission-card"
-              onClick={() => setSelectedItem(task)}
-            >
+          {groupedItems.map(task => (
+            <div key={task.taskId} className="submission-card">
               <h4 className="submission-task-title">
                 {taskTitles[task.taskId] || `Task #${task.taskId}`}
               </h4>
@@ -159,7 +177,23 @@ const DeliverablesBoard = () => {
 
                 <div className="user-info">
                   <strong>{task.submittedByName}</strong>
-                  <span>completed this task</span>
+
+                  {/* ⭐ STARS */}
+                  <div className="rating-stars">
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <span
+                        key={n}
+                        onClick={() => handleRate(task, n)}
+                        style={{
+                          cursor: isAdminOrManager ? "pointer" : "default",
+                          color: task.rating >= n ? "#facc15" : "#d1d5db",
+                          fontSize: "18px",
+                        }}
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="date">
@@ -176,10 +210,7 @@ const DeliverablesBoard = () => {
                     <div
                       key={i}
                       className="task-file-card"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedFile(file);
-                      }}
+                      onClick={() => setSelectedFile(file)}
                     >
                       {type === "image" && <img src={file.url} alt="" />}
                       {type === "video" && <video src={file.url} muted />}
@@ -200,7 +231,7 @@ const DeliverablesBoard = () => {
       {/* FILE PREVIEW MODAL */}
       {selectedFile && (
         <div className="file-modal-overlay" onClick={() => setSelectedFile(null)}>
-          <div className="file-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="file-modal" onClick={e => e.stopPropagation()}>
             <button className="close-modal" onClick={() => setSelectedFile(null)}>
               ✖
             </button>
