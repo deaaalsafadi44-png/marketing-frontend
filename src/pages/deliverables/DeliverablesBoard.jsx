@@ -17,7 +17,7 @@ const DeliverablesBoard = () => {
   const [taskDetails, setTaskDetails] = useState(null);
   const [taskLoading, setTaskLoading] = useState(false);
 
-  // 🔥 Task titles cache (for list)
+  // Task titles cache (for list)
   const [taskTitles, setTaskTitles] = useState({});
 
   // Filters
@@ -43,9 +43,7 @@ const DeliverablesBoard = () => {
     loadDeliverables();
   }, [location.pathname]);
 
-  // ===============================
-  // 🔥 Load task titles (list view)
-  // ===============================
+  // Load task titles (list)
   useEffect(() => {
     const loadTitles = async () => {
       const missingIds = items
@@ -71,9 +69,7 @@ const DeliverablesBoard = () => {
     if (items.length) loadTitles();
   }, [items, taskTitles]);
 
-  // ===============================
   // Load task details (modal)
-  // ===============================
   useEffect(() => {
     if (!selectedItem?.taskId) return;
 
@@ -82,6 +78,9 @@ const DeliverablesBoard = () => {
         setTaskLoading(true);
         const res = await api.get(`/tasks/${selectedItem.taskId}`);
         setTaskDetails(res.data);
+
+        // ✅ الصحيح: الملفات هنا
+        console.log("FILES 👉", res.data?.files);
       } catch (err) {
         console.error("Failed to load task details:", err);
         setTaskDetails(null);
@@ -109,9 +108,6 @@ const DeliverablesBoard = () => {
     return true;
   });
 
-  // ===============================
-  // UI
-  // ===============================
   return (
     <>
       <div className="deliverables-feed-page">
@@ -141,7 +137,6 @@ const DeliverablesBoard = () => {
                 setTaskDetails(null);
               }}
             >
-              {/* 🔥 TASK TITLE */}
               <h4 className="submission-task-title">
                 {taskTitles[item.taskId] || `Task #${item.taskId}`}
               </h4>
@@ -171,11 +166,7 @@ const DeliverablesBoard = () => {
         </div>
       </div>
 
-      {/* ===============================
-          TASK DETAILS MODAL
-      =============================== */}
-      console.log("FILES 👉", selectedItem?.files);
-
+      {/* TASK DETAILS MODAL */}
       {selectedItem && (
         <div className="file-modal-overlay" onClick={() => setSelectedItem(null)}>
           <div className="task-details-modal" onClick={(e) => e.stopPropagation()}>
@@ -184,6 +175,7 @@ const DeliverablesBoard = () => {
             </button>
 
             <h2>{taskDetails?.title || `Task #${selectedItem.taskId}`}</h2>
+
             <p className="task-meta-line">
               Submitted by <strong>{selectedItem.submittedByName}</strong> •{" "}
               {new Date(selectedItem.createdAt).toLocaleString()}
@@ -222,6 +214,38 @@ const DeliverablesBoard = () => {
                 </div>
               )
             )}
+
+            {/* ✅ FILES FROM taskDetails */}
+            <div className="task-files-section">
+              <h4>Attachments</h4>
+
+              {taskDetails?.files?.length ? (
+                <div className="task-files-grid">
+                  {taskDetails.files.map((file, i) => {
+                    const isImage = file.url?.match(/\.(jpg|jpeg|png|gif)$/i);
+                    const isVideo = file.url?.match(/\.(mp4|webm|ogg)$/i);
+
+                    return (
+                      <div
+                        key={i}
+                        className="task-file-card"
+                        onClick={() => setSelectedFile(file)}
+                      >
+                        {isImage && <img src={file.url} alt="preview" />}
+                        {isVideo && <video src={file.url} muted />}
+                        {!isImage && !isVideo && (
+                          <div className="file-generic">
+                            📎 {file.originalName || "File"}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <span className="no-files">No files attached</span>
+              )}
+            </div>
           </div>
         </div>
       )}
