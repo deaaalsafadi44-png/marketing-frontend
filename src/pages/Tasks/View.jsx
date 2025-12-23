@@ -161,26 +161,36 @@ const ViewTask = () => {
 
   /* ================= DELETE FILE ================= */
   const handleDeleteFile = async (file) => {
-    if (!window.confirm("هل أنت متأكد من حذف هذا الملف؟")) return;
+  if (!window.confirm("هل أنت متأكد من حذف هذا الملف؟")) return;
 
-  try {
-  await api.delete(
-    `/deliverables/${file.deliverableId}/files/${file._id}`
+  console.log(
+    "DELETE",
+    "deliverableId:",
+    file.deliverableId,
+    "file._id:",
+    file._id,
+    "file.publicId:",
+    file.publicId
   );
 
+  try {
+    await api.delete(
+      `/deliverables/${file.deliverableId}/files/${file._id}`
+    );
 
-      setDeliverables((prev) =>
-        prev.map((d) =>
-          d._id === file.deliverableId
-            ? { ...d, files: d.files.filter((f) => f._id !== file._id) }
-            : d
-        )
-      );
-    } catch (err) {
-      alert("❌ فشل حذف الملف");
-      console.error(err);
-    }
-  };
+    setDeliverables((prev) =>
+      prev.map((d) =>
+        d._id === file.deliverableId
+          ? { ...d, files: d.files.filter((f) => f._id !== file._id) }
+          : d
+      )
+    );
+  } catch (err) {
+    alert("❌ فشل حذف الملف");
+    console.error(err);
+  }
+};
+
 
   if (loading) return <div className="loading">Loading...</div>;
   if (notFound)
