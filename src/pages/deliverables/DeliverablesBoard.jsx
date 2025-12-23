@@ -8,6 +8,7 @@ const DeliverablesBoard = () => {
   const [loading, setLoading] = useState(true);
 
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const [taskTitles, setTaskTitles] = useState({});
 
@@ -21,13 +22,12 @@ const DeliverablesBoard = () => {
   const location = useLocation();
 
   /* ================= LOAD USER ================= */
-useEffect(() => {
-  api
-    .get("/auth/me", { withCredentials: true })
-    .then(res => setCurrentUser(res.data?.user))
-    .catch(() => setCurrentUser(null));
-}, []);
-
+  useEffect(() => {
+    api
+      .get("/auth/me")
+      .then((res) => setCurrentUser(res.data?.user))
+      .catch(() => setCurrentUser(null));
+  }, []);
 
   const isAdminOrManager =
     currentUser?.role === "admin" || currentUser?.role === "manager";
@@ -114,23 +114,28 @@ useEffect(() => {
 
   /* ================= RATE ================= */
   const handleRate = async (task, value) => {
-    if (!isAdminOrManager) return;
+    // ✅ لا نمنع الضغط من الفرونت لأن /auth/me عندك أحياناً يعطي 401
+    // ✅ الباك اند هو الذي يمنع غير admin/manager (403)
+    const newRating = task.rating === value ? Math.max(value - 1, 0) : value;
 
-    const newRating = task.rating === value ? value - 1 : value;
+    // ✅ تحديث فوري للواجهة (Optimistic UI)
+    setItems((prev) =>
+      prev.map((i) => (i.taskId === task.taskId ? { ...i, rating: newRating } : i))
+    );
 
     try {
-      await api.post(
-        `/deliverables/${task.deliverableId}/rate`,
-        { rating: newRating }
-      );
-
-      setItems((prev) =>
-        prev.map((i) =>
-          i.taskId === task.taskId ? { ...i, rating: newRating } : i
-        )
-      );
+      await api.post(`/deliverables/${task.deliverableId}/rate`, {
+        rating: newRating,
+      });
     } catch (err) {
       console.error("Rating failed", err);
+
+      // ❗ لو فشل (401/403/400) نرجع التقييم القديم كما كان
+      setItems((prev) =>
+        prev.map((i) =>
+          i.taskId === task.taskId ? { ...i, rating: task.rating } : i
+        )
+      );
     }
   };
 
@@ -183,14 +188,20 @@ useEffect(() => {
                       <span
                         key={n}
                         onClick={(e) => {
-                          e.stopPropagation(); // ⭐ الحل النهائي
+                          e.stopPropagation(); // ✅ مهم جداً
                           handleRate(task, n);
                         }}
                         style={{
-                          cursor: isAdminOrManager ? "pointer" : "default",
+                          cursor: "pointer", // ✅ خليها دايماً pointer حتى لو /auth/me فشل
                           color: task.rating >= n ? "#facc15" : "#d1d5db",
                           fontSize: "18px",
+                          userSelect: "none",
                         }}
+                        title={
+                          isAdminOrManager
+                            ? `Rate ${n}`
+                            : "Only admin/manager can rate"
+                        }
                       >
                         ★
                       </span>
@@ -237,10 +248,7 @@ useEffect(() => {
           onClick={() => setSelectedFile(null)}
         >
           <div className="file-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="close-modal"
-              onClick={() => setSelectedFile(null)}
-            >
+            <button className="close-modal" onClick={() => setSelectedFile(null)}>
               ✖
             </button>
 
