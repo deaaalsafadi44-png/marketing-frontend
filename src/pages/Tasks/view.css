@@ -377,3 +377,27 @@
 .remove-attachment {
   z-index: 5;
 }
+/* ================= DESCRIPTION FIX (IMPORTANT) ================= */
+
+.desc-box {
+  white-space: pre-wrap;       /* يحافظ على الأسطر */
+  word-break: break-word;      /* يكسر الكلمات الطويلة */
+  overflow-wrap: anywhere;     /* يمنع الخروج من الصندوق */
+}
+
+/* في حال وُجد كود داخل الوصف */
+.desc-box pre,
+.desc-box code {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+  background: #f3f4f6;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+/* حماية إضافية */
+.desc-box * {
+  max-width: 100%;
+}
