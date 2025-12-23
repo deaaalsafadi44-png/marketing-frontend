@@ -325,3 +325,55 @@
   font-size: 13px;
   color: #9ca3af;
 }
+/* ================= FIX INFO GRID LAYOUT ================= */
+.info-grid {
+  grid-auto-rows: minmax(0, auto);
+}
+
+/* اجعل Attachments تمتد على صف كامل */
+.info-item.attachments {
+  grid-column: span 2;
+}
+
+/* ================= MODALS (PREVIEW / ALL FILES) ================= */
+.file-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.file-modal {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+  position: relative;
+}
+
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+}
+
+/* ================= ATTACHMENT REMOVE FIX ================= */
+.attachment-card {
+  position: relative;
+}
+
+.remove-attachment {
+  z-index: 5;
+}
