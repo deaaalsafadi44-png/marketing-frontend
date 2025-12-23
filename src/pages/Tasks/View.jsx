@@ -18,9 +18,6 @@ const ViewTask = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
 
-  // ✅ NEW: deliverables state
-  const [deliverables, setDeliverables] = useState([]);
-
   /* ================= LOAD TASK ================= */
   useEffect(() => {
     if (!id || isNaN(Number(id))) {
@@ -47,22 +44,6 @@ const ViewTask = () => {
 
     loadTask();
   }, [id, navigate]);
-
-  /* ================= LOAD DELIVERABLES ================= */
-  useEffect(() => {
-    if (!id) return;
-
-    const loadDeliverables = async () => {
-      try {
-        const res = await api.get(`/deliverables?taskId=${id}`);
-        setDeliverables(res.data || []);
-      } catch (err) {
-        console.error("Failed to load deliverables", err);
-      }
-    };
-
-    loadDeliverables();
-  }, [id]);
 
   /* ================= TIMER ================= */
   useEffect(() => {
@@ -146,10 +127,6 @@ const ViewTask = () => {
 
       alert("✅ تم رفع مخرجات المهمة بنجاح");
       setSelectedFiles([]);
-
-      // ✅ Reload deliverables after upload
-      const res = await api.get(`/deliverables?taskId=${id}`);
-      setDeliverables(res.data || []);
     } catch {
       alert("❌ حدث خطأ أثناء رفع الملفات");
     } finally {
@@ -208,11 +185,15 @@ const ViewTask = () => {
             </button>
           </div>
 
-          {/* ===== UPLOAD ===== */}
+          {/* ===== UPLOAD (CUSTOM UI) ===== */}
           <div className="upload-section">
             <label className="upload-label">
               📁 Choose files
-              <input type="file" multiple onChange={handleFileChange} />
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+              />
             </label>
 
             <span className="upload-info">
@@ -231,53 +212,47 @@ const ViewTask = () => {
           </div>
         </div>
 
-        {/* ===== DELIVERABLES VIEW ===== */}
-        <div className="deliverables-section">
-          <h2>Task Deliverables</h2>
-
-          {deliverables.length === 0 && (
-            <p style={{ opacity: 0.6 }}>No deliverables uploaded yet.</p>
-          )}
-
-          <div className="deliverables-grid">
-            {deliverables.flatMap((d, i) =>
-              d.files.map((file, idx) => {
-                if (file.url.match(/\.(jpg|jpeg|png|gif)$/i)) {
-                  return (
-                    <img
-                      key={`${i}-${idx}`}
-                      src={file.url}
-                      alt={file.originalName}
-                      className="deliverable-img"
-                    />
-                  );
-                }
-
-                if (file.url.match(/\.(mp4|webm)$/i)) {
-                  return (
-                    <video
-                      key={`${i}-${idx}`}
-                      src={file.url}
-                      controls
-                      className="deliverable-video"
-                    />
-                  );
-                }
-
-                return (
-                  <a
-                    key={`${i}-${idx}`}
-                    href={file.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="deliverable-file"
-                  >
-                    📄 {file.originalName}
-                  </a>
-                );
-              })
-            )}
+        {/* ===== INFO GRID ===== */}
+        <div className="info-grid">
+          <div className="info-item">
+            <h3>Company</h3>
+            <p>{task?.company || "—"}</p>
           </div>
+
+          <div className="info-item">
+            <h3>Task Type</h3>
+            <p>{task?.type || "—"}</p>
+          </div>
+
+          <div className="info-item">
+            <h3>Assigned To</h3>
+            <p>{task?.workerName || "—"}</p>
+          </div>
+
+          <div className="info-item">
+            <h3>Created At</h3>
+            <p>
+              {task?.createdAt
+                ? new Date(task.createdAt).toLocaleString()
+                : "—"}
+            </p>
+          </div>
+
+          <div className="info-item">
+            <h3>Time Spent</h3>
+            <p>{formatStoredTime(task?.timeSpent)}</p>
+          </div>
+        </div>
+
+        {/* ===== DESCRIPTION ===== */}
+        <div className="desc-section">
+          <h2>Description</h2>
+          <div
+            className="desc-box"
+            dangerouslySetInnerHTML={{
+              __html: task?.description || "<i>No description</i>",
+            }}
+          />
         </div>
 
         {/* ===== ACTIONS ===== */}
