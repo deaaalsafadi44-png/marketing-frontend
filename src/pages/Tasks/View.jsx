@@ -163,13 +163,11 @@ const ViewTask = () => {
   const handleDeleteFile = async (file) => {
     if (!window.confirm("هل أنت متأكد من حذف هذا الملف؟")) return;
 
-    try {
-      await api.delete("/deliverables/file", {
-        data: {
-          deliverableId: file.deliverableId,
-          fileId: file._id,
-        },
-      });
+  try {
+  await api.delete(
+    `/deliverables/${file.deliverableId}/files/${file._id}`
+  );
+
 
       setDeliverables((prev) =>
         prev.map((d) =>
@@ -384,4 +382,3 @@ const ViewTask = () => {
   );
 };
 
-export default ViewTask;
