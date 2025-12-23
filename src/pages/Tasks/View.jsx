@@ -370,20 +370,31 @@ const ViewTask = () => {
             <button className="close-modal" onClick={() => setShowAllAttachments(false)}>✖</button>
 
             <div className="task-files-grid">
-              {allFiles.map((file, i) => (
-                <div
-                  key={i}
-                  className="task-file-card"
-                  onClick={() => setPreviewFile(file)}
-                >
-                  {file.mimeType?.startsWith("image/") && <img src={file.url} alt="" />}
-                  {file.mimeType?.startsWith("video/") && <video src={file.url} />}
-                  {!file.mimeType?.startsWith("image/") &&
-                    !file.mimeType?.startsWith("video/") && (
-                      <div className="file-generic">📎 {file.originalName}</div>
-                    )}
-                </div>
-              ))}
+            {allFiles.map((file, i) => (
+  <div
+    key={i}
+    className="task-file-card"
+    onClick={() => setPreviewFile(file)}
+  >
+    <span
+      className="remove-attachment"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleDeleteFile(file);
+      }}
+    >
+      ✖
+    </span>
+
+    {file.mimeType?.startsWith("image/") && <img src={file.url} alt="" />}
+    {file.mimeType?.startsWith("video/") && <video src={file.url} />}
+    {!file.mimeType?.startsWith("image/") &&
+      !file.mimeType?.startsWith("video/") && (
+        <div className="file-generic">📎 {file.originalName}</div>
+      )}
+  </div>
+))}
+
             </div>
           </div>
         </div>
