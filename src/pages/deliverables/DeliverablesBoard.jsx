@@ -252,21 +252,29 @@ const DeliverablesBoard = () => {
             </button>
 
             <h3>{selectedFile.originalName}</h3>
+{selectedFile.mimeType?.startsWith("image/") ? (
+  <img
+    src={selectedFile.url}
+    className="modal-image"
+    alt={selectedFile.originalName}
+  />
+) : selectedFile.mimeType === "application/pdf" ? (
+  <iframe
+    src={selectedFile.url}
+    className="modal-pdf"
+    title={selectedFile.originalName}
+  />
+) : (
+  <a
+    href={selectedFile.url}
+    target="_blank"
+    rel="noreferrer"
+    className="download-link"
+  >
+    Download file
+  </a>
+)}
 
-            {selectedFile.url?.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-              <img src={selectedFile.url} className="modal-image" />
-            ) : selectedFile.url?.match(/\.pdf$/i) ? (
-              <iframe src={selectedFile.url} className="modal-pdf" />
-            ) : (
-              <a
-                href={selectedFile.url}
-                target="_blank"
-                rel="noreferrer"
-                className="download-link"
-              >
-                Download file
-              </a>
-            )}
           </div>
         </div>
       )}
