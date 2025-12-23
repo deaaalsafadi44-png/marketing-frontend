@@ -21,6 +21,9 @@ const ViewTask = () => {
   // ✅ deliverables state
   const [deliverables, setDeliverables] = useState([]);
 
+  // ✅ NEW: هل حاول المستخدم الرفع؟
+  const [uploadAttempted, setUploadAttempted] = useState(false);
+
   /* ================= LOAD TASK ================= */
   useEffect(() => {
     if (!id || isNaN(Number(id))) {
@@ -132,6 +135,9 @@ const ViewTask = () => {
     setSelectedFiles(Array.from(e.target.files));
 
   const uploadDeliverables = async () => {
+    // ✅ NEW: تسجيل محاولة الرفع
+    setUploadAttempted(true);
+
     if (!selectedFiles.length) return alert("❌ اختر ملفات أولاً");
 
     setUploading(true);
@@ -226,29 +232,28 @@ const ViewTask = () => {
             </button>
           </div>
 
-          {/* ===== DEBUG DELIVERABLES (تشخيص فقط) ===== */}
-          {deliverables.length > 0 && (
-            <div className="deliverables-list">
-              {deliverables.every(d => !d.files || d.files.length === 0) && (
-                <p style={{ color: "#dc2626", marginTop: "10px" }}>
-                  ⚠️ تم إنشاء مخرجات لهذه المهمة، لكن لا توجد ملفات مرفوعة (فشل الرفع)
-                </p>
-              )}
+          {/* ===== NEW: رسالة التحذير المنطقية ===== */}
+          {uploadAttempted &&
+            deliverables.length > 0 &&
+            deliverables.every(d => !d.files || d.files.length === 0) && (
+              <p style={{ color: "#dc2626", marginTop: "10px" }}>
+                ⚠️ تم إنشاء مخرجات لهذه المهمة، لكن لا توجد ملفات مرفوعة (فشل الرفع)
+              </p>
+            )}
 
-              {deliverables.flatMap((d, i) =>
-                d.files.map((file, idx) => (
-                  <a
-                    key={`${i}-${idx}`}
-                    href={file.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="deliverable-link"
-                  >
-                    📎 {file.originalName}
-                  </a>
-                ))
-              )}
-            </div>
+          {/* ===== عرض الملفات إن وُجدت ===== */}
+          {deliverables.flatMap((d, i) =>
+            d.files.map((file, idx) => (
+              <a
+                key={`${i}-${idx}`}
+                href={file.url}
+                target="_blank"
+                rel="noreferrer"
+                className="deliverable-link"
+              >
+                📎 {file.originalName}
+              </a>
+            ))
           )}
         </div>
 
