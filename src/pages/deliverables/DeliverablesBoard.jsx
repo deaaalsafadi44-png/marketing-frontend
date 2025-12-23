@@ -174,6 +174,8 @@ const DeliverablesBoard = () => {
       {/* ===============================
           TASK DETAILS MODAL
       =============================== */}
+      console.log("FILES 👉", selectedItem?.files);
+
       {selectedItem && (
         <div className="file-modal-overlay" onClick={() => setSelectedItem(null)}>
           <div className="task-details-modal" onClick={(e) => e.stopPropagation()}>
