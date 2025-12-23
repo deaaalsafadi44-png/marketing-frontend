@@ -32,9 +32,6 @@ ChartJS.register(
   Legend
 );
 
-/* =============================
-   UTIL: FORMAT MINUTES
-============================= */
 const formatMinutesToText = (minutes) => {
   if (!minutes || minutes <= 0) return "0 minutes";
 
@@ -58,9 +55,6 @@ const Reports = () => {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  /* =============================
-     LOAD TASKS
-  ============================= */
   useEffect(() => {
     const loadTasks = async () => {
       try {
@@ -75,9 +69,6 @@ const Reports = () => {
     loadTasks();
   }, []);
 
-  /* =============================
-     LOAD SUMMARY
-  ============================= */
   useEffect(() => {
     const loadSummary = async () => {
       setLoading(true);
@@ -108,9 +99,6 @@ const Reports = () => {
   if (error) return <div className="error-box">{error}</div>;
   if (!summary) return <div className="loading">Preparing summary...</div>;
 
-  /* =============================
-     FILTER TASKS
-  ============================= */
   const filteredTasks = tasks.filter((task) => {
     if (!task.createdAt) return false;
 
@@ -128,9 +116,6 @@ const Reports = () => {
     return matchCompany && matchDateFrom && matchDateTo;
   });
 
-  /* =============================
-     CHART DATA
-  ============================= */
   const uniqueCompanies = [...new Set(filteredTasks.map((t) => t.company))];
 
   const dashboardColors = [
@@ -174,6 +159,29 @@ const Reports = () => {
     ],
   };
 
+  // 🔧 التعديل هنا فقط
+  const barOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: "top" },
+    },
+    scales: {
+      y: { beginAtZero: true },
+      x: {
+        ticks: {
+          maxRotation: 0,
+          minRotation: 0,
+          autoSkip: false,
+          callback: function (value) {
+            const label = this.getLabelForValue(value);
+            return label.length > 10 ? label.slice(0, 10) + "…" : label;
+          },
+        },
+      },
+    },
+  };
+
   const monthlyHours = Array(12).fill(0);
   filteredTasks.forEach((task) => {
     const month = new Date(task.createdAt).getMonth();
@@ -196,78 +204,10 @@ const Reports = () => {
     ],
   };
 
-  /* =============================
-     EXPORTS
-  ============================= */
-  const exportPDF = () => {
-    const doc = new jsPDF();
-
-    doc.setFontSize(18);
-    doc.text("Tasks Report", 14, 20);
-
-    doc.setFontSize(12);
-    doc.text(
-      `Total Time: ${formatMinutesToText(summary.totalMinutes)}`,
-      14,
-      36
-    );
-
-    doc.text(`Most Common Task: ${summary.mostCommonTask}`, 14, 42);
-
-    autoTable(doc, {
-      startY: 50,
-      head: [[
-        "Company", "Type", "Priority",
-        "Status", "Time Spent", "Created At"
-      ]],
-      body: filteredTasks.map((t) => [
-        t.company,
-        t.type,
-        t.priority,
-        t.status,
-        formatMinutesToText(t.timeSpent || 0),
-        t.createdAt,
-      ]),
-    });
-
-    doc.save("Tasks_Report.pdf");
-  };
-
-  const exportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(
-      filteredTasks.map((t) => ({
-        Company: t.company,
-        Type: t.type,
-        Priority: t.priority,
-        Status: t.status,
-        TimeSpent: formatMinutesToText(t.timeSpent || 0),
-        CreatedAt: t.createdAt,
-      }))
-    );
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
-
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-
-    saveAs(
-      new Blob([excelBuffer], { type: "application/octet-stream" }),
-      "Tasks_Report.xlsx"
-    );
-  };
-
-  /* =============================
-     RENDER
-  ============================= */
   return (
     <div className="reports-page">
-
       <h1 className="reports-title">Reports</h1>
 
-      {/* ===== Filters ===== */}
       <div className="reports-card filters-card">
         <select onChange={(e) => setCompanyFilter(e.target.value)}>
           <option value="">Company</option>
@@ -283,7 +223,6 @@ const Reports = () => {
         <button className="export-btn" onClick={exportExcel}>Export Excel</button>
       </div>
 
-      {/* ===== Summary ===== */}
       <div className="reports-summary">
         <div className="summary-item">
           <span>Total Tasks</span>
@@ -301,12 +240,10 @@ const Reports = () => {
         </div>
       </div>
 
-      {/* ===== Charts ===== */}
       <div className="reports-charts">
-
         <div className="reports-card">
           <h3>Tasks by Type</h3>
-          <Bar data={barData} />
+          <Bar data={barData} options={barOptions} />
         </div>
 
         <div className="reports-card">
@@ -318,7 +255,6 @@ const Reports = () => {
           <h3>Hours Over Months</h3>
           <Line data={lineData} />
         </div>
-
       </div>
     </div>
   );
