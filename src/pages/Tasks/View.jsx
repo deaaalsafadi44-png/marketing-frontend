@@ -18,7 +18,7 @@ const ViewTask = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
 
-  // ✅ NEW: deliverables state
+  // ✅ deliverables state
   const [deliverables, setDeliverables] = useState([]);
 
   /* ================= LOAD TASK ================= */
@@ -49,7 +49,6 @@ const ViewTask = () => {
   }, [id, navigate]);
 
   /* ================= LOAD DELIVERABLES ================= */
-  // ✅ NEW: load deliverables for this task
   useEffect(() => {
     if (!id) return;
 
@@ -147,20 +146,6 @@ const ViewTask = () => {
 
       alert("✅ تم رفع مخرجات المهمة بنجاح");
       setSelectedFiles([]);
-
-      // ✅ NEW: polling to wait for Cloudinary update
-      let attempts = 0;
-      const interval = setInterval(async () => {
-        attempts++;
-        const res = await api.get(`/deliverables?taskId=${id}`);
-        const hasFiles = res.data?.some(d => d.files && d.files.length > 0);
-
-        if (hasFiles || attempts >= 5) {
-          setDeliverables(res.data || []);
-          clearInterval(interval);
-        }
-      }, 1500);
-
     } catch {
       alert("❌ حدث خطأ أثناء رفع الملفات");
     } finally {
@@ -241,9 +226,15 @@ const ViewTask = () => {
             </button>
           </div>
 
-          {/* ===== NEW: DELIVERABLES VIEW (بدون لمس باقي الواجهة) ===== */}
+          {/* ===== DEBUG DELIVERABLES (تشخيص فقط) ===== */}
           {deliverables.length > 0 && (
             <div className="deliverables-list">
+              {deliverables.every(d => !d.files || d.files.length === 0) && (
+                <p style={{ color: "#dc2626", marginTop: "10px" }}>
+                  ⚠️ تم إنشاء مخرجات لهذه المهمة، لكن لا توجد ملفات مرفوعة (فشل الرفع)
+                </p>
+              )}
+
               {deliverables.flatMap((d, i) =>
                 d.files.map((file, idx) => (
                   <a
