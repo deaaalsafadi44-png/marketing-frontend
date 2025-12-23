@@ -391,4 +391,5 @@ const ViewTask = () => {
     </div>
   );
 };
+export default ViewTask;
 
