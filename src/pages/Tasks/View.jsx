@@ -18,10 +18,6 @@ const ViewTask = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
 
-  // 🔥 NEW: deliverables for this task
-  const [deliverables, setDeliverables] = useState([]);
-  const [deliverablesLoading, setDeliverablesLoading] = useState(false);
-
   /* ================= LOAD TASK ================= */
   useEffect(() => {
     if (!id || isNaN(Number(id))) {
@@ -48,31 +44,6 @@ const ViewTask = () => {
 
     loadTask();
   }, [id, navigate]);
-
-  /* ================= LOAD DELIVERABLES ================= */
-  useEffect(() => {
-    if (!id) return;
-
-    const loadDeliverables = async () => {
-      try {
-        setDeliverablesLoading(true);
-        const res = await api.get("/deliverables");
-        const all = Array.isArray(res.data) ? res.data : res.data?.data || [];
-
-        const filtered = all.filter(
-          (d) => String(d.taskId) === String(id)
-        );
-
-        setDeliverables(filtered);
-      } catch (err) {
-        console.error("Failed to load deliverables", err);
-      } finally {
-        setDeliverablesLoading(false);
-      }
-    };
-
-    loadDeliverables();
-  }, [id]);
 
   /* ================= TIMER ================= */
   useEffect(() => {
@@ -195,7 +166,83 @@ const ViewTask = () => {
         </div>
 
         {/* ===== TIMER PANEL ===== */}
-        {/* (لم ألمس أي شيء هنا) */}
+        <div className="timer-box">
+          <div className="timer-time">{formatTime()}</div>
+
+          <div className="timer-actions">
+            {!isRunning ? (
+              <button className="timer-btn start" onClick={startTimer}>
+                ▶ Start
+              </button>
+            ) : (
+              <button className="timer-btn pause" onClick={pauseTimer}>
+                ⏸ Pause
+              </button>
+            )}
+
+            <button className="timer-btn finish" onClick={finishTask}>
+              ✔ Finish
+            </button>
+          </div>
+
+          {/* ===== UPLOAD (CUSTOM UI) ===== */}
+          <div className="upload-section">
+            <label className="upload-label">
+              📁 Choose files
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+              />
+            </label>
+
+            <span className="upload-info">
+              {selectedFiles.length > 0
+                ? `${selectedFiles.length} file(s) selected`
+                : "No files selected"}
+            </span>
+
+            <button
+              className="timer-btn upload-btn"
+              onClick={uploadDeliverables}
+              disabled={uploading}
+            >
+              📤 رفع مخرجات المهمة
+            </button>
+          </div>
+        </div>
+
+        {/* ===== INFO GRID ===== */}
+        <div className="info-grid">
+          <div className="info-item">
+            <h3>Company</h3>
+            <p>{task?.company || "—"}</p>
+          </div>
+
+          <div className="info-item">
+            <h3>Task Type</h3>
+            <p>{task?.type || "—"}</p>
+          </div>
+
+          <div className="info-item">
+            <h3>Assigned To</h3>
+            <p>{task?.workerName || "—"}</p>
+          </div>
+
+          <div className="info-item">
+            <h3>Created At</h3>
+            <p>
+              {task?.createdAt
+                ? new Date(task.createdAt).toLocaleString()
+                : "—"}
+            </p>
+          </div>
+
+          <div className="info-item">
+            <h3>Time Spent</h3>
+            <p>{formatStoredTime(task?.timeSpent)}</p>
+          </div>
+        </div>
 
         {/* ===== DESCRIPTION ===== */}
         <div className="desc-section">
@@ -206,45 +253,6 @@ const ViewTask = () => {
               __html: task?.description || "<i>No description</i>",
             }}
           />
-        </div>
-
-        {/* ===== ATTACHMENTS ===== */}
-        <div className="desc-section">
-          <h2>Attachments</h2>
-
-          {deliverablesLoading ? (
-            <p>Loading files...</p>
-          ) : deliverables.length === 0 ? (
-            <p style={{ color: "#6b7280" }}>No files attached</p>
-          ) : (
-            <div className="task-files-grid">
-              {deliverables.flatMap((d) =>
-                d.files.map((file, i) => {
-                  const isImage = file.url.match(/\.(jpg|jpeg|png|gif)$/i);
-                  const isVideo = file.url.match(/\.(mp4|webm|ogg)$/i);
-
-                  return (
-                    <div key={file.publicId + i} className="task-file-card">
-                      {isImage && <img src={file.url} alt="" />}
-                      {isVideo && (
-                        <video src={file.url} controls />
-                      )}
-                      {!isImage && !isVideo && (
-                        <a
-                          href={file.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="file-generic"
-                        >
-                          📎 {file.originalName}
-                        </a>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          )}
         </div>
 
         {/* ===== ACTIONS ===== */}
