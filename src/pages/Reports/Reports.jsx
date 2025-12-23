@@ -32,6 +32,9 @@ ChartJS.register(
   Legend
 );
 
+/* =============================
+   UTIL: FORMAT MINUTES
+============================= */
 const formatMinutesToText = (minutes) => {
   if (!minutes || minutes <= 0) return "0 minutes";
 
@@ -159,7 +162,7 @@ const Reports = () => {
     ],
   };
 
-  // 🔧 التعديل هنا فقط
+  // ✅ الحل هنا فقط
   const barOptions = {
     responsive: true,
     maintainAspectRatio: false,
