@@ -27,9 +27,6 @@ ChartJS.register(
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  // -----------------------------
-  // LOAD TASKS
-  // -----------------------------
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +38,6 @@ const Dashboard = () => {
       } catch (err) {
         console.error("Error loading tasks:", err);
 
-        // ❗ إذا حدث خطأ 401 → انتهاء التوكن
         if (err?.response?.status === 401) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
@@ -59,9 +55,6 @@ const Dashboard = () => {
     return <h2 style={{ textAlign: "center", marginTop: "40px" }}>Loading...</h2>;
   }
 
-  // -----------------------------
-  // CALCULATE STATISTICS
-  // -----------------------------
   const total = tasks.length;
 
   const inProgress = tasks.filter(
@@ -77,25 +70,16 @@ const Dashboard = () => {
       t.status === "Under Review"
   ).length;
 
-  // -----------------------------
-  // COMPANY COUNTS — ديناميكي
-  // -----------------------------
   const companyCounts = {};
   tasks.forEach((t) => {
     companyCounts[t.company] = (companyCounts[t.company] || 0) + 1;
   });
 
-  // -----------------------------
-  // TYPE COUNTS — ديناميكي
-  // -----------------------------
   const typeCounts = {};
   tasks.forEach((t) => {
     typeCounts[t.type] = (typeCounts[t.type] || 0) + 1;
   });
 
-  // -----------------------------
-  // PIE CHART DATA
-  // -----------------------------
   const pieData = {
     labels: Object.keys(companyCounts),
     datasets: [
@@ -116,9 +100,6 @@ const Dashboard = () => {
     layout: { padding: 10 },
   };
 
-  // -----------------------------
-  // BAR CHART DATA
-  // -----------------------------
   const barData = {
     labels: Object.keys(typeCounts),
     datasets: [
@@ -130,18 +111,33 @@ const Dashboard = () => {
     ],
   };
 
+  // 🔧 التعديل هنا فقط
   const barOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { position: "top" } },
-    scales: { y: { beginAtZero: true } },
+    plugins: {
+      legend: { position: "top" },
+    },
+    scales: {
+      y: { beginAtZero: true },
+      x: {
+        ticks: {
+          maxRotation: 0,
+          minRotation: 0,
+          autoSkip: false,
+          callback: function (value) {
+            const label = this.getLabelForValue(value);
+            return label.length > 10 ? label.slice(0, 10) + "…" : label;
+          },
+        },
+      },
+    },
   };
 
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">لوحة القيادة الرئيسية (Dashboard)</h1>
 
-      {/* Stats */}
       <div className="stats-row">
         <StatCard title="Total Tasks" value={total} border="black" />
         <StatCard title="In Progress" value={inProgress} border="gold" />
@@ -149,7 +145,6 @@ const Dashboard = () => {
         <StatCard title="Pending / New" value={pending} border="red" />
       </div>
 
-      {/* Charts */}
       <div className="charts-row">
         <div className="chart-box">
           <h3 className="chart-title">توزيع المهام حسب الشركة</h3>
