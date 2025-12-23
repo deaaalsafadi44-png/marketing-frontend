@@ -305,11 +305,13 @@ const Reports = () => {
         </div>
       </div>
 
-      <div className="reports-charts">
-        <div className="reports-card">
-          <h3>Tasks by Type</h3>
-          <Bar data={barData} options={barOptions} />
-        </div>
+    <div className="reports-card">
+  <h3>Tasks by Type</h3>
+  <div className="chart-container">
+    <Bar data={barData} options={barOptions} />
+  </div>
+
+
 
         <div className="reports-card">
           <h3>Tasks by Company</h3>
