@@ -18,10 +18,7 @@ const ViewTask = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
 
-  // ✅ deliverables state
   const [deliverables, setDeliverables] = useState([]);
-
-  // ✅ NEW: هل حاول المستخدم الرفع؟
   const [uploadAttempted, setUploadAttempted] = useState(false);
 
   /* ================= LOAD TASK ================= */
@@ -135,7 +132,6 @@ const ViewTask = () => {
     setSelectedFiles(Array.from(e.target.files));
 
   const uploadDeliverables = async () => {
-    // ✅ NEW: تسجيل محاولة الرفع
     setUploadAttempted(true);
 
     if (!selectedFiles.length) return alert("❌ اختر ملفات أولاً");
@@ -177,6 +173,10 @@ const ViewTask = () => {
   if (notFound)
     return <h2 style={{ textAlign: "center" }}>❌ Task Not Found</h2>;
 
+  const allFiles = deliverables.flatMap((d) => d.files || []);
+  const visibleFiles = allFiles.slice(0, 2);
+  const remainingCount = allFiles.length - 2;
+
   return (
     <div className="view-wrapper">
       <div className="view-card">
@@ -210,7 +210,6 @@ const ViewTask = () => {
             </button>
           </div>
 
-          {/* ===== UPLOAD ===== */}
           <div className="upload-section">
             <label className="upload-label">
               📁 Choose files
@@ -232,16 +231,15 @@ const ViewTask = () => {
             </button>
           </div>
 
-          {/* ===== NEW: رسالة التحذير المنطقية ===== */}
           {uploadAttempted &&
             deliverables.length > 0 &&
             deliverables.every(d => !d.files || d.files.length === 0) && (
               <p style={{ color: "#dc2626", marginTop: "10px" }}>
-                ⚠️ تم إنشاء مخرجات لهذه المهمة، لكن لا توجد ملفات مرفوعة (فشل الرفع)
+                ⚠️ تم إنشاء مخرجات لهذه المهمة، لكن لا توجد ملفات مرفوعة
               </p>
             )}
 
-          {/* ===== عرض الملفات إن وُجدت ===== */}
+          {/* ===== الروابط القديمة (بقيت كما هي) ===== */}
           {deliverables.flatMap((d, i) =>
             d.files.map((file, idx) => (
               <a
@@ -259,6 +257,7 @@ const ViewTask = () => {
 
         {/* ===== INFO GRID ===== */}
         <div className="info-grid">
+
           <div className="info-item">
             <h3>Company</h3>
             <p>{task?.company || "—"}</p>
@@ -276,11 +275,38 @@ const ViewTask = () => {
 
           <div className="info-item">
             <h3>Created At</h3>
-            <p>
-              {task?.createdAt
-                ? new Date(task.createdAt).toLocaleString()
-                : "—"}
-            </p>
+            <p>{task?.createdAt ? new Date(task.createdAt).toLocaleString() : "—"}</p>
+          </div>
+
+          {/* ===== NEW ATTACHMENTS UI ===== */}
+          <div className="info-item">
+            <h3>Attachments</h3>
+
+            <div className="attachments-box">
+              {visibleFiles.map((file, i) => (
+                <div className="attachment-card" key={i}>
+                  <span className="remove-attachment">✖</span>
+
+                  {file.mimeType?.startsWith("image/") ? (
+                    <img src={file.url} alt="" />
+                  ) : file.mimeType?.startsWith("video/") ? (
+                    <video src={file.url} />
+                  ) : (
+                    <div className="file-icon">📄</div>
+                  )}
+                </div>
+              ))}
+
+              {remainingCount > 0 && (
+                <div className="attachment-card more">
+                  +{remainingCount}
+                </div>
+              )}
+
+              {allFiles.length === 0 && (
+                <span className="no-attachments">No attachments</span>
+              )}
+            </div>
           </div>
 
           <div className="info-item">
