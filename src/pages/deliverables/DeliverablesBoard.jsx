@@ -175,29 +175,31 @@ const DeliverablesBoard = () => {
 
               {selectedItem.files?.length ? (
                 <div className="task-files-grid">
-                  {selectedItem.files.map((file, i) => {
-                    const isImage = file.url?.match(/\.(jpg|jpeg|png|gif)$/i);
-                    const isVideo = file.url?.match(/\.(mp4|webm|ogg)$/i);
+                  {selectedItem.files.map((file, i) => (
+                    <div
+                      key={i}
+                      className="task-file-card"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedFile(file);
+                      }}
+                    >
+                      {file.mimeType?.startsWith("image/") && (
+                        <img src={file.url} alt="" />
+                      )}
 
-                    return (
-                      <div
-                        key={i}
-                        className="task-file-card"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedFile(file);
-                        }}
-                      >
-                        {isImage && <img src={file.url} alt="" />}
-                        {isVideo && <video src={file.url} muted />}
-                        {!isImage && !isVideo && (
+                      {file.mimeType?.startsWith("video/") && (
+                        <video src={file.url} muted />
+                      )}
+
+                      {!file.mimeType?.startsWith("image/") &&
+                        !file.mimeType?.startsWith("video/") && (
                           <div className="file-generic">
                             📎 {file.originalName}
                           </div>
                         )}
-                      </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <span className="no-files">No files attached</span>
@@ -207,7 +209,7 @@ const DeliverablesBoard = () => {
         </div>
       )}
 
-      {/* FILE PREVIEW MODAL (✅ FIXED) */}
+      {/* FILE PREVIEW MODAL ✅ FINAL FIX */}
       {selectedFile && (
         <div className="file-modal-overlay" onClick={() => setSelectedFile(null)}>
           <div className="file-modal" onClick={(e) => e.stopPropagation()}>
@@ -218,46 +220,35 @@ const DeliverablesBoard = () => {
             <h3>{selectedFile.originalName}</h3>
 
             {/* IMAGE */}
-            {selectedFile.url?.match(/\.(jpg|jpeg|png|gif)$/i) && (
+            {selectedFile.mimeType?.startsWith("image/") && (
               <img
                 src={selectedFile.url}
                 alt={selectedFile.originalName}
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "80vh",
-                  objectFit: "contain",
-                }}
+                style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain" }}
               />
             )}
 
             {/* VIDEO */}
-            {selectedFile.url?.match(/\.(mp4|webm|ogg)$/i) && (
+            {selectedFile.mimeType?.startsWith("video/") && (
               <video
                 src={selectedFile.url}
                 controls
                 autoPlay
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "80vh",
-                }}
+                style={{ maxWidth: "100%", maxHeight: "80vh" }}
               />
             )}
 
             {/* PDF */}
-            {selectedFile.url?.match(/\.pdf$/i) && (
+            {selectedFile.mimeType === "application/pdf" && (
               <iframe
                 src={selectedFile.url}
                 title={selectedFile.originalName}
-                style={{
-                  width: "100%",
-                  height: "80vh",
-                  border: "none",
-                }}
+                style={{ width: "100%", height: "80vh", border: "none" }}
               />
             )}
 
-            {/* OTHER FILES */}
-            {!selectedFile.url?.match(/\.(jpg|jpeg|png|gif|mp4|webm|ogg|pdf)$/i) && (
+            {/* OTHER */}
+            {!selectedFile.mimeType && (
               <a
                 href={selectedFile.url}
                 target="_blank"
