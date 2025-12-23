@@ -233,6 +233,16 @@ const ViewTask = () => {
             <h3>Created At</h3>
             <p>{task?.createdAt ? new Date(task.createdAt).toLocaleString() : "—"}</p>
           </div>
+{/* ===== DESCRIPTION ===== */}
+<div className="desc-section">
+  <h2>Description</h2>
+  <div
+    className="desc-box"
+    dangerouslySetInnerHTML={{
+      __html: task?.description || "<i>No description</i>",
+    }}
+  />
+</div>
 
           {/* ===== ATTACHMENTS ===== */}
           <div className="info-item attachments">
