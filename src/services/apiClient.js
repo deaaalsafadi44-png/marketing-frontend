@@ -29,6 +29,23 @@ const api = axios.create({
 });
 
 /* =========================================
+   ✅ 3.5️⃣ Attach Access Token to Requests (NEW)
+========================================= */
+
+api.interceptors.request.use(
+  (config) => {
+    const accessToken = localStorage.getItem("accessToken"); // ✅ هذا هو الحل
+
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+/* =========================================
    4️⃣ Refresh Token Handler (SAFE)
 ========================================= */
 
