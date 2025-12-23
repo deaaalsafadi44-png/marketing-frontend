@@ -1,49 +1,16 @@
 import axios from "axios";
 
-/* =========================================
-   1️⃣ Environment Detection
-========================================= */
-
 const isProd = import.meta.env.MODE === "production";
-
-/* =========================================
-   2️⃣ API URLs
-========================================= */
 
 const ONLINE_API = "https://marketing-backend-1-db4i.onrender.com";
 const LOCAL_API = "http://localhost:5000";
 
 const API_URL = isProd ? ONLINE_API : LOCAL_API;
 
-if (!isProd) {
-  console.log("🧪 DEV MODE → API:", API_URL);
-}
-
-/* =========================================
-   3️⃣ Axios Instance (HttpOnly Cookies)
-========================================= */
-
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true, // ✅ ضروري
+  withCredentials: true, // ⭐ هذا وحده يكفي
 });
-
-/* =========================================
-   ✅ 3.5️⃣ Attach Access Token to Requests (NEW)
-========================================= */
-
-api.interceptors.request.use(
-  (config) => {
-    const accessToken = localStorage.getItem("accessToken"); // ✅ هذا هو الحل
-
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
 /* =========================================
    4️⃣ Refresh Token Handler (SAFE)
@@ -86,13 +53,11 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await api.post("/refresh"); // Cookie يُرسل تلقائيًا
+        await api.post("/refresh");
         processQueue();
         return api(originalRequest);
       } catch (err) {
         processQueue(err);
-
-        // ⛔ لا Redirect هنا — AuthContext سيتكفّل
         return Promise.reject(err);
       } finally {
         isRefreshing = false;
