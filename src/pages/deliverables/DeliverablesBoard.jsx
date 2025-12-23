@@ -112,28 +112,30 @@ const DeliverablesBoard = () => {
   }, [filteredItems]);
 
   /* ================= RATE ================= */
-  const handleRate = async (task, value) => {
-    if (!isAdminOrManager) return;
+ const handleRate = async (task, value) => {
+  if (!isAdminOrManager) return;
 
-    const newRating = task.rating === value ? value - 1 : value;
+  const newRating = task.rating === value ? value - 1 : value;
 
-    try {
-      await api.post(
-        `/deliverables/${task.deliverableId}/rate`,
-        { rating: newRating }
-      );
+  try {
+    await api.post(
+      `/deliverables/${task.deliverableId}/rate`,
+      { rating: newRating }
+    );
 
-      setItems(prev =>
-        prev.map(i =>
-          i._id === task.deliverableId
-            ? { ...i, rating: newRating }
-            : i
-        )
-      );
-    } catch (err) {
-      console.error("Rating failed", err);
-    }
-  };
+    // ✅ تحديث كل Deliverables الخاصة بنفس التاسك
+    setItems(prev =>
+      prev.map(i =>
+        i.taskId === task.taskId
+          ? { ...i, rating: newRating }
+          : i
+      )
+    );
+  } catch (err) {
+    console.error("Rating failed", err);
+  }
+};
+
 
   /* ================= HELPERS ================= */
   const getFileType = file => {
