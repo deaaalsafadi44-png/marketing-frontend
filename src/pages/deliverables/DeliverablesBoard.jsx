@@ -21,12 +21,13 @@ const DeliverablesBoard = () => {
   const location = useLocation();
 
   /* ================= LOAD USER ================= */
-  useEffect(() => {
-    api
-      .get("/auth/me")
-      .then((res) => setCurrentUser(res.data?.user))
-      .catch(() => setCurrentUser(null));
-  }, []);
+useEffect(() => {
+  api
+    .get("/auth/me", { withCredentials: true })
+    .then(res => setCurrentUser(res.data?.user))
+    .catch(() => setCurrentUser(null));
+}, []);
+
 
   const isAdminOrManager =
     currentUser?.role === "admin" || currentUser?.role === "manager";
