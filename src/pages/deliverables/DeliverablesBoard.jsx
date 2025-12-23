@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import api from "../../services/apiClient";
 import "./deliverables.css";
@@ -62,29 +62,7 @@ const DeliverablesBoard = () => {
     if (items.length) loadTitles();
   }, [items, taskTitles]);
 
-  useEffect(() => {
-    if (!selectedItem?.taskId) return;
-
-    const loadTaskDetails = async () => {
-      try {
-        setTaskLoading(true);
-        const res = await api.get(`/tasks/${selectedItem.taskId}`);
-        setTaskDetails(res.data);
-      } catch (err) {
-        console.error("Failed to load task details:", err);
-        setTaskDetails(null);
-      } finally {
-        setTaskLoading(false);
-      }
-    };
-
-    loadTaskDetails();
-  }, [selectedItem]);
-
-  if (loading) {
-    return <div className="deliverables-loading">Loading submissions...</div>;
-  }
-
+  /* ================= FILTER ================= */
   const filteredItems = items.filter((item) => {
     const itemDate = item.createdAt ? new Date(item.createdAt) : null;
     if (fromDate && itemDate < new Date(fromDate)) return false;
@@ -97,7 +75,34 @@ const DeliverablesBoard = () => {
     return true;
   });
 
-  // ✅ Helper لتحديد نوع الملف (بدون تغيير منطقك)
+  /* ================= GROUP BY TASK ================= */
+  const groupedItems = useMemo(() => {
+    const map = {};
+
+    filteredItems.forEach((item) => {
+      if (!map[item.taskId]) {
+        map[item.taskId] = {
+          taskId: item.taskId,
+          submittedByName: item.submittedByName,
+          createdAt: item.createdAt,
+          files: [],
+          notes: [],
+        };
+      }
+
+      if (item.files?.length) {
+        map[item.taskId].files.push(...item.files);
+      }
+
+      if (item.notes) {
+        map[item.taskId].notes.push(item.notes);
+      }
+    });
+
+    return Object.values(map);
+  }, [filteredItems]);
+
+  /* ================= HELPERS ================= */
   const getFileType = (file) => {
     if (file.resource_type) return file.resource_type;
     if (file.mimeType?.startsWith("image/")) return "image";
@@ -105,7 +110,6 @@ const DeliverablesBoard = () => {
     return "raw";
   };
 
-  // ✅ Helper لإصلاح أسماء الملفات العربية
   const decodeFileName = (name) => {
     try {
       return decodeURIComponent(escape(name));
@@ -113,6 +117,10 @@ const DeliverablesBoard = () => {
       return name;
     }
   };
+
+  if (loading) {
+    return <div className="deliverables-loading">Loading submissions...</div>;
+  }
 
   return (
     <>
@@ -134,94 +142,60 @@ const DeliverablesBoard = () => {
         </div>
 
         <div className="deliverables-feed">
-          {filteredItems.map((item) => (
+          {groupedItems.map((task) => (
             <div
-              key={item._id}
+              key={task.taskId}
               className="submission-card"
-              onClick={() => {
-                setSelectedItem(item);
-                setTaskDetails(null);
-              }}
+              onClick={() => setSelectedItem(task)}
             >
               <h4 className="submission-task-title">
-                {taskTitles[item.taskId] || `Task #${item.taskId}`}
+                {taskTitles[task.taskId] || `Task #${task.taskId}`}
               </h4>
 
               <div className="submission-header">
                 <div className="avatar">
-                  {item.submittedByName?.charAt(0)?.toUpperCase() || "U"}
+                  {task.submittedByName?.charAt(0)?.toUpperCase() || "U"}
                 </div>
 
                 <div className="user-info">
-                  <strong>{item.submittedByName || "Unknown"}</strong>
-                  <span>submitted this task</span>
+                  <strong>{task.submittedByName}</strong>
+                  <span>completed this task</span>
                 </div>
 
                 <div className="date">
-                  {item.createdAt
-                    ? new Date(item.createdAt).toLocaleDateString()
+                  {task.createdAt
+                    ? new Date(task.createdAt).toLocaleDateString()
                     : "—"}
                 </div>
               </div>
 
-              {item.notes && (
-                <div className="submission-notes">{item.notes}</div>
-              )}
+              <div className="task-files-grid">
+                {task.files.map((file, i) => {
+                  const type = getFileType(file);
+                  return (
+                    <div
+                      key={i}
+                      className="task-file-card"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedFile(file);
+                      }}
+                    >
+                      {type === "image" && <img src={file.url} alt="" />}
+                      {type === "video" && <video src={file.url} muted />}
+                      {type === "raw" && (
+                        <div className="file-generic">
+                          📎 {decodeFileName(file.originalName)}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </div>
       </div>
-
-      {/* TASK DETAILS MODAL */}
-      {selectedItem && (
-        <div className="file-modal-overlay" onClick={() => setSelectedItem(null)}>
-          <div className="task-details-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="close-modal" onClick={() => setSelectedItem(null)}>
-              ✖
-            </button>
-
-            <h2>{taskDetails?.title || `Task #${selectedItem.taskId}`}</h2>
-
-            <p className="task-meta-line">
-              Submitted by <strong>{selectedItem.submittedByName}</strong> •{" "}
-              {new Date(selectedItem.createdAt).toLocaleString()}
-            </p>
-
-            <div className="task-files-section">
-              <h4>Attachments</h4>
-
-              {selectedItem.files?.length ? (
-                <div className="task-files-grid">
-                  {selectedItem.files.map((file, i) => {
-                    const type = getFileType(file);
-
-                    return (
-                      <div
-                        key={i}
-                        className="task-file-card"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedFile(file);
-                        }}
-                      >
-                        {type === "image" && <img src={file.url} alt="" />}
-                        {type === "video" && <video src={file.url} muted />}
-                        {type === "raw" && (
-                          <div className="file-generic">
-                            📎 {decodeFileName(file.originalName)}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <span className="no-files">No files attached</span>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* FILE PREVIEW MODAL */}
       {selectedFile && (
@@ -233,39 +207,12 @@ const DeliverablesBoard = () => {
 
             <h3>{decodeFileName(selectedFile.originalName)}</h3>
 
-            {getFileType(selectedFile) === "raw" && selectedFile.format === "pdf" && (
-  <iframe
-    src={`${selectedFile.url}?fl_inline`}
-    title={selectedFile.originalName}
-    style={{ width: "100%", height: "80vh", border: "none" }}
-  />
-)}
-
-
             {getFileType(selectedFile) === "video" && (
-              <video
-                src={selectedFile.url}
-                controls
-                autoPlay
-                style={{ maxWidth: "100%", maxHeight: "80vh" }}
-              />
+              <video src={selectedFile.url} controls autoPlay />
             )}
 
-            {getFileType(selectedFile) === "raw" && selectedFile.format === "pdf" && (
-              <iframe
-                src={selectedFile.url}
-                title={selectedFile.originalName}
-                style={{ width: "100%", height: "80vh", border: "none" }}
-              />
-            )}
-
-            {getFileType(selectedFile) === "raw" && selectedFile.format !== "pdf" && (
-              <a
-                href={selectedFile.url}
-                target="_blank"
-                rel="noreferrer"
-                className="download-link"
-              >
+            {getFileType(selectedFile) === "raw" && (
+              <a href={selectedFile.url} target="_blank" rel="noreferrer">
                 Download file
               </a>
             )}
