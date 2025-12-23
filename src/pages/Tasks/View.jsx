@@ -21,6 +21,10 @@ const ViewTask = () => {
   const [deliverables, setDeliverables] = useState([]);
   const [uploadAttempted, setUploadAttempted] = useState(false);
 
+  // ✅ NEW STATES (عرض فقط)
+  const [previewFile, setPreviewFile] = useState(null);
+  const [showAllAttachments, setShowAllAttachments] = useState(false);
+
   /* ================= LOAD TASK ================= */
   useEffect(() => {
     if (!id || isNaN(Number(id))) {
@@ -155,19 +159,6 @@ const ViewTask = () => {
     }
   };
 
-  /* ================= HELPERS ================= */
-  const formatTime = () => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${h.toString().padStart(2, "0")}:${m
-      .toString()
-      .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  };
-
-  const formatStoredTime = (min) =>
-    !min || min <= 0 ? "—" : `${Math.floor(min / 60)}h ${min % 60}m`;
-
   /* ================= RENDER ================= */
   if (loading) return <div className="loading">Loading...</div>;
   if (notFound)
@@ -192,22 +183,17 @@ const ViewTask = () => {
 
         {/* ===== TIMER PANEL ===== */}
         <div className="timer-box">
-          <div className="timer-time">{formatTime()}</div>
+          <div className="timer-time">
+            {`${String(Math.floor(seconds / 3600)).padStart(2,"0")}:${String(Math.floor((seconds%3600)/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}`}
+          </div>
 
           <div className="timer-actions">
             {!isRunning ? (
-              <button className="timer-btn start" onClick={startTimer}>
-                ▶ Start
-              </button>
+              <button className="timer-btn start" onClick={startTimer}>▶ Start</button>
             ) : (
-              <button className="timer-btn pause" onClick={pauseTimer}>
-                ⏸ Pause
-              </button>
+              <button className="timer-btn pause" onClick={pauseTimer}>⏸ Pause</button>
             )}
-
-            <button className="timer-btn finish" onClick={finishTask}>
-              ✔ Finish
-            </button>
+            <button className="timer-btn finish" onClick={finishTask}>✔ Finish</button>
           </div>
 
           <div className="upload-section">
@@ -217,76 +203,34 @@ const ViewTask = () => {
             </label>
 
             <span className="upload-info">
-              {selectedFiles.length > 0
-                ? `${selectedFiles.length} file(s) selected`
-                : "No files selected"}
+              {selectedFiles.length ? `${selectedFiles.length} file(s) selected` : "No files selected"}
             </span>
 
-            <button
-              className="timer-btn upload-btn"
-              onClick={uploadDeliverables}
-              disabled={uploading}
-            >
+            <button className="timer-btn upload-btn" onClick={uploadDeliverables} disabled={uploading}>
               📤 رفع مخرجات المهمة
             </button>
           </div>
 
-          {uploadAttempted &&
-            deliverables.length > 0 &&
-            deliverables.every(d => !d.files || d.files.length === 0) && (
-              <p style={{ color: "#dc2626", marginTop: "10px" }}>
-                ⚠️ تم إنشاء مخرجات لهذه المهمة، لكن لا توجد ملفات مرفوعة
-              </p>
-            )}
-
-          {/* ===== الروابط القديمة (بقيت كما هي) ===== */}
-          {deliverables.flatMap((d, i) =>
+          {/* ❌ تعطيل العرض القديم فقط */}
+          {false && deliverables.flatMap((d, i) =>
             d.files.map((file, idx) => (
-              <a
-                key={`${i}-${idx}`}
-                href={file.url}
-                target="_blank"
-                rel="noreferrer"
-                className="deliverable-link"
-              >
-                📎 {file.originalName}
-              </a>
+              <a key={`${i}-${idx}`} href={file.url}>{file.originalName}</a>
             ))
           )}
         </div>
 
         {/* ===== INFO GRID ===== */}
         <div className="info-grid">
-
-          <div className="info-item">
-            <h3>Company</h3>
-            <p>{task?.company || "—"}</p>
-          </div>
-
-          <div className="info-item">
-            <h3>Task Type</h3>
-            <p>{task?.type || "—"}</p>
-          </div>
-
-          <div className="info-item">
-            <h3>Assigned To</h3>
-            <p>{task?.workerName || "—"}</p>
-          </div>
-
-          <div className="info-item">
-            <h3>Created At</h3>
-            <p>{task?.createdAt ? new Date(task.createdAt).toLocaleString() : "—"}</p>
-          </div>
-
-          {/* ===== NEW ATTACHMENTS UI ===== */}
           <div className="info-item">
             <h3>Attachments</h3>
 
             <div className="attachments-box">
               {visibleFiles.map((file, i) => (
-                <div className="attachment-card" key={i}>
-                  <span className="remove-attachment">✖</span>
-
+                <div
+                  key={i}
+                  className="attachment-card"
+                  onClick={() => setPreviewFile(file)}
+                >
                   {file.mimeType?.startsWith("image/") ? (
                     <img src={file.url} alt="" />
                   ) : file.mimeType?.startsWith("video/") ? (
@@ -298,45 +242,68 @@ const ViewTask = () => {
               ))}
 
               {remainingCount > 0 && (
-                <div className="attachment-card more">
+                <div
+                  className="attachment-card more"
+                  onClick={() => setShowAllAttachments(true)}
+                >
                   +{remainingCount}
                 </div>
               )}
-
-              {allFiles.length === 0 && (
-                <span className="no-attachments">No attachments</span>
-              )}
             </div>
           </div>
-
-          <div className="info-item">
-            <h3>Time Spent</h3>
-            <p>{formatStoredTime(task?.timeSpent)}</p>
-          </div>
-        </div>
-
-        {/* ===== DESCRIPTION ===== */}
-        <div className="desc-section">
-          <h2>Description</h2>
-          <div
-            className="desc-box"
-            dangerouslySetInnerHTML={{
-              __html: task?.description || "<i>No description</i>",
-            }}
-          />
-        </div>
-
-        {/* ===== ACTIONS ===== */}
-        <div className="actions-row">
-          <Link to={`/tasks/edit/${id}`} className="btn-edit">
-            ✏ Edit Task
-          </Link>
-          <Link to="/tasks" className="btn-back">
-            ← Back to Tasks
-          </Link>
         </div>
 
       </div>
+
+      {/* ===== PREVIEW MODAL ===== */}
+      {previewFile && (
+        <div className="file-modal-overlay" onClick={() => setPreviewFile(null)}>
+          <div className="file-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="close-modal" onClick={() => setPreviewFile(null)}>✖</button>
+
+            {previewFile.mimeType?.startsWith("image/") && (
+              <img src={previewFile.url} alt="" style={{ maxWidth: "100%" }} />
+            )}
+
+            {previewFile.mimeType?.startsWith("video/") && (
+              <video src={previewFile.url} controls style={{ maxWidth: "100%" }} />
+            )}
+
+            {!previewFile.mimeType?.startsWith("image/") &&
+              !previewFile.mimeType?.startsWith("video/") && (
+                <a href={previewFile.url} target="_blank" rel="noreferrer">
+                  Download file
+                </a>
+              )}
+          </div>
+        </div>
+      )}
+
+      {/* ===== ALL ATTACHMENTS MODAL ===== */}
+      {showAllAttachments && (
+        <div className="file-modal-overlay" onClick={() => setShowAllAttachments(false)}>
+          <div className="file-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="close-modal" onClick={() => setShowAllAttachments(false)}>✖</button>
+
+            <div className="task-files-grid">
+              {allFiles.map((file, i) => (
+                <div
+                  key={i}
+                  className="task-file-card"
+                  onClick={() => setPreviewFile(file)}
+                >
+                  {file.mimeType?.startsWith("image/") && <img src={file.url} alt="" />}
+                  {file.mimeType?.startsWith("video/") && <video src={file.url} />}
+                  {!file.mimeType?.startsWith("image/") &&
+                    !file.mimeType?.startsWith("video/") && (
+                      <div className="file-generic">📎 {file.originalName}</div>
+                    )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
