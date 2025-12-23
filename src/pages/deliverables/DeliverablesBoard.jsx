@@ -233,13 +233,14 @@ const DeliverablesBoard = () => {
 
             <h3>{decodeFileName(selectedFile.originalName)}</h3>
 
-            {getFileType(selectedFile) === "image" && (
-              <img
-                src={selectedFile.url}
-                alt={selectedFile.originalName}
-                style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain" }}
-              />
-            )}
+            {getFileType(selectedFile) === "raw" && selectedFile.format === "pdf" && (
+  <iframe
+    src={`${selectedFile.url}?fl_inline`}
+    title={selectedFile.originalName}
+    style={{ width: "100%", height: "80vh", border: "none" }}
+  />
+)}
+
 
             {getFileType(selectedFile) === "video" && (
               <video
