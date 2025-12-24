@@ -1,33 +1,35 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import Login from "./pages/Login/Login";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import TasksList from "./pages/Tasks/TasksList";
 import AddTask from "./pages/Tasks/AddTask";
 import Users from "./pages/Users/Users";
 import DeliverablesBoard from "./pages/deliverables/DeliverablesBoard";
+
 import PrivateRoute from "./components/PrivateRoute";
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* صفحة تسجيل الدخول */}
+        {/* 1. صفحة تسجيل الدخول */}
         <Route path="/login" element={<Login />} />
 
-        {/* ✅ الحل: جعل "/" هو المسار الرئيسي للداشبورد ليتوافق مع Navbar */}
+        {/* 2. الداشبورد (الهوم)
+           ✅ التعديل: جعلنا المسار "/" هو الأساسي ليتوافق مع NavLink to="/" في النافبار
+           ✅ التعديل: تمرير المصفوفة بشكل صريح لضمان وصولها للـ PrivateRoute
+        */}
         <Route
           path="/"
           element={
-            <PrivateRoute roles={["Admin", "Manager", "admin", "manager"]}> 
+            <PrivateRoute roles={["Admin", "Manager", "admin", "manager"]}>
               <Dashboard />
             </PrivateRoute>
           }
         />
 
-        {/* توجيه احتياطي: أي شخص يدخل /dashboard يدوياً يذهب إلى "/" */}
-        <Route path="/dashboard" element={<Navigate to="/" replace />} />
-
-        {/* المهام متاحة للجميع */}
+        {/* 3. المهام */}
         <Route
           path="/tasks"
           element={
@@ -37,7 +39,7 @@ const App = () => {
           }
         />
 
-        {/* إضافة مهمة (أدمن ومانجر) */}
+        {/* 4. إضافة مهمة */}
         <Route
           path="/tasks/add"
           element={
@@ -47,7 +49,7 @@ const App = () => {
           }
         />
 
-        {/* المستخدمين (أدمن فقط) */}
+        {/* 5. المستخدمين (أدمن فقط) */}
         <Route
           path="/users"
           element={
@@ -57,6 +59,7 @@ const App = () => {
           }
         />
 
+        {/* 6. التسليمات */}
         <Route
           path="/submissions"
           element={
@@ -66,8 +69,9 @@ const App = () => {
           }
         />
 
-        {/* في حال المسار غير موجود */}
+        {/* ✅ أي مسار غير معروف يوجهه للهوم (الداشبورد للمديرين) */}
         <Route path="*" element={<Navigate to="/" replace />} />
+        
       </Routes>
     </BrowserRouter>
   );
