@@ -10,7 +10,7 @@ const DeliverablesBoard = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  // حالة تشمل تفاصيل المهمة كاملة (العنوان، الحالة، الوقت، واسم الشركة)
+  // حالة تشمل تفاصيل المهمة (العنوان، الحالة، الوقت، والشركة)
   const [tasksData, setTasksData] = useState({});
 
   const [fromDate, setFromDate] = useState("");
@@ -74,18 +74,19 @@ const DeliverablesBoard = () => {
       for (const id of missingIds) {
         try {
           const res = await api.get(`/tasks/${id}`);
+          // تعديل هنا ليقرأ 'company' بدلاً من 'companyName' بناءً على الـ Schema
           newDetails[id] = {
             title: res.data?.title || `Task #${id}`,
             status: res.data?.status || "Unknown",
             timeSpent: res.data?.timeSpent || 0,
-            companyName: res.data?.companyName || "No Company" // إضافة جلب اسم الشركة
+            company: res.data?.company || "No Company" 
           };
         } catch {
           newDetails[id] = { 
             title: `Task #${id}`, 
             status: "Error", 
             timeSpent: 0,
-            companyName: "Error"
+            company: "Error"
           };
         }
       }
@@ -96,10 +97,11 @@ const DeliverablesBoard = () => {
     if (items.length) loadDetails();
   }, [items, tasksData]);
 
-  /* ================= FILTER LOGIC (Updated) ================= */
+  /* ================= FILTER LOGIC ================= */
   const filteredItems = items.filter((item) => {
-    // فلتر التاريخ
     const itemDate = item.createdAt ? new Date(item.createdAt) : null;
+    
+    // فلتر التاريخ
     if (itemDate) {
       if (fromDate && itemDate < new Date(fromDate)) return false;
       if (toDate && itemDate > new Date(toDate + "T23:59:59")) return false;
@@ -208,7 +210,7 @@ const DeliverablesBoard = () => {
         <div className="deliverables-feed-header">
           <h1>Task Submissions</h1>
           <p>Live activity from your team</p>
-          
+
           {/* ================= 🆕 FILTER BAR ================= */}
           <div className="feed-filters-bar">
             <div className="filter-group">
@@ -236,7 +238,7 @@ const DeliverablesBoard = () => {
                 onChange={(e) => setToDate(e.target.value)}
               />
             </div>
-            <button className="reset-filters" onClick={() => {setSearchName(""); setFromDate(""); setToDate("");}}>
+            <button className="reset-filters" onClick={() => { setSearchName(""); setFromDate(""); setToDate(""); }}>
               Reset
             </button>
           </div>
@@ -252,8 +254,8 @@ const DeliverablesBoard = () => {
                     <h4 className="submission-task-title">
                       {detail.title || `Task #${task.taskId}`}
                     </h4>
-                    {/* 🆕 إضافة اسم الشركة */}
-                    <span className="company-badge">🏢 {detail.companyName}</span>
+                    {/* 🆕 عرض اسم الشركة بشكل صحيح */}
+                    <span className="company-badge">🏢 {detail.company}</span>
                   </div>
                   
                   <div className="task-info-badges">
