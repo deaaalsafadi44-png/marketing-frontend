@@ -60,29 +60,22 @@ const Dashboard = () => {
       📊 منطق الحساب الديناميكي (Dynamic Logic)
      ============================================= */
   
-  const total = tasks.length;
+  // دالة مساعدة لحساب العدد بناءً على مسمى الحالة (تتجاهل الفراغات وحالة الأحرف)
+  const getCountByStatus = (statusName) => {
+    return tasks.filter((t) => {
+      const s = t.status?.toLowerCase().trim() || "";
+      return s === statusName.toLowerCase().trim();
+    }).length;
+  };
 
-  // دالة تصنيف المهام بناءً على الحالة بشكل مرن
-  const stats = tasks.reduce((acc, task) => {
-    const s = task.status?.toLowerCase().trim() || "";
-
-    // 1. تصنيف "قيد التنفيذ"
-    if (["in progress", "accepted", "accebted", "active"].includes(s)) {
-      acc.inProgress++;
-    } 
-    // 2. تصنيف "المكتمل"
-    else if (["approved", "completed", "done", "finished"].includes(s)) {
-      acc.done++;
-    } 
-    // 3. أي حالة أخرى تعتبر "معلقة أو جديدة"
-    else {
-      acc.pending++;
-    }
-    return acc;
-  }, { inProgress: 0, done: 0, pending: 0 });
-
-  // استخراج القيم للرسم البياني والكروت
-  const { inProgress, done, pending } = stats;
+  // ربط الكروت ديناميكياً مع الحالات المحددة
+  const stats = {
+    new: getCountByStatus("New"),
+    accepted: getCountByStatus("Accepted") + getCountByStatus("Accebted"), // دمج لتجنب أخطاء الكتابة
+    inProgress: getCountByStatus("In progress"),
+    underReview: getCountByStatus("Under review"),
+    approved: getCountByStatus("Approved")
+  };
 
   /* =============================================
       📈 تجهيز بيانات الرسوم البيانية
@@ -159,12 +152,13 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <h1 className="dashboard-title">لوحة القيادة الرئيسية (Dashboard)</h1>
 
-      {/* الكروت العلوية - أصبحت الآن مرتبطة بالـ state الديناميكي */}
-      <div className="stats-row">
-        <StatCard title="Total Tasks" value={total} border="black" />
-        <StatCard title="In Progress" value={inProgress} border="gold" />
-        <StatCard title="Completed" value={done} border="green" />
-        <StatCard title="Pending / New" value={pending} border="red" />
+      {/* الكروت العلوية - تم تعديل الأسماء والربط لتكون ديناميكية تماماً */}
+      <div className="stats-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px' }}>
+        <StatCard title="New" value={stats.new} border="blue" />
+        <StatCard title="Accepted" value={stats.accepted} border="orange" />
+        <StatCard title="In Progress" value={stats.inProgress} border="gold" />
+        <StatCard title="Under Review" value={stats.underReview} border="purple" />
+        <StatCard title="Approved" value={stats.approved} border="green" />
       </div>
 
       <div className="charts-row">
