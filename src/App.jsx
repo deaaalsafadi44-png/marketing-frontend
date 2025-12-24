@@ -1,5 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"; // أضفنا Navigate للتحويل
-
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login/Login";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import TasksList from "./pages/Tasks/TasksList";
@@ -15,9 +14,7 @@ const App = () => {
         {/* صفحة تسجيل الدخول */}
         <Route path="/login" element={<Login />} />
 
-        {/* ✅ تعديل المسار ليتوافق مع Navbar 
-           إذا كان النافبار يوجه إلى "/" فاجعل الداشبورد هي الصفحة الرئيسية
-        */}
+        {/* ✅ الحل: جعل "/" هو المسار الرئيسي للداشبورد ليتوافق مع Navbar */}
         <Route
           path="/"
           element={
@@ -27,10 +24,10 @@ const App = () => {
           }
         />
 
-        {/* للاحتياط إذا دخل المستخدم على /dashboard يدوياً */}
+        {/* توجيه احتياطي: أي شخص يدخل /dashboard يدوياً يذهب إلى "/" */}
         <Route path="/dashboard" element={<Navigate to="/" replace />} />
 
-        {/* Tasks */}
+        {/* المهام متاحة للجميع */}
         <Route
           path="/tasks"
           element={
@@ -40,7 +37,7 @@ const App = () => {
           }
         />
 
-        {/* Add Task */}
+        {/* إضافة مهمة (أدمن ومانجر) */}
         <Route
           path="/tasks/add"
           element={
@@ -50,7 +47,7 @@ const App = () => {
           }
         />
 
-        {/* Users - للأدمن فقط */}
+        {/* المستخدمين (أدمن فقط) */}
         <Route
           path="/users"
           element={
@@ -60,7 +57,6 @@ const App = () => {
           }
         />
 
-        {/* Submissions */}
         <Route
           path="/submissions"
           element={
@@ -69,9 +65,9 @@ const App = () => {
             </PrivateRoute>
           }
         />
-        
-        {/* صفحة 404 أو غير مصرح به */}
-        <Route path="/unauthorized" element={<h1>Unauthorized Access</h1>} />
+
+        {/* في حال المسار غير موجود */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
