@@ -10,7 +10,7 @@ const DeliverablesBoard = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  // تم تغيير اسم الحالة لتشمل تفاصيل المهمة كاملة (العنوان، الحالة، الوقت)
+  // حالة تشمل تفاصيل المهمة كاملة (العنوان، الحالة، الوقت، واسم الشركة)
   const [tasksData, setTasksData] = useState({});
 
   const [fromDate, setFromDate] = useState("");
@@ -60,7 +60,7 @@ const DeliverablesBoard = () => {
     loadDeliverables();
   }, [location.pathname]);
 
-  /* ================= LOAD TASK DETAILS (Title, Status, Time) ================= */
+  /* ================= LOAD TASK DETAILS (Title, Status, Time, Company) ================= */
   useEffect(() => {
     const loadDetails = async () => {
       const missingIds = items
@@ -77,13 +77,15 @@ const DeliverablesBoard = () => {
           newDetails[id] = {
             title: res.data?.title || `Task #${id}`,
             status: res.data?.status || "Unknown",
-            timeSpent: res.data?.timeSpent || 0
+            timeSpent: res.data?.timeSpent || 0,
+            companyName: res.data?.companyName || "No Company" // إضافة جلب اسم الشركة
           };
         } catch {
           newDetails[id] = { 
             title: `Task #${id}`, 
             status: "Error", 
-            timeSpent: 0 
+            timeSpent: 0,
+            companyName: "Error"
           };
         }
       }
@@ -94,16 +96,22 @@ const DeliverablesBoard = () => {
     if (items.length) loadDetails();
   }, [items, tasksData]);
 
-  /* ================= FILTER ================= */
+  /* ================= FILTER LOGIC (Updated) ================= */
   const filteredItems = items.filter((item) => {
+    // فلتر التاريخ
     const itemDate = item.createdAt ? new Date(item.createdAt) : null;
-    if (fromDate && itemDate < new Date(fromDate)) return false;
-    if (toDate && itemDate > new Date(toDate + "T23:59:59")) return false;
+    if (itemDate) {
+      if (fromDate && itemDate < new Date(fromDate)) return false;
+      if (toDate && itemDate > new Date(toDate + "T23:59:59")) return false;
+    }
+
+    // فلتر اسم صاحب التاسك
     if (
       searchName &&
       !item.submittedByName?.toLowerCase().includes(searchName.toLowerCase())
-    )
+    ) {
       return false;
+    }
     return true;
   });
 
@@ -160,12 +168,11 @@ const DeliverablesBoard = () => {
     }
   };
 
-  /* ================= HELPERS (SOLVED) ================= */
+  /* ================= HELPERS ================= */
   const getFileType = (file) => {
     const url = file.url?.toLowerCase() || "";
     const name = file.originalName?.toLowerCase() || "";
     
-    // التحقق الصارم من ملفات PDF
     if (url.endsWith(".pdf") || name.endsWith(".pdf") || file.mimeType === "application/pdf") {
       return "pdf";
     }
@@ -201,6 +208,38 @@ const DeliverablesBoard = () => {
         <div className="deliverables-feed-header">
           <h1>Task Submissions</h1>
           <p>Live activity from your team</p>
+          
+          {/* ================= 🆕 FILTER BAR ================= */}
+          <div className="feed-filters-bar">
+            <div className="filter-group">
+              <label>Owner Name</label>
+              <input 
+                type="text" 
+                placeholder="Search by name..." 
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+              />
+            </div>
+            <div className="filter-group">
+              <label>From Date</label>
+              <input 
+                type="date" 
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+              />
+            </div>
+            <div className="filter-group">
+              <label>To Date</label>
+              <input 
+                type="date" 
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+              />
+            </div>
+            <button className="reset-filters" onClick={() => {setSearchName(""); setFromDate(""); setToDate("");}}>
+              Reset
+            </button>
+          </div>
         </div>
 
         <div className="deliverables-feed">
@@ -208,11 +247,15 @@ const DeliverablesBoard = () => {
             const detail = tasksData[task.taskId] || {};
             return (
               <div key={task.taskId} className="submission-card">
-                {/* الجزء المحدث لإظهار العنوان والحالة والوقت */}
                 <div className="submission-card-top-header">
-                  <h4 className="submission-task-title">
-                    {detail.title || `Task #${task.taskId}`}
-                  </h4>
+                  <div className="title-section">
+                    <h4 className="submission-task-title">
+                      {detail.title || `Task #${task.taskId}`}
+                    </h4>
+                    {/* 🆕 إضافة اسم الشركة */}
+                    <span className="company-badge">🏢 {detail.companyName}</span>
+                  </div>
+                  
                   <div className="task-info-badges">
                     <span className={`status-badge ${detail.status?.toLowerCase()}`}>
                       {detail.status}
@@ -295,7 +338,7 @@ const DeliverablesBoard = () => {
         </div>
       </div>
 
-      {/* ================= FILE MODAL (FOR IMAGES/VIDEOS ONLY) ================= */}
+      {/* ================= FILE MODAL ================= */}
       {selectedFile && getFileType(selectedFile) !== "pdf" && (
         <div
           className="file-modal-overlay"
