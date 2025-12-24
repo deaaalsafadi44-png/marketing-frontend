@@ -9,6 +9,20 @@ import "./tasks.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
+/* =============================================
+    🛠️ دالة جلب الشعار (تعريفها قبل المكون)
+   ============================================= */
+const getCompanyLogo = (companyName) => {
+  const name = companyName?.toLowerCase().trim();
+  // تأكد أن هذه الملفات موجودة في مجلد public مباشرة
+  if (name === "laffah") return "/laffah.png"; 
+  if (name === "syrian united co") return "/logos/syrian_united.png";
+  if (name === "healthy family") return "/logos/healthy_family.png";
+  
+  // شعار افتراضي في حال لم يتطابق الاسم
+  return "/laffah.png"; 
+};
+
 const TasksList = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -18,15 +32,6 @@ const TasksList = () => {
   const [loading, setLoading] = useState(true);
   const [statusOptions, setStatusOptions] = useState([]);
 
-  const formatMinutes = (minutes) => {
-    if (!minutes || minutes <= 0) return "—";
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    if (h > 0 && m > 0) return `${h}h ${m}m`;
-    if (h > 0) return `${h}h`;
-    return `${m}m`;
-  };
-
   const safeLower = (val) => String(val || "").toLowerCase();
   const safeDate = (val) => {
     const d = new Date(val);
@@ -34,12 +39,13 @@ const TasksList = () => {
   };
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case "New": return "#2196f3";
-      case "Accepted": return "#9c27b0";
-      case "In Progress": return "#fbc02d";
-      case "Under Review": return "#ff9800";
-      case "Approved": return "#4caf50";
+    const s = status?.toLowerCase().trim();
+    switch (s) {
+      case "new": return "#2196f3";
+      case "accepted": case "accebted": return "#9c27b0";
+      case "in progress": return "#fbc02d";
+      case "under review": return "#ff9800";
+      case "approved": return "#4caf50";
       default: return "#555";
     }
   };
@@ -78,9 +84,7 @@ const TasksList = () => {
   const handleStatusChange = async (taskId, newStatus) => {
     const task = tasks.find((t) => t.id === taskId);
     if (!task) return;
-    
     try {
-      // نرسل التعديل للسيرفر
       await updateTaskApi(taskId, { ...task, status: newStatus });
       loadTasks();
     } catch (err) {
@@ -106,7 +110,7 @@ const TasksList = () => {
     );
   });
 
-  if (authLoading || loading) return <h2>Loading...</h2>;
+  if (authLoading || loading) return <h2 style={{textAlign:'center', marginTop:'50px'}}>Loading...</h2>;
   if (!user) return null;
 
   return (
@@ -116,8 +120,8 @@ const TasksList = () => {
       </h1>
 
       <div className="filters-row">
-        <select onChange={(e) => setCompanyFilter(e.target.value)}>
-          <option value="">Company</option>
+        <select value={companyFilter} onChange={(e) => setCompanyFilter(e.target.value)}>
+          <option value="">All Companies</option>
           {[...new Set(tasks.map((t) => t.company).filter(Boolean))].map(
             (company, i) => (
               <option key={i} value={company}>{company}</option>
@@ -128,8 +132,8 @@ const TasksList = () => {
         <input type="date" onChange={(e) => setDateFrom(e.target.value)} />
         <input type="date" onChange={(e) => setDateTo(e.target.value)} />
 
-        <select onChange={(e) => setStatusFilter(e.target.value)}>
-          <option value="">Status</option>
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <option value="">All Status</option>
           {statusOptions.map((s, i) => (
             <option key={i} value={s}>{s}</option>
           ))}
@@ -164,27 +168,40 @@ const TasksList = () => {
 
         <tbody>
           {filteredTasks.map((task) => {
-            // ✅ فحص الصلاحية: هل هو أدمن/مانجر؟ أم هل هو الموظف المسند إليه التاسك؟
-            // ملاحظة: تأكد أن السيرفر يرسل workerId أو استبدلها بـ task.workerName === user.name
             const canChangeStatus = 
               user.role === "Admin" || 
               user.role === "Manager" || 
-              task.workerId === user.id || 
-              task.workerName === user.username; // حسب البيانات المتاحة لديك
+              task.workerName === user.username;
 
             return (
               <tr key={task.id}>
                 <td>{task.id}</td>
-                {/* لا تنسَ استيراد الدالة في أعلى الملف: import { getCompanyLogo } from "../../utils/companyHelper"; */}
+                
+                {/* ✅ عرض الشركة مع اللوغو الدائري الصغير */}
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                        width: '30px',
+                        height: '30px',
+                        borderRadius: '50%',
+                        border: '1px solid #ddd',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: '#fff',
+                        flexShrink: 0
+                    }}>
+                        <img 
+                          src={getCompanyLogo(task.company)} 
+                          alt="logo" 
+                          style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                        />
+                    </div>
+                    <span style={{fontWeight:'500'}}>{task.company}</span>
+                  </div>
+                </td>
 
-<td style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-  <img 
-    src={getCompanyLogo(task.company)} 
-    alt="logo" 
-    style={{ width: '25px', height: '25px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #ddd' }} 
-  />
-  <span>{task.company}</span>
-</td>
                 <td>{task.type || "—"}</td>
                 <td>{task.workerName || "—"}</td>
 
@@ -197,37 +214,31 @@ const TasksList = () => {
                 <td>
                   <select
                     value={task.status || ""}
-                    // ✅ إذا لم يكن لديه صلاحية، يتم تعطيل الاختيار
                     disabled={!canChangeStatus}
                     onChange={(e) => handleStatusChange(task.id, e.target.value)}
                     style={{
                       backgroundColor: getStatusColor(task.status),
                       color: "#fff",
+                      padding: '5px 10px',
+                      borderRadius: '5px',
+                      border: 'none',
                       cursor: canChangeStatus ? "pointer" : "not-allowed",
-                      opacity: canChangeStatus ? 1 : 0.7
                     }}
                   >
                     {statusOptions.map((s, i) => (
-                      <option key={i} value={s}>{s}</option>
+                      <option key={i} value={s} style={{backgroundColor:'#fff', color:'#000'}}>{s}</option>
                     ))}
                   </select>
                 </td>
 
                 <td>
-                  <Link to={`/tasks/view/${task.id}`} className="view-link">
-                    View
-                  </Link>
-
+                  <Link to={`/tasks/view/${task.id}`} className="view-link">View</Link>
                   {(user.role === "Admin" || user.role === "Manager") && (
                     <>
                       {" | "}
-                      <Link to={`/tasks/edit/${task.id}`} className="edit-link">
-                        Edit
-                      </Link>
+                      <Link to={`/tasks/edit/${task.id}`} className="edit-link">Edit</Link>
                       {" | "}
-                      <span className="delete-link" onClick={() => handleDelete(task.id)}>
-                        Delete
-                      </span>
+                      <span className="delete-link" onClick={() => handleDelete(task.id)}>Delete</span>
                     </>
                   )}
                 </td>
