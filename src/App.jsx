@@ -1,35 +1,36 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"; // أضفنا Navigate للتحويل
 
 import Login from "./pages/Login/Login";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import TasksList from "./pages/Tasks/TasksList";
 import AddTask from "./pages/Tasks/AddTask";
 import Users from "./pages/Users/Users";
-
-// ✅ الاستيراد الصحيح
 import DeliverablesBoard from "./pages/deliverables/DeliverablesBoard";
-
 import PrivateRoute from "./components/PrivateRoute";
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-
-        {/* صفحة تسجيل الدخول بدون حماية */}
+        {/* صفحة تسجيل الدخول */}
         <Route path="/login" element={<Login />} />
 
-        {/* ✅ Dashboard (تمت إضافة Manager هنا) */}
+        {/* ✅ تعديل المسار ليتوافق مع Navbar 
+           إذا كان النافبار يوجه إلى "/" فاجعل الداشبورد هي الصفحة الرئيسية
+        */}
         <Route
-          path="/dashboard"
+          path="/"
           element={
-            <PrivateRoute roles={["Admin", "Manager"]}> 
+            <PrivateRoute roles={["Admin", "Manager", "admin", "manager"]}> 
               <Dashboard />
             </PrivateRoute>
           }
         />
 
-        {/* Tasks (أي مستخدم مسجّل) */}
+        {/* للاحتياط إذا دخل المستخدم على /dashboard يدوياً */}
+        <Route path="/dashboard" element={<Navigate to="/" replace />} />
+
+        {/* Tasks */}
         <Route
           path="/tasks"
           element={
@@ -39,27 +40,27 @@ const App = () => {
           }
         />
 
-        {/* Add Task (Admin + Manager) */}
+        {/* Add Task */}
         <Route
           path="/tasks/add"
           element={
-            <PrivateRoute roles={["Admin", "Manager"]}>
+            <PrivateRoute roles={["Admin", "Manager", "admin", "manager"]}>
               <AddTask />
             </PrivateRoute>
           }
         />
 
-        {/* Users (Admin فقط) */}
+        {/* Users - للأدمن فقط */}
         <Route
           path="/users"
           element={
-            <PrivateRoute roles={["Admin"]}>
+            <PrivateRoute roles={["Admin", "admin"]}>
               <Users />
             </PrivateRoute>
           }
         />
 
-        {/* ✅ Submissions / Deliverables */}
+        {/* Submissions */}
         <Route
           path="/submissions"
           element={
@@ -68,7 +69,9 @@ const App = () => {
             </PrivateRoute>
           }
         />
-
+        
+        {/* صفحة 404 أو غير مصرح به */}
+        <Route path="/unauthorized" element={<h1>Unauthorized Access</h1>} />
       </Routes>
     </BrowserRouter>
   );
