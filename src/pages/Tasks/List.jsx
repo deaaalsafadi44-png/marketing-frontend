@@ -18,6 +18,18 @@ const TasksList = () => {
   const [loading, setLoading] = useState(true);
   const [statusOptions, setStatusOptions] = useState([]);
 
+  /* ================= TIME FORMAT ================= */
+  const formatMinutes = (minutes) => {
+    if (!minutes || minutes <= 0) return "—";
+
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+
+    if (h > 0 && m > 0) return `${h}h ${m}m`;
+    if (h > 0) return `${h}h`;
+    return `${m}m`;
+  };
+
   const safeLower = (val) => String(val || "").toLowerCase();
   const safeDate = (val) => {
     const d = new Date(val);
@@ -190,18 +202,8 @@ const TasksList = () => {
                 </select>
               </td>
 
-              {/* ===== TIMER (READ ONLY) ===== */}
-              <td>
-                {task.timer?.isRunning ? (
-                  <span style={{ color: "green", fontWeight: "bold" }}>
-                    ⏱ Running
-                  </span>
-                ) : task.timer?.totalSeconds > 0 ? (
-                  <span style={{ color: "#ff9800" }}>⏸ Paused</span>
-                ) : (
-                  "—"
-                )}
-              </td>
+              {/* ===== TIMER (TIME SPENT ONLY) ===== */}
+              <td>{formatMinutes(task.timeSpent)}</td>
 
               <td>
                 <Link to={`/tasks/view/${task.id}`} className="view-link">
