@@ -1,10 +1,10 @@
 /* ===============================
-   PAGE - خلفية الصفحة الجديدة
+   PAGE - تم تغميق الخلفية هنا لتعزيز التباين
 =============================== */
 .deliverables-feed-page {
   min-height: 100vh;
-  /* لون رمادي بارد وهادئ يجعل الكروت تبرز */
-  background: #f0f2f5; 
+  /* درجة رمادي أعمق قليلاً تجعل الكروت تبرز بوضوح فائق */
+  background: #e2e8f0; 
   padding: 40px 16px;
   display: flex;
   flex-direction: column;
@@ -29,7 +29,7 @@
 
 .deliverables-feed-header p {
   font-size: 15px;
-  color: #6b7280;
+  color: #4b5563; /* لون نص أغمق قليلاً ليتناسب مع الخلفية */
   margin-top: 4px;
 }
 
@@ -40,16 +40,16 @@
   background: #ffffff;
   border-radius: 20px;
   padding: 24px;
-  /* ظل أنعم وأعمق ليعطي إيحاء بالطفو */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 10px 40px rgba(0, 0, 0, 0.04);
+  /* ظل محسّن ليتناسب مع الخلفية الجديدة ويعطي عمقاً */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 20px 48px rgba(0, 0, 0, 0.05);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
 .submission-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.07);
+  transform: translateY(-6px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
 }
 
 .submission-card-top-header {
@@ -77,16 +77,15 @@
 
 /* ===============================
    STATUS BADGE (Minimalist Style)
-   إلغاء الألوان والاعتماد على المظهر الرسمي
 =============================== */
 .status-badge {
   padding: 6px 12px;
   border-radius: 8px;
   font-size: 11px;
   font-weight: 600;
-  background: #f8fafc; /* خلفية فاتحة جداً */
-  color: #334155;
-  border: 1px solid #e2e8f0;
+  background: #f1f5f9; /* خلفية متناسقة مع الخلفية العامة */
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -97,17 +96,17 @@
   content: "STATUS:";
   font-weight: 800;
   font-size: 10px;
-  color: #94a3b8;
+  color: #64748b;
   margin-right: 2px;
 }
 
-/* إزالة تلوين الحالات والاعتماد على المظهر الموحد */
+/* توحيد المظهر لكافة الحالات */
 .status-badge.completed,
 .status-badge.in-progress,
 .status-badge.pending {
-  background: #f8fafc;
-  color: #334155;
-  border-color: #e2e8f0;
+  background: #f1f5f9;
+  color: #1e293b;
+  border-color: #cbd5e1;
 }
 
 /* ===============================
@@ -116,14 +115,14 @@
 .time-spent-badge {
   font-size: 11px;
   font-weight: 700;
-  color: #64748b;
+  color: #334155;
   background: #f1f5f9;
   padding: 6px 12px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 5px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
 }
 
 /* ===============================
@@ -134,7 +133,7 @@
   align-items: center;
   gap: 12px;
   padding-top: 16px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid #e2e8f0;
   margin-bottom: 16px;
 }
 
@@ -142,7 +141,7 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #334155, #0f172a); /* تدرج داكن فخم */
+  background: linear-gradient(135deg, #1e293b, #020617); /* تدرج داكن فخم */
   color: #fff;
   display: flex;
   align-items: center;
@@ -170,7 +169,7 @@
 
 .date {
   font-size: 11px;
-  color: #94a3b8;
+  color: #64748b;
   font-weight: 500;
 }
 
@@ -185,13 +184,13 @@
 }
 
 .task-file-card {
-  background: #f8fafc;
+  background: #ffffff;
   border-radius: 14px;
   cursor: pointer;
   overflow: hidden;
   height: 120px;
   transition: all 0.2s ease;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -200,7 +199,7 @@
 
 .task-file-card:hover {
   transform: scale(1.03);
-  border-color: #cbd5e1;
+  border-color: #94a3b8;
 }
 
 .task-file-card img,
@@ -220,23 +219,23 @@
 }
 
 .pdf-style {
-  background: #fffafa; /* لون أبيض مائل للحمرة خفيف جداً */
+  background: #fef2f2; /* لون مائل للوردي خفيف جداً */
 }
 
 .pdf-icon {
   font-size: 28px;
-  color: #ef4444;
+  color: #dc2626;
 }
 
 .pdf-text {
   font-size: 11px;
   font-weight: 700;
-  color: #ef4444;
+  color: #dc2626;
 }
 
 .file-name-small {
   font-size: 10px;
-  color: #94a3b8;
+  color: #64748b;
   max-width: 90%;
   white-space: nowrap;
   overflow: hidden;
@@ -249,7 +248,7 @@
 .file-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.7);
+  background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
@@ -265,7 +264,7 @@
   border-radius: 24px;
   padding: 24px;
   position: relative;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
 
@@ -290,7 +289,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #64748b;
+  color: #475569;
   transition: all 0.2s;
 }
 
@@ -306,7 +305,7 @@
   text-align: center;
   padding: 100px 0;
   font-size: 18px;
-  color: #64748b;
+  color: #475569;
 }
 
 .rating-stars span {
