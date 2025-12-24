@@ -214,55 +214,51 @@ filteredTasks.forEach((task) => {
     ],
   };
 
-function exportPDF() {
-  const doc = new jsPDF();
+const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Tasks Report", 14, 15);
+    
+    // إعداد بيانات الجدول
+    const tableColumn = ["ID", "Company", "Type", "Worker", "Status", "Time (Min)"];
+    const tableRows = filteredTasks.map(task => [
+      task.id,
+      task.company,
+      task.type,
+      task.workerName || "N/A",
+      task.status,
+      task.timeSpent || 0
+    ]);
 
-  doc.text("Tasks Report", 14, 15);
+    // إنشاء الجدول تلقائياً
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+    });
 
-  const tableData = filteredTasks.map((t) => [
-    t.id,
-    t.company || "-",
-    t.type || "-",
-    t.workerName || "-",
-    t.timeSpent || 0,
-  ]);
+    doc.save(`report_${new Date().toLocaleDateString()}.pdf`);
+  };
+const exportExcel = () => {
+    // تجهيز البيانات بشكل مبسط للاكسل
+    const dataToExport = filteredTasks.map(task => ({
+      ID: task.id,
+      Company: task.company,
+      Task_Type: task.type,
+      Worker: task.workerName || "N/A",
+      Status: task.status,
+      Time_Spent_Minutes: task.timeSpent || 0,
+      Created_At: new Date(task.createdAt).toLocaleDateString()
+    }));
 
-  autoTable(doc, {
-    startY: 20,
-    head: [["ID", "Company", "Type", "Worker", "Time (min)"]],
-    body: tableData,
-  });
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Tasks");
 
-  doc.save("tasks-report.pdf");
-}
-
-  function exportExcel() {
-  const data = filteredTasks.map((t) => ({
-    ID: t.id,
-    Company: t.company,
-    Type: t.type,
-    Worker: t.workerName,
-    "Time (minutes)": t.timeSpent || 0,
-  }));
-
-  const worksheet = XLSX.utils.json_to_sheet(data);
-  const workbook = XLSX.utils.book_new();
-
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Tasks");
-
-  const excelBuffer = XLSX.write(workbook, {
-    bookType: "xlsx",
-    type: "array",
-  });
-
-  const blob = new Blob([excelBuffer], {
-    type:
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  });
-
-  saveAs(blob, "tasks-report.xlsx");
-}
-
+    // إنشاء الملف وتحميله
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8" });
+    saveAs(data, `tasks_report_${new Date().getTime()}.xlsx`);
+  };
 
   return (
     <div className="reports-page">
