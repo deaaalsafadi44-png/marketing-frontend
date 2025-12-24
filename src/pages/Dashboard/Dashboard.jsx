@@ -30,68 +30,76 @@ const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // جلب البيانات عند تحميل الصفحة
   useEffect(() => {
     const load = async () => {
       try {
         const res = await getTasks();
-        setTasks(res.data);
+        // تأكد من أننا نأخذ أحدث بيانات من السيرفر
+        setTasks(res.data || []);
       } catch (err) {
         console.error("Error loading tasks:", err);
-
         if (err?.response?.status === 401) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           navigate("/login");
         }
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     load();
-  }, []);
+  }, [navigate]);
 
   if (loading) {
     return <h2 style={{ textAlign: "center", marginTop: "40px" }}>Loading...</h2>;
   }
 
-  // دالة مساعدة للمقارنة الآمنة بين النصوص بغض النظر عن حالة الأحرف (كبير/صغير)
-  const isStatus = (status, target) => status?.trim().toLowerCase() === target.toLowerCase();
-
+  /* =============================================
+      📊 منطق الحساب الديناميكي (Dynamic Logic)
+     ============================================= */
+  
   const total = tasks.length;
 
-  // 1. حساب قيد التنفيذ (In Progress / Accepted / Accebted)
-  const inProgress = tasks.filter(
-    (t) => 
-      isStatus(t.status, "In Progress") || 
-      isStatus(t.status, "Accepted") || 
-      isStatus(t.status, "Accebted") // التعامل مع الخطأ الإملائي في الصور
-  ).length;
+  // دالة تصنيف المهام بناءً على الحالة بشكل مرن
+  const stats = tasks.reduce((acc, task) => {
+    const s = task.status?.toLowerCase().trim() || "";
 
-  // 2. حساب المكتمل (Approved / Completed / Done)
-  const done = tasks.filter(
-    (t) => 
-      isStatus(t.status, "Approved") || 
-      isStatus(t.status, "Completed") ||
-      isStatus(t.status, "Done")
-  ).length;
+    // 1. تصنيف "قيد التنفيذ"
+    if (["in progress", "accepted", "accebted", "active"].includes(s)) {
+      acc.inProgress++;
+    } 
+    // 2. تصنيف "المكتمل"
+    else if (["approved", "completed", "done", "finished"].includes(s)) {
+      acc.done++;
+    } 
+    // 3. أي حالة أخرى تعتبر "معلقة أو جديدة"
+    else {
+      acc.pending++;
+    }
+    return acc;
+  }, { inProgress: 0, done: 0, pending: 0 });
 
-  // 3. حساب المعلق والجديد (Pending / New / Under Review)
-  const pending = tasks.filter(
-    (t) =>
-      isStatus(t.status, "Pending") ||
-      isStatus(t.status, "New") ||
-      isStatus(t.status, "Under Review")
-  ).length;
+  // استخراج القيم للرسم البياني والكروت
+  const { inProgress, done, pending } = stats;
+
+  /* =============================================
+      📈 تجهيز بيانات الرسوم البيانية
+     ============================================= */
 
   const companyCounts = {};
   tasks.forEach((t) => {
-    companyCounts[t.company] = (companyCounts[t.company] || 0) + 1;
+    if (t.company) {
+      companyCounts[t.company] = (companyCounts[t.company] || 0) + 1;
+    }
   });
 
   const typeCounts = {};
   tasks.forEach((t) => {
-    typeCounts[t.type] = (typeCounts[t.type] || 0) + 1;
+    if (t.type) {
+      typeCounts[t.type] = (typeCounts[t.type] || 0) + 1;
+    }
   });
 
   const pieData = {
@@ -151,6 +159,7 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <h1 className="dashboard-title">لوحة القيادة الرئيسية (Dashboard)</h1>
 
+      {/* الكروت العلوية - أصبحت الآن مرتبطة بالـ state الديناميكي */}
       <div className="stats-row">
         <StatCard title="Total Tasks" value={total} border="black" />
         <StatCard title="In Progress" value={inProgress} border="gold" />
