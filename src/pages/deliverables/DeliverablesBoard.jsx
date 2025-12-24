@@ -10,7 +10,8 @@ const DeliverablesBoard = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const [taskTitles, setTaskTitles] = useState({});
+  // تم تغيير اسم الحالة لتشمل تفاصيل المهمة كاملة (العنوان، الحالة، الوقت)
+  const [tasksData, setTasksData] = useState({});
 
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
@@ -20,6 +21,16 @@ const DeliverablesBoard = () => {
   const [currentUser, setCurrentUser] = useState(null);
 
   const location = useLocation();
+
+  /* ================= تنسيق الوقت المستغرق ================= */
+  const formatMinutes = (minutes) => {
+    if (!minutes || minutes <= 0) return "0 min";
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    if (h > 0 && m > 0) return `${h}h ${m}m`;
+    if (h > 0) return `${h}h`;
+    return `${m}m`;
+  };
 
   /* ================= LOAD USER ================= */
   useEffect(() => {
@@ -49,31 +60,39 @@ const DeliverablesBoard = () => {
     loadDeliverables();
   }, [location.pathname]);
 
-  /* ================= LOAD TASK TITLES ================= */
+  /* ================= LOAD TASK DETAILS (Title, Status, Time) ================= */
   useEffect(() => {
-    const loadTitles = async () => {
+    const loadDetails = async () => {
       const missingIds = items
         .map((i) => i.taskId)
-        .filter((id) => id && !taskTitles[id]);
+        .filter((id) => id && !tasksData[id]);
 
       if (!missingIds.length) return;
 
-      const newTitles = {};
+      const newDetails = {};
 
       for (const id of missingIds) {
         try {
           const res = await api.get(`/tasks/${id}`);
-          newTitles[id] = res.data?.title || `Task #${id}`;
+          newDetails[id] = {
+            title: res.data?.title || `Task #${id}`,
+            status: res.data?.status || "Unknown",
+            timeSpent: res.data?.timeSpent || 0
+          };
         } catch {
-          newTitles[id] = `Task #${id}`;
+          newDetails[id] = { 
+            title: `Task #${id}`, 
+            status: "Error", 
+            timeSpent: 0 
+          };
         }
       }
 
-      setTaskTitles((prev) => ({ ...prev, ...newTitles }));
+      setTasksData((prev) => ({ ...prev, ...newDetails }));
     };
 
-    if (items.length) loadTitles();
-  }, [items, taskTitles]);
+    if (items.length) loadDetails();
+  }, [items, tasksData]);
 
   /* ================= FILTER ================= */
   const filteredItems = items.filter((item) => {
@@ -158,8 +177,6 @@ const DeliverablesBoard = () => {
   const handleFileClick = (file) => {
     const type = getFileType(file);
     if (type === "pdf") {
-      // الحل النهائي لفتح الـ PDF: إرسال رابط مباشر للمتصفح ليفتحه بنافذة جديدة
-      // نستخدم window.open للرابط الأصلي لضمان تخطي أي مشكلة في المودال
       window.open(file.url, '_blank', 'noopener,noreferrer');
     } else {
       setSelectedFile(file);
@@ -187,81 +204,94 @@ const DeliverablesBoard = () => {
         </div>
 
         <div className="deliverables-feed">
-          {groupedItems.map((task) => (
-            <div key={task.taskId} className="submission-card">
-              <h4 className="submission-task-title">
-                {taskTitles[task.taskId] || `Task #${task.taskId}`}
-              </h4>
-
-              <div className="submission-header">
-                <div className="avatar">
-                  {task.submittedByName?.charAt(0)?.toUpperCase() || "U"}
-                </div>
-
-                <div className="user-info">
-                  <strong>{task.submittedByName}</strong>
-
-                  <div className="rating-stars">
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <span
-                        key={n}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRate(task, n);
-                        }}
-                        style={{
-                          cursor: "pointer",
-                          color: task.rating >= n ? "#facc15" : "#d1d5db",
-                          fontSize: "18px",
-                          userSelect: "none",
-                        }}
-                      >
-                        ★
-                      </span>
-                    ))}
+          {groupedItems.map((task) => {
+            const detail = tasksData[task.taskId] || {};
+            return (
+              <div key={task.taskId} className="submission-card">
+                {/* الجزء المحدث لإظهار العنوان والحالة والوقت */}
+                <div className="submission-card-top-header">
+                  <h4 className="submission-task-title">
+                    {detail.title || `Task #${task.taskId}`}
+                  </h4>
+                  <div className="task-info-badges">
+                    <span className={`status-badge ${detail.status?.toLowerCase()}`}>
+                      {detail.status}
+                    </span>
+                    <span className="time-spent-badge">
+                      ⏱ {formatMinutes(detail.timeSpent)}
+                    </span>
                   </div>
                 </div>
 
-                <div className="date">
-                  {task.createdAt
-                    ? new Date(task.createdAt).toLocaleDateString()
-                    : "—"}
+                <div className="submission-header">
+                  <div className="avatar">
+                    {task.submittedByName?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+
+                  <div className="user-info">
+                    <strong>{task.submittedByName}</strong>
+
+                    <div className="rating-stars">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <span
+                          key={n}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRate(task, n);
+                          }}
+                          style={{
+                            cursor: "pointer",
+                            color: task.rating >= n ? "#facc15" : "#d1d5db",
+                            fontSize: "18px",
+                            userSelect: "none",
+                          }}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="date">
+                    {task.createdAt
+                      ? new Date(task.createdAt).toLocaleDateString()
+                      : "—"}
+                  </div>
+                </div>
+
+                <div className="task-files-grid">
+                  {task.files.map((file, i) => {
+                    const type = getFileType(file);
+                    return (
+                      <div
+                        key={i}
+                        className="task-file-card"
+                        onClick={() => handleFileClick(file)}
+                      >
+                        {type === "image" && <img src={file.url} alt="" />}
+                        
+                        {type === "pdf" && (
+                          <div className="file-generic pdf-style">
+                            <div className="pdf-icon">📄</div>
+                            <div className="pdf-text">PDF Document</div>
+                            <span className="file-name-small">{decodeFileName(file.originalName)}</span>
+                          </div>
+                        )}
+
+                        {type === "video" && <video src={file.url} muted />}
+                        
+                        {type === "raw" && (
+                          <div className="file-generic">
+                            📎 {decodeFileName(file.originalName)}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-
-              <div className="task-files-grid">
-                {task.files.map((file, i) => {
-                  const type = getFileType(file);
-                  return (
-                    <div
-                      key={i}
-                      className="task-file-card"
-                      onClick={() => handleFileClick(file)}
-                    >
-                      {type === "image" && <img src={file.url} alt="" />}
-                      
-                      {/* عرض أيقونة واضحة للـ PDF بدلاً من محاولة عرض صورة معطوبة */}
-                      {type === "pdf" && (
-                        <div className="file-generic pdf-style">
-                          <div className="pdf-icon">📄</div>
-                          <div className="pdf-text">PDF Document</div>
-                          <span className="file-name-small">{decodeFileName(file.originalName)}</span>
-                        </div>
-                      )}
-
-                      {type === "video" && <video src={file.url} muted />}
-                      
-                      {type === "raw" && (
-                        <div className="file-generic">
-                          📎 {decodeFileName(file.originalName)}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
