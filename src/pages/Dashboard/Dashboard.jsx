@@ -55,19 +55,33 @@ const Dashboard = () => {
     return <h2 style={{ textAlign: "center", marginTop: "40px" }}>Loading...</h2>;
   }
 
+  // دالة مساعدة للمقارنة الآمنة بين النصوص بغض النظر عن حالة الأحرف (كبير/صغير)
+  const isStatus = (status, target) => status?.trim().toLowerCase() === target.toLowerCase();
+
   const total = tasks.length;
 
+  // 1. حساب قيد التنفيذ (In Progress / Accepted / Accebted)
   const inProgress = tasks.filter(
-    (t) => t.status === "In Progress" || t.status === "Accepted"
+    (t) => 
+      isStatus(t.status, "In Progress") || 
+      isStatus(t.status, "Accepted") || 
+      isStatus(t.status, "Accebted") // التعامل مع الخطأ الإملائي في الصور
   ).length;
 
-  const done = tasks.filter((t) => t.status === "Approved").length;
+  // 2. حساب المكتمل (Approved / Completed / Done)
+  const done = tasks.filter(
+    (t) => 
+      isStatus(t.status, "Approved") || 
+      isStatus(t.status, "Completed") ||
+      isStatus(t.status, "Done")
+  ).length;
 
+  // 3. حساب المعلق والجديد (Pending / New / Under Review)
   const pending = tasks.filter(
     (t) =>
-      t.status === "Pending" ||
-      t.status === "New" ||
-      t.status === "Under Review"
+      isStatus(t.status, "Pending") ||
+      isStatus(t.status, "New") ||
+      isStatus(t.status, "Under Review")
   ).length;
 
   const companyCounts = {};
@@ -111,7 +125,6 @@ const Dashboard = () => {
     ],
   };
 
-  // 🔧 التعديل هنا فقط
   const barOptions = {
     responsive: true,
     maintainAspectRatio: false,
