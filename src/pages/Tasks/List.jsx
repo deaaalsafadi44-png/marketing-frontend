@@ -18,7 +18,6 @@ const TasksList = () => {
   const [loading, setLoading] = useState(true);
   const [statusOptions, setStatusOptions] = useState([]);
 
-  /* ================= TIME FORMAT ================= */
   const formatMinutes = (minutes) => {
     if (!minutes || minutes <= 0) return "—";
 
@@ -164,7 +163,6 @@ const TasksList = () => {
             <th>Worker</th>
             <th>Priority</th>
             <th>Status</th>
-            <th>Timer</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -201,9 +199,6 @@ const TasksList = () => {
                   ))}
                 </select>
               </td>
-
-              {/* ===== TIMER (TIME SPENT ONLY) ===== */}
-              <td>{formatMinutes(task.timeSpent)}</td>
 
               <td>
                 <Link to={`/tasks/view/${task.id}`} className="view-link">
