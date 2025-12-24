@@ -1,14 +1,75 @@
+/* =====================================================
+   GLOBAL STYLES (تحسينات العرض الشاملة)
+===================================================== */
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  box-sizing: border-box; /* يضمن عدم خروج العناصر عن الحاوية بسبب Padding */
+  -webkit-tap-highlight-color: transparent; /* يحسن شكل النقر في الجوال */
+}
+
+html, body {
+  /* منع التمرير الأفقي تماماً لضمان تجربة مستخدم نظيفة */
+  overflow-x: hidden; 
+  width: 100%;
+  height: 100%;
 }
 
 body {
   background: #f3f4f7;
-  font-family: Arial, sans-serif;
+  /* تحسين سلاسة الخطوط في المتصفحات المختلفة */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  color: #111827;
 }
 
 #root {
   width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* تحسين شكل الصور والفيديوهات لتكون متجاوبة تلقائياً */
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* تنسيق الروابط الافتراضي */
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+/* تخصيص شكل شريط التمرير (Scrollbar) ليكون أكثر حداثة */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* =====================================================
+   UTILITY CLASSES (اختياري - للسرعة)
+===================================================== */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
 }

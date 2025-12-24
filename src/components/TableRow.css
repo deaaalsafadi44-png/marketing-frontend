@@ -1,11 +1,60 @@
 .view-link {
   color: #1976d2;
   cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.view-link:hover {
+  text-decoration: underline;
+  color: #115293;
 }
 
 .delete-link {
   color: #c62828;
   cursor: pointer;
-  margin-left: 5px;
+  margin-left: 10px; /* زيادة المسافة قليلاً للسلامة */
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
 }
 
+.delete-link:hover {
+  text-decoration: underline;
+  color: #8e1b1b;
+}
+
+/* ===============================
+   🆕 RESPONSIVE ADJUSTMENTS (الموبايل)
+=============================== */
+@media (max-width: 768px) {
+  .view-link, 
+  .delete-link {
+    display: inline-block; /* للسماح بإضافة padding */
+    padding: 8px 12px;     /* تكبير منطقة النقر لسهولة الاستخدام بالإصبع */
+    font-size: 14px;
+    border-radius: 4px;
+  }
+
+  .delete-link {
+    margin-left: 5px;      /* تعديل المسافة بما يتناسب مع الحشو الجديد */
+  }
+
+  /* اختياري: إضافة خلفية خفيفة في الموبايل لتبدو كأزرار صغيرة */
+  .view-link {
+    background: rgba(25, 118, 210, 0.05);
+  }
+  
+  .delete-link {
+    background: rgba(198, 40, 40, 0.05);
+  }
+}
+
+@media (max-width: 480px) {
+  .view-link, 
+  .delete-link {
+    padding: 10px 14px;   /* زيادة أكبر للمساحة في الشاشات الصغيرة جداً */
+    margin-bottom: 5px;   /* تباعد رأسي إذا ترتبت الروابط تحت بعضها */
+  }
+}

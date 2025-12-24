@@ -2,19 +2,22 @@
 .add-page {
   display: flex;
   justify-content: center;
-  padding: 50px 0;
+  padding: 50px 16px; /* تم إضافة هامش جانبي بسيط */
   background: #f5f7fa;
   min-height: 100vh;
+  box-sizing: border-box;
 }
 
 /* ================= CARD ================= */
 .add-card {
-  width: 820px;
+  width: 100%; /* تغيير من عرض ثابت إلى مرن */
+  max-width: 820px; /* الحفاظ على الحجم الأصلي كحد أقصى */
   background: #ffffff;
   border-radius: 20px;
   padding: 36px 40px;
   box-shadow: 0 20px 40px rgba(0,0,0,0.08);
   animation: fadeIn 0.35s ease;
+  box-sizing: border-box;
 }
 
 /* ================= TITLE ================= */
@@ -58,6 +61,7 @@ textarea {
   font-size: 15px;
   background: #f9fafb;
   transition: all 0.2s ease;
+  box-sizing: border-box; /* ضمان عدم خروج الحقول عن الحواف */
 }
 
 input::placeholder,
@@ -94,6 +98,7 @@ textarea:focus {
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .submit-btn:hover {
@@ -115,13 +120,38 @@ textarea:focus {
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
+  .add-page {
+    padding: 20px 12px; /* تقليل الفراغ العلوي والجانبي في الموبايل */
+  }
+
   .add-card {
-    width: 95%;
-    padding: 28px 24px;
+    padding: 28px 20px; /* تقليل الحشو الداخلي للبطاقة */
+    border-radius: 16px;
+  }
+
+  .card-title {
+    font-size: 24px;
+    margin-bottom: 20px;
   }
 
   .form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* تحويل الشبكة لعمود واحد */
+    gap: 15px;
+  }
+
+  .submit-btn {
+    padding: 16px; /* تكبير الزر قليلاً ليسهل الضغط عليه */
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-card {
+    padding: 24px 15px;
+  }
+  
+  input, select, textarea {
+    font-size: 14px; /* تصغير الخط قليلاً للشاشات الصغيرة جداً */
   }
 }
 

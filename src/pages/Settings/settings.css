@@ -7,6 +7,7 @@
   padding: 40px 20px;
   display: flex;
   justify-content: center;
+  box-sizing: border-box; /* لضمان عدم خروج الحاوية عن الشاشة */
 }
 
 /* ===============================
@@ -20,6 +21,7 @@
   padding: 32px 34px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
   animation: fadeUp 0.35s ease;
+  box-sizing: border-box;
 }
 
 /* ===============================
@@ -29,7 +31,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* يسمح بنزول الزر تحت العنوان في الشاشات الصغيرة */
   gap: 15px;
   margin-bottom: 25px;
 }
@@ -55,6 +57,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap; /* منع انكسار نص الزر */
 }
 
 .manage-options-btn:hover {
@@ -73,6 +76,7 @@
   font-size: 14px;
   color: #111827;
   margin-bottom: 28px;
+  word-wrap: break-word; /* لضمان عدم خروج الإيميل الطويل عن الصندوق */
 }
 
 /* ===============================
@@ -83,6 +87,7 @@
   border-radius: 18px;
   padding: 26px 24px;
   border: 1px solid #e5e7eb;
+  box-sizing: border-box;
 }
 
 /* ===============================
@@ -114,6 +119,7 @@
   background: #fff;
   font-size: 15px;
   transition: all 0.2s ease;
+  box-sizing: border-box; /* لمنع تمدد الحقل خارج البطاقة */
 }
 
 .input-field:focus {
@@ -137,6 +143,7 @@
   background: linear-gradient(135deg, #16a34a, #15803d);
   cursor: pointer;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .save-btn:hover {
@@ -169,5 +176,58 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ===============================
+   🆕 RESPONSIVE ADJUSTMENTS (الموبايل)
+=============================== */
+@media (max-width: 768px) {
+  .settings-wrapper {
+    padding: 20px 10px; /* تقليل الهوامش الجانبية في الموبايل */
+  }
+
+  .settings-big-card {
+    padding: 24px 18px; /* تقليل الحشو الداخلي */
+    border-radius: 16px;
+  }
+
+  .settings-top-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .settings-title {
+    font-size: 24px;
+  }
+
+  .manage-options-btn {
+    width: 100%; /* جعل الزر يأخذ كامل العرض في الموبايل لسهولة الضغط */
+    text-align: center;
+  }
+
+  .compact-card {
+    padding: 18px 15px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-title {
+    font-size: 22px;
+  }
+
+  .input-field {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .save-btn {
+    padding: 12px;
+    font-size: 15px;
   }
 }

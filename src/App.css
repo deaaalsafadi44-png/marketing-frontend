@@ -1,11 +1,60 @@
-/* App level reset */
+/* =====================================================
+   APP LEVEL RESET & GLOBAL STYLES
+===================================================== */
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  box-sizing: border-box; /* يضمن أن الحواف والحدود لا تزيد من عرض العناصر */
+  -webkit-tap-highlight-color: transparent; /* يمنع الوميض الأزرق عند النقر في الجوال */
+}
+
+html, body {
+  width: 100%;
+  overflow-x: hidden; /* يمنع ظهور شريط التمرير الأفقي المزعج في الموبايل */
+  scroll-behavior: smooth; /* تنقل سلس عند الانتقال بين أقسام الصفحة */
 }
 
 body {
   background: #f3f4f7;
-  font-family: Arial, sans-serif;
+  /* استخدام خطوط النظام الحديثة لضمان سرعة التحميل ومظهر احترافي */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  color: #111827;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased; /* لجعل الخطوط تبدو أنعم في متصفحات الماك */
+}
+
+#root, .app-container {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* تحسين شكل الصور والفيديوهات لتكون متجاوبة تلقائياً */
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* تنسيق الروابط الافتراضي لمنع التداخل مع التصاميم الخاصة */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* تحسين شكل شريط التمرير (Scrollbar) ليناسب التصميم العصري */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

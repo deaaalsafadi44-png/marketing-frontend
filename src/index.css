@@ -1,8 +1,12 @@
+/* =====================================================
+   GLOBAL VARIABLES & ROOT
+===================================================== */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
+  /* إعدادات الألوان الافتراضية (الوضع الداكن) */
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
@@ -13,21 +17,40 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+/* =====================================================
+   APP RESET
+===================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
   display: flex;
-  place-items: center;
+  place-items: flex-start; /* تم التعديل لضمان عدم تمركز المحتوى في المنتصف العمودي دائماً */
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden; /* منع التمرير الأفقي */
+}
+
+#root {
+  width: 100%;
+}
+
+/* =====================================================
+   ELEMENTS STYLING
+===================================================== */
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #535bf2;
 }
 
 h1 {
@@ -43,26 +66,50 @@ button {
   font-weight: 500;
   font-family: inherit;
   background-color: #1a1a1a;
+  color: white; /* لضمان وضوح النص في الوضع الداكن */
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: all 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
+  transform: translateY(-1px);
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* =====================================================
+   ☀️ LIGHT MODE OVERRIDES
+===================================================== */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
-    background-color: #ffffff;
+    background-color: #f3f4f7; /* تم التعديل ليناسب الخلفية الرمادية التي طلبتها سابقاً */
   }
+  
   a:hover {
     color: #747bff;
   }
+  
   button {
     background-color: #f9f9f9;
+    color: #213547;
+    border: 1px solid #d1d5db;
+  }
+}
+
+/* =====================================================
+   📱 MOBILE RESPONSIVENESS (GLOBAL)
+===================================================== */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2.2em;
+  }
+  
+  body {
+    place-items: flex-start;
   }
 }

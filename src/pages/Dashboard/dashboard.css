@@ -1,6 +1,7 @@
 .dashboard-container {
   width: 100%;
   padding: 20px;
+  box-sizing: border-box; /* لضمان عدم خروج العرض عن 100% */
 }
 
 /* العنوان */
@@ -15,17 +16,20 @@
   display: flex;
   gap: 20px;
   margin-bottom: 40px;
+  flex-wrap: wrap; /* للسماح للكروت بالنزول في الموبايل */
 }
 
 /* كروت الإحصائيات */
 .stat-card {
   flex: 1;
+  min-width: 200px; /* يضمن عدم صغر الكرت بشكل مبالغ فيه قبل النزول لسطر جديد */
   background: #ffffff;
   padding: 25px;
   border-radius: 15px;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
   border-left: 6px solid transparent;
   transition: transform 0.2s ease;
+  box-sizing: border-box;
 }
 
 .stat-card:hover {
@@ -49,6 +53,7 @@
   display: flex;
   gap: 25px;
   margin-top: 20px;
+  flex-wrap: wrap; /* ضروري جداً لتجاوب الرسوم البيانية */
 }
 
 /* صندوق الرسم */
@@ -56,16 +61,17 @@
   background: white;
   padding: 20px;
   border-radius: 15px;
-  width: 50%;
+  width: calc(50% - 13px); /* طرح نصف الـ gap للحفاظ على الدقة */
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
 
-  height: 460px; /* ✔ خفضنا الارتفاع قليلاً */
+  height: 460px; 
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
 
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* عنوان الرسم */
@@ -76,8 +82,69 @@
   margin-bottom: 20px;
 }
 
-/* ✔ تصغير الرسم نفسه ليتناسب مع الكارد */
+/* تصغير الرسم نفسه ليتناسب مع الكارد */
 .chart-box svg {
-  height: 330px !important;  /* ← تصغير الدائرة */
+  height: 330px !important;  
   width: 100% !important;
+}
+
+/* ===============================
+   🆕 RESPONSIVE ADJUSTMENTS (الموبايل والتابلت)
+=============================== */
+@media (max-width: 1024px) {
+  .chart-box {
+    width: 100%; /* الرسوم تأخذ العرض كاملاً في التابلت والموبايل */
+    height: auto; /* السماح بالارتفاع التلقائي */
+    min-height: 400px;
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 15px;
+  }
+
+  .dashboard-title {
+    font-size: 24px;
+    margin-bottom: 25px;
+    text-align: center;
+  }
+
+  .stats-row {
+    gap: 15px;
+  }
+
+  .stat-card {
+    flex: none;
+    width: 100%; /* كل كرت إحصائيات يأخذ سطراً كاملاً في الموبايل */
+    padding: 20px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+  }
+
+  .chart-box {
+    padding: 15px;
+    min-height: 350px;
+  }
+
+  .chart-title {
+    font-size: 18px;
+  }
+
+  .chart-box svg {
+    height: 280px !important; /* تقليل حجم الرسم ليتناسب مع شاشة الموبايل */
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-card {
+    padding: 15px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
 }

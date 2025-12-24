@@ -1,5 +1,7 @@
 .layout-container {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column; /* يضمن ترتيب الهيدر ثم المحتوى عمودياً */
 }
 
 /* كل الصفحات العادية */
@@ -7,6 +9,8 @@
   padding: 35px;
   padding-top: calc(35px + 65px); /* 🔥 يعوّض ارتفاع Navbar */
   background: #f4f6fa;
+  min-height: 100vh;
+  box-sizing: border-box; /* لضمان عدم خروج المحتوى عن حدود الشاشة */
 }
 
 /* صفحات Full Background */
@@ -14,4 +18,27 @@
   padding: 0;
   padding-top: 65px; /* 🔥 نفس ارتفاع Navbar */
   background: transparent;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* ===============================
+   🆕 RESPONSIVE ADJUSTMENTS (الموبايل)
+=============================== */
+@media (max-width: 768px) {
+  .page-content {
+    /* تقليل الهوامش في الموبايل لإعطاء مساحة أكبر للمحتوى */
+    padding: 15px;
+    padding-top: calc(15px + 65px); /* الحفاظ على التعويض مع تقليل الهامش */
+  }
+
+  /* في حالة وجود Sidebar يتحول لوضع أفقي، قد نحتاج لزيادة الـ padding العلوي */
+  /* .page-content { padding-top: calc(15px + 120px); } */
+}
+
+@media (max-width: 480px) {
+  .page-content {
+    padding: 10px;
+    padding-top: calc(10px + 65px);
+  }
 }

@@ -4,6 +4,8 @@
   color: #fff;
   padding: 20px;
   min-height: 100vh;
+  box-sizing: border-box; /* لضمان حساب العرض بدقة */
+  transition: all 0.3s ease;
 }
 
 .sidebar ul {
@@ -20,4 +22,63 @@
   color: #fff;
   text-decoration: none;
   font-size: 16px;
+  display: block; /* لجعل مساحة الضغط أكبر */
+  transition: 0.2s;
+}
+
+.sidebar a:hover {
+  color: #7b2fff; /* أضفت لمسة بسيطة للتفاعل */
+}
+
+/* ===============================
+   🆕 RESPONSIVE ADJUSTMENTS (الموبايل)
+=============================== */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;       /* يأخذ كامل العرض في الموبايل */
+    min-height: auto;  /* إلغاء الارتفاع الكامل */
+    padding: 10px 15px;
+    position: relative; /* ليتدفق مع محتوى الصفحة */
+    top: 65px;         /* إذا كان الـ Navbar ثابتاً، ندفعه للأسفل قليلاً */
+  }
+
+  .sidebar ul {
+    display: flex;     /* تحويل القائمة من رأسية إلى أفقية */
+    margin-top: 0;
+    gap: 20px;
+    overflow-x: auto;  /* السماح بالتمرير الأفقي إذا كثرت العناصر */
+    padding-bottom: 5px;
+    -webkit-overflow-scrolling: touch; /* تمرير ناعم في الآيفون */
+  }
+
+  /* إخفاء شريط التمرير بشكل جمالي */
+  .sidebar ul::-webkit-scrollbar {
+    height: 3px;
+  }
+  .sidebar ul::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+  }
+
+  .sidebar li {
+    margin-bottom: 0;  /* إلغاء الهامش السفلي في الوضع الأفقي */
+    white-space: nowrap; /* منع انكسار النص */
+  }
+
+  .sidebar a {
+    font-size: 14px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05); /* إضافة خلفية بسيطة للتمييز */
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    padding: 8px 10px;
+  }
+  
+  .sidebar ul {
+    gap: 10px;
+  }
 }

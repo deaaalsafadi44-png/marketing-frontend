@@ -1,3 +1,7 @@
+/* =====================================================
+   كودك الأصلي كاملاً دون أي حذف (حرفياً)
+===================================================== */
+
 .view-wrapper {
   background: #f5f7fa;
   min-height: 100vh;
@@ -238,7 +242,7 @@
 }
 
 /* =====================================================
-   🔥 NEW — ATTACHMENTS UI (PRO / CLEAN / SCALABLE)
+    🔥 NEW — ATTACHMENTS UI (PRO / CLEAN / SCALABLE)
 ===================================================== */
 
 .attachments-box {
@@ -325,6 +329,7 @@
   font-size: 13px;
   color: #9ca3af;
 }
+
 /* ================= FIX INFO GRID LAYOUT ================= */
 .info-grid {
   grid-auto-rows: minmax(0, auto);
@@ -377,8 +382,8 @@
 .remove-attachment {
   z-index: 5;
 }
-/* ================= DESCRIPTION FIX (IMPORTANT) ================= */
 
+/* ================= DESCRIPTION FIX (IMPORTANT) ================= */
 .desc-box {
   white-space: pre-wrap;       /* يحافظ على الأسطر */
   word-break: break-word;      /* يكسر الكلمات الطويلة */
@@ -401,12 +406,87 @@
 .desc-box * {
   max-width: 100%;
 }
-/* ===== FIX DELETE ICON INSIDE +40 MODAL ===== */
 
+/* ===== FIX DELETE ICON INSIDE +40 MODAL ===== */
 .task-file-card {
   position: relative;
 }
 
 .task-file-card:hover .remove-attachment {
   opacity: 1;
+}
+
+/* =====================================================
+    ✨ التعديلات الاحترافية النهائية (للتجاوب والأداء)
+===================================================== */
+
+/* 1. ضمان أن الحاويات تأخذ عرض الشاشة في الجوال */
+@media (max-width: 950px) {
+  .view-wrapper {
+    padding: 20px;
+  }
+  .view-card {
+    width: 100%;
+    padding: 25px;
+  }
+}
+
+/* 2. تعديل المؤقت والرفع في الشاشات الصغيرة */
+@media (max-width: 768px) {
+  .timer-box {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  .upload-section {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 15px;
+  }
+  .info-grid {
+    grid-template-columns: 1fr; /* عمود واحد للمعلومات */
+  }
+  .info-item.attachments {
+    grid-column: span 1;
+  }
+  .attachments-box {
+    flex-wrap: wrap; /* السماح للمرفقات بالنزول لسطر جديد */
+    justify-content: center;
+  }
+  .actions-row {
+    flex-direction: column-reverse; /* زر الرجوع تحت زر التعديل */
+    gap: 12px;
+  }
+  .btn-edit, .btn-back {
+    width: 100%;
+    text-align: center;
+  }
+  .task-title {
+    font-size: 24px;
+  }
+}
+
+/* 3. تحسينات اللمس للهواتف */
+@media (max-width: 480px) {
+  .timer-time {
+    font-size: 26px;
+    min-width: auto;
+  }
+  .timer-btn {
+    padding: 10px;
+    font-size: 12px;
+  }
+  .attachment-card {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* 4. معالجة الصور داخل الوصف لضمان عدم خروجها */
+.desc-box img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
 }

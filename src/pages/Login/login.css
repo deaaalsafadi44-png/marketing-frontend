@@ -8,6 +8,7 @@
   justify-content: center;
   background: linear-gradient(135deg, #2563eb, #1e40af);
   padding: 20px;
+  box-sizing: border-box; /* ضمان عدم خروج الحاوية عن الشاشة */
 }
 
 /* ===============================
@@ -22,6 +23,7 @@
   padding: 32px 28px;
   box-shadow: 0 30px 60px rgba(0,0,0,0.25);
   animation: fadeScale 0.4s ease;
+  box-sizing: border-box;
 }
 
 /* ===============================
@@ -62,6 +64,7 @@
   font-size: 15px;
   background: #f9fafb;
   transition: all 0.2s ease;
+  box-sizing: border-box; /* مهم لمنع تمدد الحقل خارج الصندوق */
 }
 
 .login-box input:focus {
@@ -87,7 +90,7 @@
   position: absolute;
   right: 14px;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-80%); /* تعديل بسيط لتوسيط الأيقونة مع المارجن السفلي */
   cursor: pointer;
   font-size: 18px;
   opacity: 0.6;
@@ -116,6 +119,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
 }
 
 .login-btn:hover {
@@ -157,5 +161,36 @@
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
+  }
+}
+
+/* ===============================
+   🆕 RESPONSIVE ADJUSTMENTS (الموبايل)
+=============================== */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 15px;
+    align-items: flex-start; /* دفع الصندوق للأعلى قليلاً لتجنب لوحة المفاتيح */
+    padding-top: 10vh;
+  }
+
+  .login-box {
+    padding: 24px 20px;
+    border-radius: 18px;
+  }
+
+  .login-box h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .login-box input {
+    padding: 12px 14px; /* تصغير طفيف ليناسب الشاشات الصغيرة */
+    font-size: 14px;
+  }
+
+  .login-btn {
+    padding: 12px;
+    font-size: 15px;
   }
 }
