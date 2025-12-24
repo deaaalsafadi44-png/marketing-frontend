@@ -1,148 +1,146 @@
-.reports-page {
-  padding: 30px;
-  background: #f5f7fa;
+/* =====================================================
+   OPTIONS SETTINGS PAGE (MODERN UI)
+===================================================== */
+
+.options-wrapper {
+  padding: 40px 20px;
+  background-color: #f3f4f7;
   min-height: 100vh;
-  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
 }
 
-.reports-title {
+.options-container {
+  width: 100%;
+  max-width: 800px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 35px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.options-container h1 {
   font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 25px;
   color: #111827;
-}
-
-/* ===== Cards ===== */
-.reports-card {
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 18px; 
-  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-  box-sizing: border-box;
-  width: 100%;
-}
-
-/* ===== Filters ===== */
-.filters-card {
   margin-bottom: 30px;
-  display: grid;
-  /* auto-fit ستقوم آلياً بنقل الفلاتر لسطر جديد إذا ضاقت الشاشة */
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 15px;
+  border-bottom: 2px solid #f3f4f7;
+  padding-bottom: 15px;
+  font-weight: 800;
 }
 
-/* ===== Summary ===== */
-.reports-summary {
-  display: grid;
-  /* التعديل: جعلها تتجاوب آلياً بدل 3 أعمدة ثابتة */
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+/* ================= SECTION STYLING ================= */
+.option-group {
   margin-bottom: 35px;
-}
-
-.summary-item {
-  background: #ffffff;
-  border-radius: 16px;
+  background: #f9fafb;
   padding: 20px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.05);
-  box-sizing: border-box;
+  border-radius: 15px;
+  border: 1px solid #e5e7eb;
 }
 
-.summary-item span {
-  font-size: 13px;
-  color: #6b7280;
+.option-group h2 {
+  font-size: 18px;
+  color: #374151;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.summary-item strong {
-  display: block;
-  font-size: 24px;
-  margin-top: 8px;
-  color: #111827;
+/* ================= INPUT & ADD BUTTON ================= */
+.input-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-/* ===== Charts Layout ===== */
-.reports-charts {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px; 
-  align-items: start;
+.option-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.2s;
+  outline: none;
 }
 
-/* Full width chart */
-.reports-card.full {
-  grid-column: span 2;
+.option-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-/* Chart titles */
-.reports-card h3 {
-  margin-bottom: 10px;
-  font-size: 16px; 
+.btn-add-option {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 0 20px;
+  border-radius: 10px;
   font-weight: 600;
-  color: #111827;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
 }
 
-/* ===== Chart sizing ===== */
-.chart-container {
-  height: 240px; 
-  width: 100%;
-  position: relative;
+.btn-add-option:hover {
+  background-color: #1d4ed8;
 }
 
-/* منع الـ canvas من التمدد */
-.reports-card canvas {
-  max-height: 240px;
-  width: 100% !important;
-  height: auto !important;
+/* ================= LIST ITEMS (TAGS) ================= */
+.options-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0;
 }
 
-/* ===============================
-   🆕 RESPONSIVE ADJUSTMENTS (الموبايل)
-=============================== */
-@media (max-width: 1024px) {
-  .reports-charts {
-    grid-template-columns: 1fr; /* جعل الرسوم البيانية تأخذ العرض كاملاً في التابلت */
-  }
-  
-  .reports-card.full {
-    grid-column: span 1; /* إلغاء التمدد العرضي ليتناسب مع الصف الواحد */
-  }
+.option-item {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 8px 14px;
+  border-radius: 999px; /* شكل كبسولة */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  transition: all 0.2s;
 }
 
-@media (max-width: 768px) {
-  .reports-page {
-    padding: 20px 15px;
-  }
-
-  .reports-title {
-    font-size: 24px;
-    text-align: center;
-  }
-
-  .reports-summary {
-    /* جعل كروت الملخص تأخذ العرض كاملاً في الموبايلات المتوسطة */
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .summary-item {
-    padding: 15px;
-  }
-
-  .summary-item strong {
-    font-size: 20px;
-  }
-
-  .chart-container {
-    height: 200px; /* تقليل الارتفاع قليلاً ليناسب شاشة الموبايل */
-  }
+.option-item:hover {
+  border-color: #2563eb;
+  background: #f0f7ff;
 }
 
-@media (max-width: 480px) {
-  .filters-card {
-    grid-template-columns: 1fr; /* كل فلتر في سطر مستقل */
+.btn-remove-option {
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.btn-remove-option:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 600px) {
+  .options-container {
+    padding: 20px;
   }
-  
-  .reports-card {
+  .input-row {
+    flex-direction: column;
+  }
+  .btn-add-option {
     padding: 12px;
   }
 }
