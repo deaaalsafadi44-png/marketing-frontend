@@ -347,3 +347,36 @@
 .rating-stars span:hover {
   transform: scale(1.2);
 }
+/* ===============================
+   FIX: Submission Image Modal
+================================ */
+
+.file-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* مهم */
+}
+
+.file-modal {
+  background: #fff;
+  max-width: 90vw;
+  max-height: 90vh;
+  padding: 16px;
+  border-radius: 10px;
+  z-index: 10000;
+  overflow: auto;
+}
+
+.file-modal img,
+.file-modal video {
+  max-width: 100%;
+  max-height: 80vh;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+}
