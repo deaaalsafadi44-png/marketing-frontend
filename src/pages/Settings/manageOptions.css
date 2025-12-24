@@ -1,146 +1,171 @@
 /* =====================================================
-   OPTIONS SETTINGS PAGE (MODERN UI)
+   MANAGE OPTIONS PROFESSIONAL DESIGN
 ===================================================== */
 
-.options-wrapper {
-  padding: 40px 20px;
-  background-color: #f3f4f7;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-}
-
-.options-container {
-  width: 100%;
-  max-width: 800px;
+/* الحاوية الخارجية */
+.opt-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 40px;
   background: #ffffff;
   border-radius: 20px;
-  padding: 35px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+  font-family: 'Inter', sans-serif;
 }
 
-.options-container h1 {
-  font-size: 28px;
+/* العنوان الرئيسي */
+.opt-title {
+  font-size: 32px;
+  font-weight: 800;
   color: #111827;
   margin-bottom: 30px;
-  border-bottom: 2px solid #f3f4f7;
   padding-bottom: 15px;
-  font-weight: 800;
+  border-bottom: 2px solid #f3f4f6;
+  text-align: left;
 }
 
-/* ================= SECTION STYLING ================= */
-.option-group {
-  margin-bottom: 35px;
+/* رسالة الخطأ */
+.opt-error {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border-left: 4px solid #dc2626;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* الصناديق التي تحتوي الأقسام */
+.opt-box {
   background: #f9fafb;
-  padding: 20px;
-  border-radius: 15px;
   border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 25px;
+  margin-bottom: 25px;
+  transition: transform 0.2s ease;
 }
 
-.option-group h2 {
+.opt-box:hover {
+  border-color: #d1d5db;
+}
+
+.opt-box h2 {
   font-size: 18px;
   color: #374151;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
-/* ================= INPUT & ADD BUTTON ================= */
-.input-row {
+/* منطقة الإدخال والزر */
+.opt-form {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
-.option-input {
+.opt-form input {
   flex: 1;
   padding: 12px 16px;
   border: 1px solid #d1d5db;
-  border-radius: 10px;
-  font-size: 14px;
-  transition: all 0.2s;
+  border-radius: 12px;
+  font-size: 15px;
   outline: none;
+  transition: all 0.2s;
 }
 
-.option-input:focus {
+.opt-form input:focus {
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  background: #fff;
 }
 
-.btn-add-option {
-  background-color: #2563eb;
-  color: white;
+.opt-form button {
+  background: #2563eb;
+  color: #fff;
   border: none;
-  padding: 0 20px;
-  border-radius: 10px;
+  padding: 0 24px;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
-  white-space: nowrap;
 }
 
-.btn-add-option:hover {
-  background-color: #1d4ed8;
+.opt-form button:hover {
+  background: #1d4ed8;
 }
 
-/* ================= LIST ITEMS (TAGS) ================= */
-.options-list {
+/* قائمة العناصر المضافة */
+.opt-list {
   list-style: none;
+  padding: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  padding: 0;
 }
 
-.option-item {
+.opt-list li {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   padding: 8px 14px;
-  border-radius: 999px; /* شكل كبسولة */
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 14px;
   font-weight: 500;
   color: #4b5563;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
   transition: all 0.2s;
 }
 
-.option-item:hover {
+.opt-list li:hover {
   border-color: #2563eb;
-  background: #f0f7ff;
+  transform: translateY(-2px);
 }
 
-.btn-remove-option {
+/* زر الحذف الصغير (X) */
+.del-btn {
   background: #fee2e2;
   color: #ef4444;
   border: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 10px;
   transition: all 0.2s;
 }
 
-.btn-remove-option:hover {
+.del-btn:hover {
   background: #ef4444;
   color: #ffffff;
 }
 
+/* حالة التحميل */
+.opt-loading {
+  text-align: center;
+  padding: 100px;
+  font-size: 18px;
+  color: #6b7280;
+}
+
 /* ================= RESPONSIVE ================= */
-@media (max-width: 600px) {
-  .options-container {
+@media (max-width: 768px) {
+  .opt-container {
+    margin: 20px;
     padding: 20px;
   }
-  .input-row {
+  
+  .opt-form {
     flex-direction: column;
   }
-  .btn-add-option {
+  
+  .opt-form button {
     padding: 12px;
   }
 }
