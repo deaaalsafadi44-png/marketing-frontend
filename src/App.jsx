@@ -5,7 +5,9 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import TasksList from "./pages/Tasks/TasksList";
 import AddTask from "./pages/Tasks/AddTask";
 import Users from "./pages/Users/Users";
-import Submissions from "./pages/Submissions/Submissions";
+
+// ✅ الاستيراد الصحيح
+import DeliverablesBoard from "./pages/deliverables/DeliverablesBoard";
 
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -17,11 +19,11 @@ const App = () => {
         {/* صفحة تسجيل الدخول بدون حماية */}
         <Route path="/login" element={<Login />} />
 
-        {/* Dashboard (Admin فقط) */}
+        {/* ✅ Dashboard (تمت إضافة Manager هنا) */}
         <Route
           path="/dashboard"
           element={
-            <PrivateRoute roles={["Admin"]}>
+            <PrivateRoute roles={["Admin", "Manager"]}> 
               <Dashboard />
             </PrivateRoute>
           }
@@ -57,7 +59,7 @@ const App = () => {
           }
         />
 
-        {/* ✅ Submissions (أي مستخدم مسجّل) */}
+        {/* ✅ Submissions / Deliverables */}
         <Route
           path="/submissions"
           element={
