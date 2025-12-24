@@ -8,7 +8,7 @@ function Navbar() {
   const navigate = useNavigate();
 
   /* =========================
-     AUTH CONTEXT
+      AUTH CONTEXT
   ========================= */
   const { user, logout, loading } = useAuth();
 
@@ -19,7 +19,7 @@ function Navbar() {
   if (!user) return null;
 
   /* ================================
-     ⭐ اسم السيستم
+      ⭐ اسم السيستم
   ================================ */
   const [systemName, setSystemName] = useState("System");
 
@@ -40,7 +40,7 @@ function Navbar() {
   }, [user.role]);
 
   /* ================================
-     🚪 Logout
+      🚪 Logout
   ================================ */
   const handleLogout = async () => {
     await logout();
@@ -62,16 +62,16 @@ function Navbar() {
           Tasks
         </NavLink>
 
-        {/* ✅ Admin + Manager */}
+        {/* ⭐ Submissions / Deliverables - تظهر الآن للجميع */}
+        <NavLink to="/submissions" className="nav-link">
+          Submissions
+        </NavLink>
+
+        {/* ✅ Admin + Manager فقط للـ Reports */}
         {(user.role === "Admin" || user.role === "Manager") && (
           <>
             <NavLink to="/reports" className="nav-link">
               Reports
-            </NavLink>
-
-            {/* ⭐ Submissions / Deliverables */}
-            <NavLink to="/submissions" className="nav-link">
-              Submissions
             </NavLink>
           </>
         )}
