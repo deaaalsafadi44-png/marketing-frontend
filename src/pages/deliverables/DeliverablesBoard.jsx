@@ -430,7 +430,20 @@ const DeliverablesBoard = () => {
             )}
 
             {getFileType(selectedFile) === "video" && (
-              <video src={selectedFile.url} controls autoPlay />
+              <video 
+                key={selectedFile.url} 
+                src={selectedFile.url} 
+                controls 
+                autoPlay 
+                style={{
+                  width: "100%",
+                  maxHeight: "75vh",
+                  display: "block",
+                  margin: "0 auto",
+                  borderRadius: "12px",
+                  backgroundColor: "#000"
+                }}
+              />
             )}
 
             {getFileType(selectedFile) === "raw" && (
