@@ -68,101 +68,95 @@ const ViewTask = () => {
     loadDeliverables();
   }, [id]);
 
-  /* ================= TIMER (SECURE + BACKEND SYNC) ================= */
-useEffect(() => {
-  if (!id || isNaN(Number(id))) return;
+   /* ================= TIMER (FIXED - NO JUMP ON REFRESH) ================= */
+  const secondsKey = "timer_seconds_" + id;
+  const startKey = "timer_start_" + id;
 
-  const savedStart = localStorage.getItem("timer_start_" + id);
-  const savedSeconds = localStorage.getItem("timer_seconds_" + id);
+  // ✅ تحميل الوقت المخزن + تحديد حالة التشغيل (بدون إضافة diff للتخزين)
+  useEffect(() => {
+    if (!id || isNaN(Number(id))) return;
 
-  let totalSeconds = savedSeconds ? Number(savedSeconds) : 0;
+    const savedSeconds = Number(localStorage.getItem(secondsKey) || "0");
+    const savedStart = localStorage.getItem(startKey);
 
-  if (savedStart) {
-    const diff = Math.floor((Date.now() - Number(savedStart)) / 1000);
-    totalSeconds += diff;
+    setSeconds(savedSeconds);
+    setIsRunning(!!savedStart);
+  }, [id]);
+
+  // ✅ عرض الوقت بشكل صحيح (إذا شغال نضيف diff للعرض فقط)
+  useEffect(() => {
+    if (!id || isNaN(Number(id))) return;
+
+    let interval = null;
+
+    const tick = () => {
+      const baseSeconds = Number(localStorage.getItem(secondsKey) || "0");
+      const savedStart = localStorage.getItem(startKey);
+
+      if (!savedStart) {
+        setSeconds(baseSeconds);
+        return;
+      }
+
+      const diff = Math.floor((Date.now() - Number(savedStart)) / 1000);
+      setSeconds(baseSeconds + diff);
+    };
+
+    // نحدث مباشرة مرة أولى
+    tick();
+
+    // ثم كل ثانية للتحديث
+    interval = setInterval(tick, 1000);
+
+    return () => clearInterval(interval);
+  }, [isRunning, id]);
+
+  // ✅ Start: نبدأ من الآن فقط (ولا نلمس seconds)
+  const startTimer = () => {
+    localStorage.setItem(startKey, Date.now());
     setIsRunning(true);
-  }
+  };
 
-  setSeconds(totalSeconds);
-}, [id]);
+  // ✅ Pause: نحسب diff مرة واحدة ونثبته داخل timer_seconds ثم نحذف start
+  const pauseTimer = () => {
+    const savedStart = localStorage.getItem(startKey);
+    const baseSeconds = Number(localStorage.getItem(secondsKey) || "0");
 
-useEffect(() => {
-  let interval = null;
+    if (savedStart) {
+      const diff = Math.floor((Date.now() - Number(savedStart)) / 1000);
+      const newTotal = baseSeconds + diff;
 
-  if (isRunning && id && !isNaN(Number(id))) {
-    interval = setInterval(() => {
-      setSeconds((prev) => {
-        const updated = prev + 1;
-        localStorage.setItem("timer_seconds_" + id, updated);
-        return updated;
+      localStorage.setItem(secondsKey, String(newTotal));
+      setSeconds(newTotal);
+    }
+
+    localStorage.removeItem(startKey);
+    setIsRunning(false);
+  };
+
+  // ✅ Finish: نثبّت الوقت أولاً ثم نحفظ بالدقائق كما كان منطقك القديم تماماً
+  const finishTask = async () => {
+    pauseTimer(); // يثبت الوقت ويوقف
+
+    const finalSeconds = Number(localStorage.getItem(secondsKey) || "0");
+    const totalMinutes = Math.floor(finalSeconds / 60);
+
+    try {
+      const res = await api.put(`/tasks/${id}/time`, {
+        timeSpent: totalMinutes,
       });
-    }, 1000);
-  }
 
-  return () => clearInterval(interval);
-}, [isRunning, id]);
+      setTask((prev) => ({ ...prev, timeSpent: res.data.timeSpent }));
+      alert("✅ Task finished! Time saved: " + totalMinutes + " min");
 
-/* ===== TIMER ACTIONS (CONNECTED TO BACKEND) ===== */
-const startTimer = async () => {
-  try {
-    await api.post(`/tasks/${id}/timer/start`);
-
-    localStorage.setItem("timer_start_" + id, Date.now());
-    setIsRunning(true);
-  } catch (err) {
-    console.error(err);
-    alert("❌ فشل تشغيل التايمر");
-  }
-};
-
-const pauseTimer = async () => {
-  try {
-    await api.post(`/tasks/${id}/timer/pause`);
-
-    localStorage.removeItem("timer_start_" + id);
-    setIsRunning(false);
-  } catch (err) {
-    console.error(err);
-    alert("❌ فشل إيقاف التايمر");
-  }
-};
-
-const resumeTimer = async () => {
-  try {
-    await api.post(`/tasks/${id}/timer/resume`);
-
-    localStorage.setItem("timer_start_" + id, Date.now());
-    setIsRunning(true);
-  } catch (err) {
-    console.error(err);
-    alert("❌ فشل استئناف التايمر");
-  }
-};
-
-const finishTask = async () => {
-  await pauseTimer();
-
-  const totalMinutes = Math.floor(seconds / 60);
-
-  try {
-    const res = await api.put(`/tasks/${id}/time`, {
-      timeSpent: totalMinutes,
-    });
-
-    setTask((prev) => ({ ...prev, timeSpent: res.data.timeSpent }));
-
-    setSeconds(0);
-    setIsRunning(false);
-
-    localStorage.removeItem("timer_start_" + id);
-    localStorage.removeItem("timer_seconds_" + id);
-
-    alert("✅ Task finished! Time saved: " + totalMinutes + " min");
-  } catch (err) {
-    console.error(err);
-    alert("❌ Error saving time");
-  }
-};
+      setSeconds(0);
+      setIsRunning(false);
+      localStorage.removeItem(startKey);
+      localStorage.removeItem(secondsKey);
+    } catch {
+      alert("❌ Error saving time");
+    }
+  };
 
 
   /* ================= UPLOAD ================= */
