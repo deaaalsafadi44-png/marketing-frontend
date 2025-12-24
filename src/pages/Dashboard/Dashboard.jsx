@@ -68,8 +68,9 @@ const Dashboard = () => {
     }).length;
   };
 
-  // ربط الكروت ديناميكياً مع الحالات المحددة
+  // ربط الكروت ديناميكياً مع الحالات المحددة + التوتال
   const stats = {
+    total: tasks.length, // ربط حقيقي بإجمالي عدد المهام
     new: getCountByStatus("New"),
     accepted: getCountByStatus("Accepted") + getCountByStatus("Accebted"), // دمج لتجنب أخطاء الكتابة
     inProgress: getCountByStatus("In progress"),
@@ -152,8 +153,14 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <h1 className="dashboard-title">لوحة القيادة الرئيسية (Dashboard)</h1>
 
-      {/* الكروت العلوية - تم تعديل الأسماء والربط لتكون ديناميكية تماماً */}
-      <div className="stats-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px' }}>
+      {/* ✅ الكروت العلوية - إضافة Total Tasks وتنسيق 6 كروت بشكل متناسق */}
+      <div className="stats-row" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', 
+        gap: '15px',
+        marginBottom: '25px'
+      }}>
+        <StatCard title="Total Tasks" value={stats.total} border="black" />
         <StatCard title="New" value={stats.new} border="blue" />
         <StatCard title="Accepted" value={stats.accepted} border="orange" />
         <StatCard title="In Progress" value={stats.inProgress} border="gold" />
