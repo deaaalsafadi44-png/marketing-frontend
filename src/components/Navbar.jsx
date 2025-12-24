@@ -41,7 +41,7 @@ function Navbar() {
 
   /* ================================
       🚪 Logout
-  ================================ */
+  =============================== */
   const handleLogout = async () => {
     await logout();
     navigate("/login");
@@ -54,9 +54,12 @@ function Navbar() {
       </div>
 
       <div className="nav-right">
-        <NavLink to="/" end className="nav-link">
-          Dashboard
-        </NavLink>
+        {/* ✅ التعديل هنا: Dashboard تظهر فقط لـ Admin و Manager */}
+        {(user.role === "Admin" || user.role === "Manager") && (
+          <NavLink to="/" end className="nav-link">
+            Dashboard
+          </NavLink>
+        )}
 
         <NavLink to="/tasks" className="nav-link">
           Tasks
