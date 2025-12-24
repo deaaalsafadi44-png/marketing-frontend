@@ -10,16 +10,17 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 /* =============================================
-    🛠️ دالة جلب الشعار (لإصلاح خطأ ReferenceError)
+    🛠️ دالة جلب الشعار (تم ضبطها لتطابق لقطة الشاشة 896)
    ============================================= */
 const getCompanyLogo = (companyName) => {
   const name = companyName?.toLowerCase().trim();
   
+  // مطابقة دقيقة لأسماء الملفات في مجلد public/logos
   if (name === "laffah") return "/logos/laffah.png"; 
   if (name === "healthy family") return "/logos/healthyfamily.png"; 
   if (name === "syrian united co") return "/logos/syrian united co.png"; 
   
-  // شعار افتراضي في حال لم يتم العثور على الشركة
+  // شعار افتراضي في حال لم يتطابق الاسم
   return "/logos/laffah.png"; 
 };
 
