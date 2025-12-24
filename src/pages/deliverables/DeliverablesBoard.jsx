@@ -141,21 +141,26 @@ const DeliverablesBoard = () => {
     }
   };
 
-  /* ================= HELPERS (UPDATED) ================= */
+  /* ================= HELPERS (SOLVED) ================= */
   const getFileType = (file) => {
     const url = file.url?.toLowerCase() || "";
+    const name = file.originalName?.toLowerCase() || "";
+    
+    // التحقق الصارم من ملفات PDF
+    if (url.endsWith(".pdf") || name.endsWith(".pdf") || file.mimeType === "application/pdf") {
+      return "pdf";
+    }
     if (file.resource_type === "image" || file.mimeType?.startsWith("image/")) return "image";
     if (file.resource_type === "video" || file.mimeType?.startsWith("video/")) return "video";
-    if (url.endsWith(".pdf") || file.mimeType === "application/pdf") return "pdf";
     return "raw";
   };
 
   const handleFileClick = (file) => {
     const type = getFileType(file);
     if (type === "pdf") {
-      // فتح الـ PDF مباشرة في صفحة جديدة تماماً كما في صفحة الـ View
-      const safeUrl = file.url.replace('/upload/', '/upload/fl_attachment/');
-      window.open(safeUrl, '_blank');
+      // الحل النهائي لفتح الـ PDF: إرسال رابط مباشر للمتصفح ليفتحه بنافذة جديدة
+      // نستخدم window.open للرابط الأصلي لضمان تخطي أي مشكلة في المودال
+      window.open(file.url, '_blank', 'noopener,noreferrer');
     } else {
       setSelectedFile(file);
     }
@@ -234,14 +239,18 @@ const DeliverablesBoard = () => {
                       onClick={() => handleFileClick(file)}
                     >
                       {type === "image" && <img src={file.url} alt="" />}
-                      {/* عرض صورة مصغرة للـ PDF إذا أمكن، وإلا أيقونة */}
+                      
+                      {/* عرض أيقونة واضحة للـ PDF بدلاً من محاولة عرض صورة معطوبة */}
                       {type === "pdf" && (
-                        <div className="file-preview-wrapper">
-                           <img src={file.url.replace(/\.pdf$/i, ".jpg")} alt="PDF Preview" onError={(e) => e.target.style.display='none'} />
-                           <div className="file-icon-overlay">PDF</div>
+                        <div className="file-generic pdf-style">
+                          <div className="pdf-icon">📄</div>
+                          <div className="pdf-text">PDF Document</div>
+                          <span className="file-name-small">{decodeFileName(file.originalName)}</span>
                         </div>
                       )}
+
                       {type === "video" && <video src={file.url} muted />}
+                      
                       {type === "raw" && (
                         <div className="file-generic">
                           📎 {decodeFileName(file.originalName)}
@@ -256,8 +265,8 @@ const DeliverablesBoard = () => {
         </div>
       </div>
 
-      {/* ================= FILE MODAL ================= */}
-      {selectedFile && (
+      {/* ================= FILE MODAL (FOR IMAGES/VIDEOS ONLY) ================= */}
+      {selectedFile && getFileType(selectedFile) !== "pdf" && (
         <div
           className="file-modal-overlay"
           onClick={() => setSelectedFile(null)}
