@@ -16,6 +16,7 @@ const DeliverablesBoard = () => {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [searchName, setSearchName] = useState("");
+  const [searchCompany, setSearchCompany] = useState(""); // 🆕 حالة فلترة الشركة
 
   /* 🆕 current user */
   const [currentUser, setCurrentUser] = useState(null);
@@ -74,7 +75,6 @@ const DeliverablesBoard = () => {
       for (const id of missingIds) {
         try {
           const res = await api.get(`/tasks/${id}`);
-          // تعديل هنا ليقرأ 'company' بدلاً من 'companyName' بناءً على الـ Schema
           newDetails[id] = {
             title: res.data?.title || `Task #${id}`,
             status: res.data?.status || "Unknown",
@@ -97,8 +97,17 @@ const DeliverablesBoard = () => {
     if (items.length) loadDetails();
   }, [items, tasksData]);
 
+  /* 🆕 استخراج قائمة الشركات الفريدة من البيانات المتاحة للفلترة */
+  const companiesList = useMemo(() => {
+    const companies = Object.values(tasksData)
+      .map((d) => d.company)
+      .filter((c) => c && c !== "No Company" && c !== "Error");
+    return [...new Set(companies)]; // حذف التكرار
+  }, [tasksData]);
+
   /* ================= FILTER LOGIC ================= */
   const filteredItems = items.filter((item) => {
+    const detail = tasksData[item.taskId] || {};
     const itemDate = item.createdAt ? new Date(item.createdAt) : null;
     
     // فلتر التاريخ
@@ -114,6 +123,12 @@ const DeliverablesBoard = () => {
     ) {
       return false;
     }
+
+    // 🆕 فلتر الشركة
+    if (searchCompany && detail.company !== searchCompany) {
+      return false;
+    }
+
     return true;
   });
 
@@ -222,6 +237,21 @@ const DeliverablesBoard = () => {
                 onChange={(e) => setSearchName(e.target.value)}
               />
             </div>
+
+            {/* 🆕 حقل فلترة الشركة */}
+            <div className="filter-group">
+              <label>Company</label>
+              <select 
+                value={searchCompany} 
+                onChange={(e) => setSearchCompany(e.target.value)}
+              >
+                <option value="">All Companies</option>
+                {companiesList.map((comp) => (
+                  <option key={comp} value={comp}>{comp}</option>
+                ))}
+              </select>
+            </div>
+
             <div className="filter-group">
               <label>From Date</label>
               <input 
@@ -238,7 +268,15 @@ const DeliverablesBoard = () => {
                 onChange={(e) => setToDate(e.target.value)}
               />
             </div>
-            <button className="reset-filters" onClick={() => { setSearchName(""); setFromDate(""); setToDate(""); }}>
+            <button 
+              className="reset-filters" 
+              onClick={() => { 
+                setSearchName(""); 
+                setSearchCompany(""); 
+                setFromDate(""); 
+                setToDate(""); 
+              }}
+            >
               Reset
             </button>
           </div>
@@ -254,7 +292,6 @@ const DeliverablesBoard = () => {
                     <h4 className="submission-task-title">
                       {detail.title || `Task #${task.taskId}`}
                     </h4>
-                    {/* 🆕 عرض اسم الشركة بشكل صحيح */}
                     <span className="company-badge">🏢 {detail.company}</span>
                   </div>
                   
