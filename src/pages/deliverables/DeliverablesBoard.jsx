@@ -36,7 +36,7 @@ const DeliverablesBoard = () => {
   const loadDeliverables = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/deliverables");
+      const res = await api.get("/deliverables/submissions");
       setItems(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Failed to load deliverables:", err);
@@ -95,7 +95,7 @@ const DeliverablesBoard = () => {
     filteredItems.forEach((item) => {
       if (!map[item.taskId]) {
         map[item.taskId] = {
-          deliverableId: item._id,
+          deliverableId: item.deliverableId,
           taskId: item.taskId,
           submittedByName: item.submittedByName,
           createdAt: item.createdAt,
@@ -114,13 +114,14 @@ const DeliverablesBoard = () => {
 
   /* ================= RATE ================= */
   const handleRate = async (task, value) => {
-    // ✅ لا نمنع الضغط من الفرونت لأن /auth/me عندك أحياناً يعطي 401
-    // ✅ الباك اند هو الذي يمنع غير admin/manager (403)
-    const newRating = task.rating === value ? Math.max(value - 1, 0) : value;
+    const newRating = task.rating === value ? 0 : value;
 
-    // ✅ تحديث فوري للواجهة (Optimistic UI)
     setItems((prev) =>
-      prev.map((i) => (i.taskId === task.taskId ? { ...i, rating: newRating } : i))
+      prev.map((i) =>
+        i.deliverableId === task.deliverableId
+          ? { ...i, rating: newRating }
+          : i
+      )
     );
 
     try {
@@ -130,10 +131,11 @@ const DeliverablesBoard = () => {
     } catch (err) {
       console.error("Rating failed", err);
 
-      // ❗ لو فشل (401/403/400) نرجع التقييم القديم كما كان
       setItems((prev) =>
         prev.map((i) =>
-          i.taskId === task.taskId ? { ...i, rating: task.rating } : i
+          i.deliverableId === task.deliverableId
+            ? { ...i, rating: task.rating }
+            : i
         )
       );
     }
@@ -182,26 +184,20 @@ const DeliverablesBoard = () => {
                 <div className="user-info">
                   <strong>{task.submittedByName}</strong>
 
-                  {/* ⭐ STARS */}
                   <div className="rating-stars">
                     {[1, 2, 3, 4, 5].map((n) => (
                       <span
                         key={n}
                         onClick={(e) => {
-                          e.stopPropagation(); // ✅ مهم جداً
+                          e.stopPropagation();
                           handleRate(task, n);
                         }}
                         style={{
-                          cursor: "pointer", // ✅ خليها دايماً pointer حتى لو /auth/me فشل
+                          cursor: "pointer",
                           color: task.rating >= n ? "#facc15" : "#d1d5db",
                           fontSize: "18px",
                           userSelect: "none",
                         }}
-                        title={
-                          isAdminOrManager
-                            ? `Rate ${n}`
-                            : "Only admin/manager can rate"
-                        }
                       >
                         ★
                       </span>
@@ -241,7 +237,7 @@ const DeliverablesBoard = () => {
         </div>
       </div>
 
-      {/* FILE PREVIEW MODAL */}
+      {/* ================= FILE MODAL ================= */}
       {selectedFile && (
         <div
           className="file-modal-overlay"
@@ -253,6 +249,21 @@ const DeliverablesBoard = () => {
             </button>
 
             <h3>{decodeFileName(selectedFile.originalName)}</h3>
+
+            {/* ✅ IMAGE (الإضافة الوحيدة) */}
+            {getFileType(selectedFile) === "image" && (
+              <img
+                src={selectedFile.url}
+                alt={selectedFile.originalName}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "80vh",
+                  display: "block",
+                  margin: "0 auto",
+                  objectFit: "contain",
+                }}
+              />
+            )}
 
             {getFileType(selectedFile) === "video" && (
               <video src={selectedFile.url} controls autoPlay />
