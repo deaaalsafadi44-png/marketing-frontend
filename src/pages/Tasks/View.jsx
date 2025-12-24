@@ -214,19 +214,19 @@ const ViewTask = () => {
     }
   };
 
-  /* ================= FILE HELPER ================= */
+  /* ================= FILE HELPER (MODIFIED TO MATCH SUBMISSIONS) ================= */
   const handleFilePreview = (file) => {
-    // إذا كان PDF أو ملف غير صورة/فيديو، نجهزه للفتح والتحميل
-    const isPDF = file.url.toLowerCase().endsWith('.pdf') || file.mimeType === "application/pdf";
+    const url = file.url?.toLowerCase() || "";
+    const name = file.originalName?.toLowerCase() || "";
+    const isPDF = url.endsWith(".pdf") || name.endsWith(".pdf") || file.mimeType === "application/pdf";
     const isImage = file.mimeType?.startsWith("image/");
     const isVideo = file.mimeType?.startsWith("video/");
 
     if (isPDF) {
-      // فتح الـ PDF مباشرة في Tab جديد مع باراميتر التحميل لضمان عمله من كلاوديناري
-      const safeUrl = file.url.replace('/upload/', '/upload/fl_attachment/');
-      window.open(safeUrl, '_blank');
+      // فتح الـ PDF مباشرة في تبويب جديد كما في Submissions (دون استبدال fl_attachment لضمان العرض وليس التحميل)
+      window.open(file.url, '_blank', 'noopener,noreferrer');
     } else {
-      // الصور والفيديو والملفات الأخرى تفتح المودال
+      // الصور والفيديو تفتح المودال
       setPreviewFile(file);
     }
   };
@@ -344,10 +344,12 @@ const ViewTask = () => {
 
                   {file.mimeType?.startsWith("image/") ? (
                     <img src={file.url} alt="" />
+                  ) : (file.url?.toLowerCase().endsWith('.pdf') || file.mimeType === "application/pdf") ? (
+                    <div className="file-icon">📄</div>
                   ) : file.mimeType?.startsWith("video/") ? (
                     <video src={file.url} />
                   ) : (
-                    <div className="file-icon">📄</div>
+                    <div className="file-icon">📁</div>
                   )}
                 </div>
               ))}
@@ -374,7 +376,7 @@ const ViewTask = () => {
         </div>
       </div>
 
-      {/* ===== PREVIEW MODAL (Improved for Non-Media Files) ===== */}
+      {/* ===== PREVIEW MODAL ===== */}
       {previewFile && (
         <div className="file-modal-overlay" onClick={() => setPreviewFile(null)}>
           <div className="file-modal" onClick={(e) => e.stopPropagation()}>
@@ -399,12 +401,11 @@ const ViewTask = () => {
                     className="timer-btn finish" 
                     style={{ width: "auto", padding: "10px 25px" }}
                     onClick={() => {
-                      const url = previewFile.url.replace('/upload/', '/upload/fl_attachment/');
-                      window.open(url, '_blank');
+                      window.open(previewFile.url, '_blank');
                       setPreviewFile(null);
                     }}
                   >
-                    Download File
+                    Open File
                   </button>
                 </div>
               )}
@@ -436,9 +437,11 @@ const ViewTask = () => {
                   </span>
 
                   {file.mimeType?.startsWith("image/") && <img src={file.url} alt="" />}
+                  {(file.url?.toLowerCase().endsWith('.pdf') || file.mimeType === "application/pdf") && <div className="file-generic">📄 PDF</div>}
                   {file.mimeType?.startsWith("video/") && <video src={file.url} />}
                   {!file.mimeType?.startsWith("image/") &&
-                    !file.mimeType?.startsWith("video/") && (
+                    !file.mimeType?.startsWith("video/") &&
+                    !(file.url?.toLowerCase().endsWith('.pdf') || file.mimeType === "application/pdf") && (
                       <div className="file-generic">📎 {file.originalName}</div>
                     )}
                 </div>
