@@ -175,7 +175,16 @@ const TasksList = () => {
             return (
               <tr key={task.id}>
                 <td>{task.id}</td>
-                <td>{task.company || "—"}</td>
+                {/* لا تنسَ استيراد الدالة في أعلى الملف: import { getCompanyLogo } from "../../utils/companyHelper"; */}
+
+<td style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+  <img 
+    src={getCompanyLogo(task.company)} 
+    alt="logo" 
+    style={{ width: '25px', height: '25px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #ddd' }} 
+  />
+  <span>{task.company}</span>
+</td>
                 <td>{task.type || "—"}</td>
                 <td>{task.workerName || "—"}</td>
 
