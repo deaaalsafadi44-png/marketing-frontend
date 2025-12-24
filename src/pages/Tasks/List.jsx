@@ -171,11 +171,9 @@ const TasksList = () => {
 
         <tbody>
           {filteredTasks.map((task) => {
-            // ✅ تصحيح منطق الصلاحية للموظف
-            const isAdminOrManager = user.role === "Admin" || user.role === "Manager";
-            const isAssignedWorker = safeLower(task.workerName) === safeLower(user.username) || safeLower(task.workerName) === safeLower(user.name);
-            
-            const canChangeStatus = isAdminOrManager || isAssignedWorker;
+            // ✅ تم التعديل هنا: أي مستخدم مسجل دخول يمكنه الآن تغيير الحالة
+            // القيد المرتبط باسم الموظف تمت إزالته بناءً على طلبك
+            const canChangeStatus = true;
 
             return (
               <tr key={task.id || task._id}>
@@ -221,7 +219,7 @@ const TasksList = () => {
                       border: 'none',
                       fontSize: '12px',
                       fontWeight: 'bold',
-                      cursor: canChangeStatus ? "pointer" : "not-allowed",
+                      cursor: "pointer",
                     }}
                   >
                     {statusOptions.map((s, i) => (
@@ -232,7 +230,7 @@ const TasksList = () => {
 
                 <td>
                   <Link to={`/tasks/view/${task.id || task._id}`} className="view-link">View</Link>
-                  {isAdminOrManager && (
+                  {(user.role === "Admin" || user.role === "Manager") && (
                     <>
                       {" | "}
                       <Link to={`/tasks/edit/${task.id || task._id}`} className="edit-link">Edit</Link>
