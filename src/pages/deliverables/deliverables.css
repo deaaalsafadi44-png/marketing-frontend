@@ -329,32 +329,22 @@
   transform: scale(1.3);
 }
 
-@media (max-width: 640px) {
-  .submission-card-top-header {
-    flex-direction: column;
-    gap: 10px;
-  }
-  .task-info-badges {
-    align-self: flex-start;
-  }
-}
-
 /* ===============================
-   FILTER BAR (تم تعديل العرض هنا)
+   FILTER BAR 
 =============================== */
 .feed-filters-bar {
   display: flex;
   gap: 15px;
   background: #ffffff;
-  padding: 20px; /* زيادة طفيفة للتنسيق */
-  border-radius: 20px; /* توحيدها مع حواف الكروت */
+  padding: 20px;
+  border-radius: 20px;
   margin-top: 20px;
   align-items: flex-end;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   flex-wrap: wrap;
   width: 100%;
-  max-width: 800px; /* نفس العرض تماماً لكروت التاسكات */
-  box-sizing: border-box; /* لضمان تطابق المقاس بدقة */
+  max-width: 800px;
+  box-sizing: border-box;
 }
 
 .filter-group {
@@ -374,7 +364,7 @@
 .filter-group select {
   padding: 8px 12px;
   border: 1px solid #e2e8f0;
-  border-radius: 8px; /* توحيد الحواف */
+  border-radius: 8px;
   font-size: 14px;
   outline: none;
   background: #f8fafc;
@@ -389,7 +379,7 @@
   cursor: pointer;
   font-weight: 600;
   transition: 0.2s;
-  height: 38px; /* توحيد الطول مع المدخلات */
+  height: 38px;
 }
 
 .reset-filters:hover { background: #e2e8f0; }
@@ -413,4 +403,76 @@
   align-items: center;
   gap: 5px;
   border: 1px solid #e2e8f0;
+}
+
+/* ===============================
+   🆕 RESPONSIVE ADJUSTMENTS (الموبايل)
+=============================== */
+@media (max-width: 768px) {
+  .deliverables-feed-page {
+    padding: 20px 12px; /* تقليل الهوامش الجانبية في الموبايل */
+  }
+
+  .deliverables-feed-header h1 {
+    font-size: 24px;
+  }
+
+  .feed-filters-bar {
+    flex-direction: column; /* ترتيب الفلاتر عمودياً */
+    align-items: stretch;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .filter-group input, 
+  .filter-group select {
+    width: 100%; /* الحقول تأخذ كامل العرض */
+    height: 45px; /* تكبير الحقول لسهولة اللمس */
+  }
+
+  .reset-filters {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .submission-card {
+    padding: 16px; /* تقليل الحشو الداخلي للكارت */
+  }
+
+  .submission-card-top-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .task-info-badges {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .task-files-grid {
+    grid-template-columns: repeat(2, 1fr); /* عرض ملفين فقط في الصف لتكبير الحجم */
+    gap: 8px;
+  }
+
+  .task-file-card {
+    height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .task-files-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 14px;
+  }
 }
