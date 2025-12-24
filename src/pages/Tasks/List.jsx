@@ -10,18 +10,15 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 /* =============================================
-    🛠️ دالة جلب الشعار (تم ضبطها لتطابق لقطة الشاشة 896)
+    🛠️ دالة جلب الشعار
    ============================================= */
 const getCompanyLogo = (companyName) => {
-  const name = companyName?.toLowerCase().trim();
-  
-  // مطابقة دقيقة لأسماء الملفات في مجلد public/logos
-  if (name === "laffah") return "/logos/laffah.png"; 
-  if (name === "healthy family") return "/logos/healthyfamily.png"; 
-  if (name === "syrian united co") return "/logos/syrian united co.png"; 
-  
-  // شعار افتراضي في حال لم يتطابق الاسم
-  return "/logos/laffah.png"; 
+  if (!companyName) return "/logos/laffah.png";
+  const name = companyName.toLowerCase();
+  if (name.includes("laffah")) return "/logos/laffah.png"; 
+  if (name.includes("healthy")) return "/logos/healthyfamily.png"; 
+  if (name.includes("syrian") || name.includes("united")) return "/logos/syrian united co.png"; 
+  return "/logos/laffah.png";
 };
 
 const TasksList = () => {
@@ -33,7 +30,7 @@ const TasksList = () => {
   const [loading, setLoading] = useState(true);
   const [statusOptions, setStatusOptions] = useState([]);
 
-  const safeLower = (val) => String(val || "").toLowerCase();
+  const safeLower = (val) => String(val || "").toLowerCase().trim();
   const safeDate = (val) => {
     const d = new Date(val);
     return isNaN(d.getTime()) ? null : d;
@@ -83,14 +80,19 @@ const TasksList = () => {
   }, [authLoading, user, location.state]);
 
   const handleStatusChange = async (taskId, newStatus) => {
-    const task = tasks.find((t) => t.id === taskId);
+    // نجد التاسك من القائمة المحلية أولاً
+    const task = tasks.find((t) => t.id === taskId || t._id === taskId);
     if (!task) return;
+
     try {
+      // إرسال التحديث للسيرفر
       await updateTaskApi(taskId, { ...task, status: newStatus });
-      loadTasks();
+      // تحديث الحالة محلياً فوراً ليشعر المستخدم بالتغيير
+      setTasks(prev => prev.map(t => (t.id === taskId || t._id === taskId) ? { ...t, status: newStatus } : t));
     } catch (err) {
       console.error("Update failed", err);
-      alert("You don't have permission to update this task status.");
+      alert("Error: Could not update status. Check permissions.");
+      loadTasks(); // إعادة التحميل لإرجاع القيمة القديمة في حال الفشل
     }
   };
 
@@ -130,8 +132,8 @@ const TasksList = () => {
           )}
         </select>
 
-        <input type="date" onChange={(e) => setDateFrom(e.target.value)} />
-        <input type="date" onChange={(e) => setDateTo(e.target.value)} />
+        <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+        <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
 
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           <option value="">All Status</option>
@@ -169,29 +171,23 @@ const TasksList = () => {
 
         <tbody>
           {filteredTasks.map((task) => {
-            const canChangeStatus = 
-              user.role === "Admin" || 
-              user.role === "Manager" || 
-              task.workerName === user.username;
+            // ✅ تصحيح منطق الصلاحية للموظف
+            const isAdminOrManager = user.role === "Admin" || user.role === "Manager";
+            const isAssignedWorker = safeLower(task.workerName) === safeLower(user.username) || safeLower(task.workerName) === safeLower(user.name);
+            
+            const canChangeStatus = isAdminOrManager || isAssignedWorker;
 
             return (
-              <tr key={task.id}>
+              <tr key={task.id || task._id}>
                 <td>{task.id}</td>
                 
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '50%',
-                        border: '1px solid #e0e0e0',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: '#fff',
-                        flexShrink: 0,
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                        width: '32px', height: '32px', borderRadius: '50%',
+                        border: '1px solid #e0e0e0', overflow: 'hidden',
+                        display: 'flex', justifyContent: 'center', alignItems: 'center',
+                        backgroundColor: '#fff', flexShrink: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                     }}>
                         <img 
                           src={getCompanyLogo(task.company)} 
@@ -216,7 +212,7 @@ const TasksList = () => {
                   <select
                     value={task.status || ""}
                     disabled={!canChangeStatus}
-                    onChange={(e) => handleStatusChange(task.id, e.target.value)}
+                    onChange={(e) => handleStatusChange(task.id || task._id, e.target.value)}
                     style={{
                       backgroundColor: getStatusColor(task.status),
                       color: "#fff",
@@ -235,13 +231,13 @@ const TasksList = () => {
                 </td>
 
                 <td>
-                  <Link to={`/tasks/view/${task.id}`} className="view-link">View</Link>
-                  {(user.role === "Admin" || user.role === "Manager") && (
+                  <Link to={`/tasks/view/${task.id || task._id}`} className="view-link">View</Link>
+                  {isAdminOrManager && (
                     <>
                       {" | "}
-                      <Link to={`/tasks/edit/${task.id}`} className="edit-link">Edit</Link>
+                      <Link to={`/tasks/edit/${task.id || task._id}`} className="edit-link">Edit</Link>
                       {" | "}
-                      <span className="delete-link" onClick={() => handleDelete(task.id)} style={{cursor:'pointer', color:'#d32f2f'}}>Delete</span>
+                      <span className="delete-link" onClick={() => handleDelete(task.id || task._id)} style={{cursor:'pointer', color:'#d32f2f'}}>Delete</span>
                     </>
                   )}
                 </td>
