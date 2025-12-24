@@ -68,68 +68,102 @@ const ViewTask = () => {
     loadDeliverables();
   }, [id]);
 
-  /* ================= TIMER ================= */
-  useEffect(() => {
-    if (!id || isNaN(Number(id))) return;
+  /* ================= TIMER (SECURE + BACKEND SYNC) ================= */
+useEffect(() => {
+  if (!id || isNaN(Number(id))) return;
 
-    const savedStart = localStorage.getItem("timer_start_" + id);
-    const savedSeconds = localStorage.getItem("timer_seconds_" + id);
+  const savedStart = localStorage.getItem("timer_start_" + id);
+  const savedSeconds = localStorage.getItem("timer_seconds_" + id);
 
-    let totalSeconds = savedSeconds ? Number(savedSeconds) : 0;
+  let totalSeconds = savedSeconds ? Number(savedSeconds) : 0;
 
-    if (savedStart) {
-      const diff = Math.floor((Date.now() - Number(savedStart)) / 1000);
-      totalSeconds += diff;
-      setIsRunning(true);
-    }
+  if (savedStart) {
+    const diff = Math.floor((Date.now() - Number(savedStart)) / 1000);
+    totalSeconds += diff;
+    setIsRunning(true);
+  }
 
-    setSeconds(totalSeconds);
-  }, [id]);
+  setSeconds(totalSeconds);
+}, [id]);
 
-  useEffect(() => {
-    let interval = null;
-    if (isRunning && id && !isNaN(Number(id))) {
-      interval = setInterval(() => {
-        setSeconds((prev) => {
-          const updated = prev + 1;
-          localStorage.setItem("timer_seconds_" + id, updated);
-          return updated;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isRunning, id]);
+useEffect(() => {
+  let interval = null;
 
-  const startTimer = () => {
+  if (isRunning && id && !isNaN(Number(id))) {
+    interval = setInterval(() => {
+      setSeconds((prev) => {
+        const updated = prev + 1;
+        localStorage.setItem("timer_seconds_" + id, updated);
+        return updated;
+      });
+    }, 1000);
+  }
+
+  return () => clearInterval(interval);
+}, [isRunning, id]);
+
+/* ===== TIMER ACTIONS (CONNECTED TO BACKEND) ===== */
+const startTimer = async () => {
+  try {
+    await api.post(`/tasks/${id}/timer/start`);
+
     localStorage.setItem("timer_start_" + id, Date.now());
     setIsRunning(true);
-  };
+  } catch (err) {
+    console.error(err);
+    alert("❌ فشل تشغيل التايمر");
+  }
+};
 
-  const pauseTimer = () => {
+const pauseTimer = async () => {
+  try {
+    await api.post(`/tasks/${id}/timer/pause`);
+
     localStorage.removeItem("timer_start_" + id);
     setIsRunning(false);
-  };
+  } catch (err) {
+    console.error(err);
+    alert("❌ فشل إيقاف التايمر");
+  }
+};
 
-  const finishTask = async () => {
-    pauseTimer();
-    const totalMinutes = Math.floor(seconds / 60);
+const resumeTimer = async () => {
+  try {
+    await api.post(`/tasks/${id}/timer/resume`);
 
-    try {
-      const res = await api.put(`/tasks/${id}/time`, {
-        timeSpent: totalMinutes,
-      });
+    localStorage.setItem("timer_start_" + id, Date.now());
+    setIsRunning(true);
+  } catch (err) {
+    console.error(err);
+    alert("❌ فشل استئناف التايمر");
+  }
+};
 
-      setTask((prev) => ({ ...prev, timeSpent: res.data.timeSpent }));
-      alert("✅ Task finished! Time saved: " + totalMinutes + " min");
+const finishTask = async () => {
+  await pauseTimer();
 
-      setSeconds(0);
-      setIsRunning(false);
-      localStorage.removeItem("timer_start_" + id);
-      localStorage.removeItem("timer_seconds_" + id);
-    } catch {
-      alert("❌ Error saving time");
-    }
-  };
+  const totalMinutes = Math.floor(seconds / 60);
+
+  try {
+    const res = await api.put(`/tasks/${id}/time`, {
+      timeSpent: totalMinutes,
+    });
+
+    setTask((prev) => ({ ...prev, timeSpent: res.data.timeSpent }));
+
+    setSeconds(0);
+    setIsRunning(false);
+
+    localStorage.removeItem("timer_start_" + id);
+    localStorage.removeItem("timer_seconds_" + id);
+
+    alert("✅ Task finished! Time saved: " + totalMinutes + " min");
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error saving time");
+  }
+};
+
 
   /* ================= UPLOAD ================= */
   const handleFileChange = (e) =>

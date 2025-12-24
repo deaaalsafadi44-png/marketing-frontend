@@ -152,6 +152,7 @@ const TasksList = () => {
             <th>Worker</th>
             <th>Priority</th>
             <th>Status</th>
+            <th>Timer</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -187,6 +188,19 @@ const TasksList = () => {
                     </option>
                   ))}
                 </select>
+              </td>
+
+              {/* ===== TIMER (READ ONLY) ===== */}
+              <td>
+                {task.timer?.isRunning ? (
+                  <span style={{ color: "green", fontWeight: "bold" }}>
+                    ⏱ Running
+                  </span>
+                ) : task.timer?.totalSeconds > 0 ? (
+                  <span style={{ color: "#ff9800" }}>⏸ Paused</span>
+                ) : (
+                  "—"
+                )}
               </td>
 
               <td>

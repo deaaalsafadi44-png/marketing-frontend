@@ -184,11 +184,19 @@ const Reports = () => {
     },
   };
 
-  const monthlyHours = Array(12).fill(0);
-  filteredTasks.forEach((task) => {
-    const month = new Date(task.createdAt).getMonth();
-    monthlyHours[month] += (task.timeSpent || 0) / 60;
-  });
+const monthlyHours = Array(12).fill(0);
+
+filteredTasks.forEach((task) => {
+  const month = new Date(task.createdAt).getMonth();
+
+  const minutes =
+    task.timer?.totalSeconds
+      ? Math.floor(task.timer.totalSeconds / 60)
+      : task.timeSpent || 0;
+
+  monthlyHours[month] += minutes / 60;
+});
+
 
   const lineData = {
     labels: [
