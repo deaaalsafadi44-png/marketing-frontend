@@ -3,6 +3,17 @@ import { useLocation } from "react-router-dom";
 import api from "../../services/apiClient";
 import "./deliverables.css";
 
+/* =============================================
+    🛠️ دالة جلب الشعار (المسارات الموحدة)
+   ============================================= */
+const getCompanyLogo = (companyName) => {
+  const name = companyName?.toLowerCase().trim();
+  if (name === "laffah") return "/logos/laffah.png"; 
+  if (name === "healthy family") return "/logos/healthyfamily.png"; 
+  if (name === "syrian united co") return "/logos/syrian united co.png"; 
+  return "/logos/laffah.png"; 
+};
+
 const DeliverablesBoard = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -159,7 +170,6 @@ const DeliverablesBoard = () => {
 
   /* ================= RATE ================= */
   const handleRate = async (task, value) => {
-    // منع غير المديرين من استدعاء الدالة برمجياً
     if (!isAdminOrManager) return;
 
     const newRating = task.rating === value ? 0 : value;
@@ -230,7 +240,7 @@ const DeliverablesBoard = () => {
           <h1>Task Submissions</h1>
           <p>Live activity from your team</p>
 
-          {/* ================= 🆕 FILTER BAR ================= */}
+          {/* ================= FILTER BAR ================= */}
           <div className="feed-filters-bar">
             <div className="filter-group">
               <label>Owner Name</label>
@@ -242,7 +252,6 @@ const DeliverablesBoard = () => {
               />
             </div>
 
-            {/* 🆕 حقل فلترة الشركة */}
             <div className="filter-group">
               <label>Company</label>
               <select 
@@ -296,7 +305,16 @@ const DeliverablesBoard = () => {
                     <h4 className="submission-task-title">
                       {detail.title || `Task #${task.taskId}`}
                     </h4>
-                    <span className="company-badge">🏢 {detail.company}</span>
+                    
+                    {/* ✅ إضافة لوغو الشركة بجانب اسم الشركة في البطاقة */}
+                    <div className="company-badge-container" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <img 
+                        src={getCompanyLogo(detail.company)} 
+                        alt="logo" 
+                        style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'contain', border: '1px solid #eee', backgroundColor: '#fff' }}
+                      />
+                      <span className="company-badge" style={{ margin: 0 }}>{detail.company}</span>
+                    </div>
                   </div>
                   
                   <div className="task-info-badges">
@@ -323,13 +341,11 @@ const DeliverablesBoard = () => {
                           key={n}
                           onClick={(e) => {
                             e.stopPropagation();
-                            // ✅ تفعيل الضغط فقط إذا كان Admin أو Manager
                             if (isAdminOrManager) {
                               handleRate(task, n);
                             }
                           }}
                           style={{
-                            // ✅ تغيير شكل الماوس والشفافية بناءً على الصلاحية
                             cursor: isAdminOrManager ? "pointer" : "default",
                             color: task.rating >= n ? "#facc15" : "#d1d5db",
                             fontSize: "18px",

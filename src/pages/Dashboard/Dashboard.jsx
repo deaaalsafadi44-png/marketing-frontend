@@ -24,6 +24,17 @@ ChartJS.register(
   Legend
 );
 
+/* =============================================
+    🛠️ دالة جلب الشعار (نفس الدالة المستخدمة في القائمة)
+   ============================================= */
+const getCompanyLogo = (companyName) => {
+  const name = companyName?.toLowerCase().trim();
+  if (name === "laffah") return "/logos/laffah.png"; 
+  if (name === "healthy family") return "/logos/healthyfamily.png"; 
+  if (name === "syrian united co") return "/logos/syrian united co.png"; 
+  return "/logos/laffah.png"; 
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
 
@@ -35,7 +46,6 @@ const Dashboard = () => {
     const load = async () => {
       try {
         const res = await getTasks();
-        // تأكد من أننا نأخذ أحدث بيانات من السيرفر
         setTasks(res.data || []);
       } catch (err) {
         console.error("Error loading tasks:", err);
@@ -60,7 +70,6 @@ const Dashboard = () => {
       📊 منطق الحساب الديناميكي (Dynamic Logic)
      ============================================= */
   
-  // دالة مساعدة لحساب العدد بناءً على مسمى الحالة (تتجاهل الفراغات وحالة الأحرف)
   const getCountByStatus = (statusName) => {
     return tasks.filter((t) => {
       const s = t.status?.toLowerCase().trim() || "";
@@ -68,11 +77,10 @@ const Dashboard = () => {
     }).length;
   };
 
-  // ربط الكروت ديناميكياً مع الحالات المحددة + التوتال
   const stats = {
-    total: tasks.length, // ربط حقيقي بإجمالي عدد المهام
+    total: tasks.length,
     new: getCountByStatus("New"),
-    accepted: getCountByStatus("Accepted") + getCountByStatus("Accebted"), // دمج لتجنب أخطاء الكتابة
+    accepted: getCountByStatus("Accepted") + getCountByStatus("Accebted"),
     inProgress: getCountByStatus("In progress"),
     underReview: getCountByStatus("Under review"),
     approved: getCountByStatus("Approved")
@@ -112,7 +120,15 @@ const Dashboard = () => {
   const pieOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { position: "top" } },
+    plugins: { 
+        legend: { 
+            position: "top",
+            labels: {
+                padding: 20,
+                font: { size: 14 }
+            }
+        } 
+    },
     layout: { padding: 10 },
   };
 
@@ -153,7 +169,6 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <h1 className="dashboard-title">لوحة القيادة الرئيسية (Dashboard)</h1>
 
-      {/* ✅ الكروت العلوية - إضافة Total Tasks وتنسيق 6 كروت بشكل متناسق */}
       <div className="stats-row" style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', 
@@ -171,6 +186,21 @@ const Dashboard = () => {
       <div className="charts-row">
         <div className="chart-box">
           <h3 className="chart-title">توزيع المهام حسب الشركة</h3>
+          
+          {/* ✅ إضافة قائمة الشعارات فوق الرسم البياني للشركة */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '10px', flexWrap: 'wrap' }}>
+            {Object.keys(companyCounts).map((company, index) => (
+              <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                <img 
+                  src={getCompanyLogo(company)} 
+                  alt="logo" 
+                  style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'contain', border: '1px solid #ddd' }} 
+                />
+                <span>{company}</span>
+              </div>
+            ))}
+          </div>
+
           <div style={{ width: "100%", height: "350px" }}>
             <Pie data={pieData} options={pieOptions} />
           </div>
