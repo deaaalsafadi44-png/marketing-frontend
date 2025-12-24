@@ -141,12 +141,24 @@ const DeliverablesBoard = () => {
     }
   };
 
-  /* ================= HELPERS ================= */
+  /* ================= HELPERS (UPDATED) ================= */
   const getFileType = (file) => {
-    if (file.resource_type) return file.resource_type;
-    if (file.mimeType?.startsWith("image/")) return "image";
-    if (file.mimeType?.startsWith("video/")) return "video";
+    const url = file.url?.toLowerCase() || "";
+    if (file.resource_type === "image" || file.mimeType?.startsWith("image/")) return "image";
+    if (file.resource_type === "video" || file.mimeType?.startsWith("video/")) return "video";
+    if (url.endsWith(".pdf") || file.mimeType === "application/pdf") return "pdf";
     return "raw";
+  };
+
+  const handleFileClick = (file) => {
+    const type = getFileType(file);
+    if (type === "pdf") {
+      // فتح الـ PDF مباشرة في صفحة جديدة تماماً كما في صفحة الـ View
+      const safeUrl = file.url.replace('/upload/', '/upload/fl_attachment/');
+      window.open(safeUrl, '_blank');
+    } else {
+      setSelectedFile(file);
+    }
   };
 
   const decodeFileName = (name) => {
@@ -219,9 +231,16 @@ const DeliverablesBoard = () => {
                     <div
                       key={i}
                       className="task-file-card"
-                      onClick={() => setSelectedFile(file)}
+                      onClick={() => handleFileClick(file)}
                     >
                       {type === "image" && <img src={file.url} alt="" />}
+                      {/* عرض صورة مصغرة للـ PDF إذا أمكن، وإلا أيقونة */}
+                      {type === "pdf" && (
+                        <div className="file-preview-wrapper">
+                           <img src={file.url.replace(/\.pdf$/i, ".jpg")} alt="PDF Preview" onError={(e) => e.target.style.display='none'} />
+                           <div className="file-icon-overlay">PDF</div>
+                        </div>
+                      )}
                       {type === "video" && <video src={file.url} muted />}
                       {type === "raw" && (
                         <div className="file-generic">
@@ -250,7 +269,6 @@ const DeliverablesBoard = () => {
 
             <h3>{decodeFileName(selectedFile.originalName)}</h3>
 
-            {/* ✅ IMAGE (الإضافة الوحيدة) */}
             {getFileType(selectedFile) === "image" && (
               <img
                 src={selectedFile.url}
