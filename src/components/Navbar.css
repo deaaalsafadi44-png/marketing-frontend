@@ -16,6 +16,7 @@
 
   padding: 0 40px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box; /* لضمان عدم خروج العرض عن 100% بسبب padding */
 }
 
 /* ===============================
@@ -24,6 +25,7 @@
 .system-title {
   font-size: 20px;
   font-weight: 600;
+  white-space: nowrap; /* منع انكسار العنوان لسطرين */
 }
 
 /* ===============================
@@ -40,6 +42,8 @@
   text-decoration: none;
   font-size: 15px;
   font-weight: 500;
+  transition: 0.2s;
+  white-space: nowrap;
 }
 
 .nav-link:hover {
@@ -64,6 +68,7 @@
   border: none;
   cursor: pointer;
   margin-left: 10px;
+  white-space: nowrap;
 }
 
 .login-btn {
@@ -74,4 +79,58 @@
 .logout-btn {
   background-color: #d32f2f;
   color: white;
+}
+
+/* ===============================
+   🆕 RESPONSIVE ADJUSTMENTS (الموبايل)
+=============================== */
+@media (max-width: 768px) {
+  .top-navbar {
+    padding: 0 15px; /* تقليل الحواف الجانبية */
+    height: auto;
+    min-height: 60px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    flex-wrap: wrap; /* السماح للعناصر بالنزول لسطر جديد إذا ضاقت المساحة */
+    justify-content: center; /* تمركز العناصر عند الالتفاف */
+    gap: 10px;
+  }
+
+  .system-title {
+    font-size: 18px;
+    text-align: center;
+    width: 100%; /* جعل العنوان في سطر مستقل في الموبايلات الصغيرة جداً */
+  }
+
+  .nav-right {
+    gap: 15px; /* تقليل المسافات بين الروابط */
+    justify-content: center;
+    width: 100%;
+  }
+
+  .nav-link {
+    font-size: 13px;
+  }
+
+  .login-btn, .logout-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    margin-left: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-right {
+    gap: 10px;
+  }
+  
+  .nav-link {
+    font-size: 12px;
+  }
+  
+  /* إذا زاد عدد الروابط، سيتم توزيعها بشكل أفضل */
+  .nav-right {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }
