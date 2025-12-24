@@ -214,8 +214,55 @@ filteredTasks.forEach((task) => {
     ],
   };
 
-  function exportPDF() { /* unchanged */ }
-  function exportExcel() { /* unchanged */ }
+function exportPDF() {
+  const doc = new jsPDF();
+
+  doc.text("Tasks Report", 14, 15);
+
+  const tableData = filteredTasks.map((t) => [
+    t.id,
+    t.company || "-",
+    t.type || "-",
+    t.workerName || "-",
+    t.timeSpent || 0,
+  ]);
+
+  autoTable(doc, {
+    startY: 20,
+    head: [["ID", "Company", "Type", "Worker", "Time (min)"]],
+    body: tableData,
+  });
+
+  doc.save("tasks-report.pdf");
+}
+
+  function exportExcel() {
+  const data = filteredTasks.map((t) => ({
+    ID: t.id,
+    Company: t.company,
+    Type: t.type,
+    Worker: t.workerName,
+    "Time (minutes)": t.timeSpent || 0,
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Tasks");
+
+  const excelBuffer = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "array",
+  });
+
+  const blob = new Blob([excelBuffer], {
+    type:
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+
+  saveAs(blob, "tasks-report.xlsx");
+}
+
 
   return (
     <div className="reports-page">
