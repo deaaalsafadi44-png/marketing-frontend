@@ -15,17 +15,16 @@ const ViewTask = () => {
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
-const formatMinutes = (minutes) => {
-  if (!minutes || minutes <= 0) return "0 min";
+  const formatMinutes = (minutes) => {
+    if (!minutes || minutes <= 0) return "0 min";
 
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
 
-  if (h > 0 && m > 0) return `${h}h ${m}m`;
-  if (h > 0) return `${h}h`;
-  return `${m}m`;
-};
-
+    if (h > 0 && m > 0) return `${h}h ${m}m`;
+    if (h > 0) return `${h}h`;
+    return `${m}m`;
+  };
 
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -80,11 +79,10 @@ const formatMinutes = (minutes) => {
     loadDeliverables();
   }, [id]);
 
-   /* ================= TIMER (FIXED - NO JUMP ON REFRESH) ================= */
+  /* ================= TIMER (FIXED) ================= */
   const secondsKey = "timer_seconds_" + id;
   const startKey = "timer_start_" + id;
 
-  // ✅ تحميل الوقت المخزن + تحديد حالة التشغيل (بدون إضافة diff للتخزين)
   useEffect(() => {
     if (!id || isNaN(Number(id))) return;
 
@@ -95,7 +93,6 @@ const formatMinutes = (minutes) => {
     setIsRunning(!!savedStart);
   }, [id]);
 
-  // ✅ عرض الوقت بشكل صحيح (إذا شغال نضيف diff للعرض فقط)
   useEffect(() => {
     if (!id || isNaN(Number(id))) return;
 
@@ -114,22 +111,17 @@ const formatMinutes = (minutes) => {
       setSeconds(baseSeconds + diff);
     };
 
-    // نحدث مباشرة مرة أولى
     tick();
-
-    // ثم كل ثانية للتحديث
     interval = setInterval(tick, 1000);
 
     return () => clearInterval(interval);
   }, [isRunning, id]);
 
-  // ✅ Start: نبدأ من الآن فقط (ولا نلمس seconds)
   const startTimer = () => {
     localStorage.setItem(startKey, Date.now());
     setIsRunning(true);
   };
 
-  // ✅ Pause: نحسب diff مرة واحدة ونثبته داخل timer_seconds ثم نحذف start
   const pauseTimer = () => {
     const savedStart = localStorage.getItem(startKey);
     const baseSeconds = Number(localStorage.getItem(secondsKey) || "0");
@@ -146,9 +138,8 @@ const formatMinutes = (minutes) => {
     setIsRunning(false);
   };
 
-  // ✅ Finish: نثبّت الوقت أولاً ثم نحفظ بالدقائق كما كان منطقك القديم تماماً
   const finishTask = async () => {
-    pauseTimer(); // يثبت الوقت ويوقف
+    pauseTimer();
 
     const finalSeconds = Number(localStorage.getItem(secondsKey) || "0");
     const totalMinutes = Math.floor(finalSeconds / 60);
@@ -169,7 +160,6 @@ const formatMinutes = (minutes) => {
       alert("❌ Error saving time");
     }
   };
-
 
   /* ================= UPLOAD ================= */
   const handleFileChange = (e) =>
@@ -192,6 +182,9 @@ const formatMinutes = (minutes) => {
 
       alert("✅ تم رفع مخرجات المهمة بنجاح");
       setSelectedFiles([]);
+      // إعادة تحميل المخرجات لتظهر فوراً
+      const res = await api.get(`/deliverables?taskId=${id}`);
+      setDeliverables(res.data || []);
     } catch {
       alert("❌ حدث خطأ أثناء رفع الملفات");
     } finally {
@@ -201,42 +194,47 @@ const formatMinutes = (minutes) => {
 
   /* ================= DELETE FILE ================= */
   const handleDeleteFile = async (file) => {
-  if (!window.confirm("هل أنت متأكد من حذف هذا الملف؟")) return;
+    if (!window.confirm("هل أنت متأكد من حذف هذا الملف؟")) return;
 
-  console.log(
-    "DELETE",
-    "deliverableId:",
-    file.deliverableId,
-    "file._id:",
-    file._id,
-    "file.publicId:",
-    file.publicId
-  );
+    try {
+      await api.delete(
+        `/deliverables/${file.deliverableId}/files/${file._id}`
+      );
 
-  try {
-    await api.delete(
-      `/deliverables/${file.deliverableId}/files/${file._id}`
-    );
+      setDeliverables((prev) =>
+        prev.map((d) =>
+          d._id === file.deliverableId
+            ? { ...d, files: d.files.filter((f) => f._id !== file._id) }
+            : d
+        )
+      );
+    } catch (err) {
+      alert("❌ فشل حذف الملف");
+      console.error(err);
+    }
+  };
 
-    setDeliverables((prev) =>
-      prev.map((d) =>
-        d._id === file.deliverableId
-          ? { ...d, files: d.files.filter((f) => f._id !== file._id) }
-          : d
-      )
-    );
-  } catch (err) {
-    alert("❌ فشل حذف الملف");
-    console.error(err);
-  }
-};
+  /* ================= FILE HELPER ================= */
+  const handleFilePreview = (file) => {
+    // إذا كان PDF أو ملف غير صورة/فيديو، نجهزه للفتح والتحميل
+    const isPDF = file.url.toLowerCase().endsWith('.pdf') || file.mimeType === "application/pdf";
+    const isImage = file.mimeType?.startsWith("image/");
+    const isVideo = file.mimeType?.startsWith("video/");
 
+    if (isPDF) {
+      // فتح الـ PDF مباشرة في Tab جديد مع باراميتر التحميل لضمان عمله من كلاوديناري
+      const safeUrl = file.url.replace('/upload/', '/upload/fl_attachment/');
+      window.open(safeUrl, '_blank');
+    } else {
+      // الصور والفيديو والملفات الأخرى تفتح المودال
+      setPreviewFile(file);
+    }
+  };
 
   if (loading) return <div className="loading">Loading...</div>;
   if (notFound)
     return <h2 style={{ textAlign: "center" }}>❌ Task Not Found</h2>;
 
-  // ✅ إضافة deliverableId لكل ملف (مهم للحذف)
   const allFiles = deliverables.flatMap((d) =>
     (d.files || []).map((file) => ({
       ...file,
@@ -293,7 +291,6 @@ const formatMinutes = (minutes) => {
 
         {/* ===== INFO GRID ===== */}
         <div className="info-grid">
-
           <div className="info-item">
             <h3>Company</h3>
             <p>{task?.company || "—"}</p>
@@ -328,13 +325,12 @@ const formatMinutes = (minutes) => {
           {/* ===== ATTACHMENTS ===== */}
           <div className="info-item attachments">
             <h3>Attachments</h3>
-
             <div className="attachments-box">
               {visibleFiles.map((file, i) => (
                 <div
                   key={i}
                   className="attachment-card"
-                  onClick={() => setPreviewFile(file)}
+                  onClick={() => handleFilePreview(file)}
                 >
                   <span
                     className="remove-attachment"
@@ -373,31 +369,44 @@ const formatMinutes = (minutes) => {
 
           <div className="info-item">
             <h3>Time Spent</h3>
-<p>{task?.timeSpent ? formatMinutes(task.timeSpent) : "—"}</p>
+            <p>{task?.timeSpent ? formatMinutes(task.timeSpent) : "—"}</p>
           </div>
         </div>
-
       </div>
 
-      {/* ===== PREVIEW MODAL ===== */}
+      {/* ===== PREVIEW MODAL (Improved for Non-Media Files) ===== */}
       {previewFile && (
         <div className="file-modal-overlay" onClick={() => setPreviewFile(null)}>
           <div className="file-modal" onClick={(e) => e.stopPropagation()}>
             <button className="close-modal" onClick={() => setPreviewFile(null)}>✖</button>
 
             {previewFile.mimeType?.startsWith("image/") && (
-              <img src={previewFile.url} alt="" style={{ maxWidth: "100%" }} />
+              <img src={previewFile.url} alt="" style={{ maxWidth: "100%", borderRadius: "8px" }} />
             )}
 
             {previewFile.mimeType?.startsWith("video/") && (
-              <video src={previewFile.url} controls style={{ maxWidth: "100%" }} />
+              <video src={previewFile.url} controls style={{ maxWidth: "100%", borderRadius: "8px" }} />
             )}
 
             {!previewFile.mimeType?.startsWith("image/") &&
               !previewFile.mimeType?.startsWith("video/") && (
-                <a href={previewFile.url} target="_blank" rel="noreferrer">
-                  Download file
-                </a>
+                <div style={{ textAlign: "center", padding: "20px" }}>
+                  <div style={{ fontSize: "60px", marginBottom: "15px" }}>📄</div>
+                  <p style={{ marginBottom: "20px", fontWeight: "bold", color: "#fff" }}>
+                    {previewFile.originalName || "Download Document"}
+                  </p>
+                  <button 
+                    className="timer-btn finish" 
+                    style={{ width: "auto", padding: "10px 25px" }}
+                    onClick={() => {
+                      const url = previewFile.url.replace('/upload/', '/upload/fl_attachment/');
+                      window.open(url, '_blank');
+                      setPreviewFile(null);
+                    }}
+                  >
+                    Download File
+                  </button>
+                </div>
               )}
           </div>
         </div>
@@ -410,31 +419,30 @@ const formatMinutes = (minutes) => {
             <button className="close-modal" onClick={() => setShowAllAttachments(false)}>✖</button>
 
             <div className="task-files-grid">
-            {allFiles.map((file, i) => (
-  <div
-    key={i}
-    className="task-file-card"
-    onClick={() => setPreviewFile(file)}
-  >
-    <span
-      className="remove-attachment"
-      onClick={(e) => {
-        e.stopPropagation();
-        handleDeleteFile(file);
-      }}
-    >
-      ✖
-    </span>
+              {allFiles.map((file, i) => (
+                <div
+                  key={i}
+                  className="task-file-card"
+                  onClick={() => handleFilePreview(file)}
+                >
+                  <span
+                    className="remove-attachment"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteFile(file);
+                    }}
+                  >
+                    ✖
+                  </span>
 
-    {file.mimeType?.startsWith("image/") && <img src={file.url} alt="" />}
-    {file.mimeType?.startsWith("video/") && <video src={file.url} />}
-    {!file.mimeType?.startsWith("image/") &&
-      !file.mimeType?.startsWith("video/") && (
-        <div className="file-generic">📎 {file.originalName}</div>
-      )}
-  </div>
-))}
-
+                  {file.mimeType?.startsWith("image/") && <img src={file.url} alt="" />}
+                  {file.mimeType?.startsWith("video/") && <video src={file.url} />}
+                  {!file.mimeType?.startsWith("image/") &&
+                    !file.mimeType?.startsWith("video/") && (
+                      <div className="file-generic">📎 {file.originalName}</div>
+                    )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -442,5 +450,5 @@ const formatMinutes = (minutes) => {
     </div>
   );
 };
-export default ViewTask;
 
+export default ViewTask;
