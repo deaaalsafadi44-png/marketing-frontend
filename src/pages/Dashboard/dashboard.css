@@ -147,4 +147,22 @@
   .stat-value {
     font-size: 24px;
   }
+}.company-logo-container {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid #dcdcdc;
+  overflow: hidden;
+  background-color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.company-logo-img {
+  width: 80%; /* لترك مساحة بسيطة كمارجن داخلي */
+  height: 80%;
+  object-fit: contain;
 }
