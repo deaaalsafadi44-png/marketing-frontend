@@ -314,24 +314,29 @@ const DeliverablesBoard = () => {
                     <strong>{task.submittedByName}</strong>
 
                     <div className="rating-stars">
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <span
-                          key={n}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRate(task, n);
-                          }}
-                          style={{
-                            cursor: "pointer",
-                            color: task.rating >= n ? "#facc15" : "#d1d5db",
-                            fontSize: "18px",
-                            userSelect: "none",
-                          }}
-                        >
-                          ★
-                        </span>
-                      ))}
-                    </div>
+  {[1, 2, 3, 4, 5].map((n) => (
+    <span
+      key={n}
+      onClick={(e) => {
+        e.stopPropagation();
+        // ✅ حماية: لا يتم تنفيذ التقييم إلا إذا كان Admin أو Manager
+        if (isAdminOrManager) {
+          handleRate(task, n);
+        }
+      }}
+      style={{
+        // ✅ حماية بصربة: تغيير شكل الماوس بناءً على الصلاحية
+        cursor: isAdminOrManager ? "pointer" : "default",
+        color: task.rating >= n ? "#facc15" : "#d1d5db",
+        fontSize: "18px",
+        userSelect: "none",
+        opacity: isAdminOrManager ? 1 : 0.7 // تعتيم بسيط لإظهار أنها للعرض فقط
+      }}
+    >
+      ★
+    </span>
+  ))}
+</div>
                   </div>
 
                   <div className="date">
