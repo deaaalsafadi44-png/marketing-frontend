@@ -256,7 +256,7 @@
 }
 
 /* ===============================
-   MODALS
+    MODALS - التعديل الجديد هنا
 =============================== */
 .file-modal-overlay {
   position: fixed;
@@ -271,44 +271,35 @@
 
 .file-modal {
   background: #ffffff;
-  width: 90%;
-  max-width: 800px;
-  max-height: 85vh;
+  /* التعديل: جعل العرض يتناسب مع المحتوى (صورة أو فيديو) */
+  width: fit-content; 
+  max-width: 95vw;    /* ضمان عدم خروج المودال عن الشاشة عرضاً */
+  max-height: 90vh;   /* ضمان عدم خروج المودال عن الشاشة طولاً */
   border-radius: 24px;
   padding: 24px;
   position: relative;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-}
-
-.file-modal h3 {
-  margin-top: 0;
-  margin-bottom: 16px;
-  font-size: 18px;
-  color: #1e293b;
-  text-align: center;
-}
-
-.close-modal {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: #f1f5f9;
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #475569;
-  transition: all 0.2s;
 }
 
-.close-modal:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+/* تنسيق الفيديو داخل المودال ليكون مرناً */
+.file-modal video {
+  max-width: 100%;    /* لا يتجاوز عرض المودال */
+  max-height: 70vh;   /* لا يتجاوز 70% من طول الشاشة لترك مساحة للعنوان والإغلاق */
+  border-radius: 12px;
+  background: #000;   /* خلفية سوداء للفيديو */
+  display: block;
+  object-fit: contain; /* يضمن عرض أبعاد الفيديو كاملة دون قص */
+}
+
+/* تنسيق الصور داخل المودال لتكون مرنة أيضاً */
+.file-modal img {
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: 12px;
+  object-fit: contain;
 }
 
 /* ===============================
