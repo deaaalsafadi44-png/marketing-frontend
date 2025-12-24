@@ -10,17 +10,18 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 /* =============================================
-    🛠️ دالة جلب الشعار (تعريفها قبل المكون)
+    🛠️ دالة جلب الشعار (المسارات المحدثة بناءً على مجلد logos)
    ============================================= */
 const getCompanyLogo = (companyName) => {
   const name = companyName?.toLowerCase().trim();
-  // تأكد أن هذه الملفات موجودة في مجلد public مباشرة
-  if (name === "laffah") return "/laffah.png"; 
-  if (name === "syrian united co") return "/logos/syrian_united.png";
-  if (name === "healthy family") return "/logos/healthy_family.png";
   
-  // شعار افتراضي في حال لم يتطابق الاسم
-  return "/laffah.png"; 
+  // المطابقة بناءً على الصور الموجودة في مجلد public/logos
+  if (name === "laffah") return "/logos/laffah.png"; 
+  if (name === "syrian united co") return "/logos/syrian_united.png"; 
+  if (name === "healthy family") return "/logos/healthyfamily.png"; 
+  
+  // شعار افتراضي (لفاح) في حال عدم وجود مطابقة
+  return "/logos/laffah.png"; 
 };
 
 const TasksList = () => {
@@ -177,28 +178,28 @@ const TasksList = () => {
               <tr key={task.id}>
                 <td>{task.id}</td>
                 
-                {/* ✅ عرض الشركة مع اللوغو الدائري الصغير */}
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{
-                        width: '30px',
-                        height: '30px',
+                        width: '32px',
+                        height: '32px',
                         borderRadius: '50%',
-                        border: '1px solid #ddd',
+                        border: '1px solid #e0e0e0',
                         overflow: 'hidden',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
                         backgroundColor: '#fff',
-                        flexShrink: 0
+                        flexShrink: 0,
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                     }}>
                         <img 
                           src={getCompanyLogo(task.company)} 
                           alt="logo" 
-                          style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                          style={{ width: '85%', height: '85%', objectFit: 'contain' }} 
                         />
                     </div>
-                    <span style={{fontWeight:'500'}}>{task.company}</span>
+                    <span style={{fontWeight:'500', color: '#333'}}>{task.company}</span>
                   </div>
                 </td>
 
@@ -219,9 +220,11 @@ const TasksList = () => {
                     style={{
                       backgroundColor: getStatusColor(task.status),
                       color: "#fff",
-                      padding: '5px 10px',
-                      borderRadius: '5px',
+                      padding: '6px 12px',
+                      borderRadius: '20px',
                       border: 'none',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
                       cursor: canChangeStatus ? "pointer" : "not-allowed",
                     }}
                   >
@@ -238,7 +241,7 @@ const TasksList = () => {
                       {" | "}
                       <Link to={`/tasks/edit/${task.id}`} className="edit-link">Edit</Link>
                       {" | "}
-                      <span className="delete-link" onClick={() => handleDelete(task.id)}>Delete</span>
+                      <span className="delete-link" onClick={() => handleDelete(task.id)} style={{cursor:'pointer', color:'#d32f2f'}}>Delete</span>
                     </>
                   )}
                 </td>
