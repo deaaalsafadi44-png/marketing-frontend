@@ -41,8 +41,9 @@ const DeliverablesBoard = () => {
       .catch(() => setCurrentUser(null));
   }, []);
 
+  // ✅ التعديل هنا ليتناسب مع حالة الأحرف Admin و Manager
   const isAdminOrManager =
-    currentUser?.role === "admin" || currentUser?.role === "manager";
+    currentUser?.role === "Admin" || currentUser?.role === "Manager";
 
   /* ================= LOAD DELIVERABLES ================= */
   const loadDeliverables = async () => {
@@ -158,6 +159,9 @@ const DeliverablesBoard = () => {
 
   /* ================= RATE ================= */
   const handleRate = async (task, value) => {
+    // منع غير المديرين من استدعاء الدالة برمجياً
+    if (!isAdminOrManager) return;
+
     const newRating = task.rating === value ? 0 : value;
 
     setItems((prev) =>
@@ -314,29 +318,29 @@ const DeliverablesBoard = () => {
                     <strong>{task.submittedByName}</strong>
 
                     <div className="rating-stars">
-  {[1, 2, 3, 4, 5].map((n) => (
-    <span
-      key={n}
-      onClick={(e) => {
-        e.stopPropagation();
-        // ✅ حماية: لا يتم تنفيذ التقييم إلا إذا كان Admin أو Manager
-        if (isAdminOrManager) {
-          handleRate(task, n);
-        }
-      }}
-      style={{
-        // ✅ حماية بصربة: تغيير شكل الماوس بناءً على الصلاحية
-        cursor: isAdminOrManager ? "pointer" : "default",
-        color: task.rating >= n ? "#facc15" : "#d1d5db",
-        fontSize: "18px",
-        userSelect: "none",
-        opacity: isAdminOrManager ? 1 : 0.7 // تعتيم بسيط لإظهار أنها للعرض فقط
-      }}
-    >
-      ★
-    </span>
-  ))}
-</div>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <span
+                          key={n}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // ✅ تفعيل الضغط فقط إذا كان Admin أو Manager
+                            if (isAdminOrManager) {
+                              handleRate(task, n);
+                            }
+                          }}
+                          style={{
+                            // ✅ تغيير شكل الماوس والشفافية بناءً على الصلاحية
+                            cursor: isAdminOrManager ? "pointer" : "default",
+                            color: task.rating >= n ? "#facc15" : "#d1d5db",
+                            fontSize: "18px",
+                            userSelect: "none",
+                            opacity: isAdminOrManager ? 1 : 0.6
+                          }}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="date">
