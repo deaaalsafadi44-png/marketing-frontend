@@ -20,10 +20,8 @@ const TasksList = () => {
 
   const formatMinutes = (minutes) => {
     if (!minutes || minutes <= 0) return "—";
-
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
-
     if (h > 0 && m > 0) return `${h}h ${m}m`;
     if (h > 0) return `${h}h`;
     return `${m}m`;
@@ -37,18 +35,12 @@ const TasksList = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "New":
-        return "#2196f3";
-      case "Accepted":
-        return "#9c27b0";
-      case "In Progress":
-        return "#fbc02d";
-      case "Under Review":
-        return "#ff9800";
-      case "Approved":
-        return "#4caf50";
-      default:
-        return "#555";
+      case "New": return "#2196f3";
+      case "Accepted": return "#9c27b0";
+      case "In Progress": return "#fbc02d";
+      case "Under Review": return "#ff9800";
+      case "Approved": return "#4caf50";
+      default: return "#555";
     }
   };
 
@@ -86,8 +78,15 @@ const TasksList = () => {
   const handleStatusChange = async (taskId, newStatus) => {
     const task = tasks.find((t) => t.id === taskId);
     if (!task) return;
-    await updateTaskApi(taskId, { ...task, status: newStatus });
-    loadTasks();
+    
+    try {
+      // نرسل التعديل للسيرفر
+      await updateTaskApi(taskId, { ...task, status: newStatus });
+      loadTasks();
+    } catch (err) {
+      console.error("Update failed", err);
+      alert("You don't have permission to update this task status.");
+    }
   };
 
   const handleDelete = async (taskId) => {
@@ -121,9 +120,7 @@ const TasksList = () => {
           <option value="">Company</option>
           {[...new Set(tasks.map((t) => t.company).filter(Boolean))].map(
             (company, i) => (
-              <option key={i} value={company}>
-                {company}
-              </option>
+              <option key={i} value={company}>{company}</option>
             )
           )}
         </select>
@@ -134,9 +131,7 @@ const TasksList = () => {
         <select onChange={(e) => setStatusFilter(e.target.value)}>
           <option value="">Status</option>
           {statusOptions.map((s, i) => (
-            <option key={i} value={s}>
-              {s}
-            </option>
+            <option key={i} value={s}>{s}</option>
           ))}
         </select>
 
@@ -168,64 +163,68 @@ const TasksList = () => {
         </thead>
 
         <tbody>
-          {filteredTasks.map((task) => (
-            <tr key={task.id}>
-              <td>{task.id}</td>
-              <td>{task.company || "—"}</td>
-              <td>{task.type || "—"}</td>
-              <td>{task.workerName || "—"}</td>
+          {filteredTasks.map((task) => {
+            // ✅ فحص الصلاحية: هل هو أدمن/مانجر؟ أم هل هو الموظف المسند إليه التاسك؟
+            // ملاحظة: تأكد أن السيرفر يرسل workerId أو استبدلها بـ task.workerName === user.name
+            const canChangeStatus = 
+              user.role === "Admin" || 
+              user.role === "Manager" || 
+              task.workerId === user.id || 
+              task.workerName === user.username; // حسب البيانات المتاحة لديك
 
-              <td>
-                <span className={`tag tag-${normalizeClass(task.priority)}`}>
-                  {task.priority || "—"}
-                </span>
-              </td>
+            return (
+              <tr key={task.id}>
+                <td>{task.id}</td>
+                <td>{task.company || "—"}</td>
+                <td>{task.type || "—"}</td>
+                <td>{task.workerName || "—"}</td>
 
-              <td>
-                <select
-                  value={task.status || ""}
-                  onChange={(e) =>
-                    handleStatusChange(task.id, e.target.value)
-                  }
-                  style={{
-                    backgroundColor: getStatusColor(task.status),
-                    color: "#fff",
-                  }}
-                >
-                  {statusOptions.map((s, i) => (
-                    <option key={i} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </td>
+                <td>
+                  <span className={`tag tag-${normalizeClass(task.priority)}`}>
+                    {task.priority || "—"}
+                  </span>
+                </td>
 
-              <td>
-                <Link to={`/tasks/view/${task.id}`} className="view-link">
-                  View
-                </Link>
+                <td>
+                  <select
+                    value={task.status || ""}
+                    // ✅ إذا لم يكن لديه صلاحية، يتم تعطيل الاختيار
+                    disabled={!canChangeStatus}
+                    onChange={(e) => handleStatusChange(task.id, e.target.value)}
+                    style={{
+                      backgroundColor: getStatusColor(task.status),
+                      color: "#fff",
+                      cursor: canChangeStatus ? "pointer" : "not-allowed",
+                      opacity: canChangeStatus ? 1 : 0.7
+                    }}
+                  >
+                    {statusOptions.map((s, i) => (
+                      <option key={i} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </td>
 
-                {(user.role === "Admin" || user.role === "Manager") && (
-                  <>
-                    {" | "}
-                    <Link
-                      to={`/tasks/edit/${task.id}`}
-                      className="edit-link"
-                    >
-                      Edit
-                    </Link>
-                    {" | "}
-                    <span
-                      className="delete-link"
-                      onClick={() => handleDelete(task.id)}
-                    >
-                      Delete
-                    </span>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
+                <td>
+                  <Link to={`/tasks/view/${task.id}`} className="view-link">
+                    View
+                  </Link>
+
+                  {(user.role === "Admin" || user.role === "Manager") && (
+                    <>
+                      {" | "}
+                      <Link to={`/tasks/edit/${task.id}`} className="edit-link">
+                        Edit
+                      </Link>
+                      {" | "}
+                      <span className="delete-link" onClick={() => handleDelete(task.id)}>
+                        Delete
+                      </span>
+                    </>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
