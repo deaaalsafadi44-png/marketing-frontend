@@ -49,12 +49,18 @@ function Navbar() {
 
   return (
     <nav className="top-navbar">
-      <div className="nav-left">
-        <h2 className="system-title">{systemName}</h2>
+      {/* التعديل في القسم الأيسر لإضافة اللوغو بشكل مرن */}
+      <div className="nav-left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <img 
+          src="/logo-elite.png" 
+          alt="Elite Logo" 
+          style={{ height: '40px', width: 'auto', flexShrink: 0 }} 
+        />
+        <h2 className="system-title" style={{ margin: 0 }}>{systemName}</h2>
       </div>
 
       <div className="nav-right">
-        {/* ✅ التعديل هنا: Dashboard تظهر فقط لـ Admin و Manager */}
+        {/* ✅ Dashboard تظهر فقط لـ Admin و Manager */}
         {(user.role === "Admin" || user.role === "Manager") && (
           <NavLink to="/" end className="nav-link">
             Dashboard
