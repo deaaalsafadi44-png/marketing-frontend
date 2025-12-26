@@ -12,6 +12,7 @@ const ViewTask = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
+  // الحالة الآن تُدار عبر مزامنة السيرفر
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -36,7 +37,7 @@ const ViewTask = () => {
   const [previewFile, setPreviewFile] = useState(null);
   const [showAllAttachments, setShowAllAttachments] = useState(false);
 
-  /* ================= LOAD TASK ================= */
+  /* ================= LOAD TASK & SYNC TIMER ================= */
   useEffect(() => {
     if (!id || isNaN(Number(id))) {
       setLoading(false);
@@ -47,8 +48,17 @@ const ViewTask = () => {
     const loadTask = async () => {
       try {
         const res = await getTaskById(id);
-        if (!res?.data) setNotFound(true);
-        else setTask(res.data);
+        if (!res?.data) {
+          setNotFound(true);
+        } else {
+          setTask(res.data);
+          
+          // مزامنة العداد من بيانات السيرفر مباشرة عند التحميل
+          if (res.data.timer) {
+            setSeconds(res.data.timer.totalSeconds || 0);
+            setIsRunning(res.data.timer.isRunning || false);
+          }
+        }
       } catch (err) {
         if (err?.response?.status === 403) {
           alert("❌ غير مسموح لك بعرض هذه المهمة");
@@ -79,70 +89,50 @@ const ViewTask = () => {
     loadDeliverables();
   }, [id]);
 
-  /* ================= TIMER (FIXED) ================= */
-  const secondsKey = "timer_seconds_" + id;
-  const startKey = "timer_start_" + id;
-
+  /* ================= TIMER LOGIC (CLIENT-SIDE TICK) ================= */
   useEffect(() => {
-    if (!id || isNaN(Number(id))) return;
-
-    const savedSeconds = Number(localStorage.getItem(secondsKey) || "0");
-    const savedStart = localStorage.getItem(startKey);
-
-    setSeconds(savedSeconds);
-    setIsRunning(!!savedStart);
-  }, [id]);
-
-  useEffect(() => {
-    if (!id || isNaN(Number(id))) return;
-
     let interval = null;
 
-    const tick = () => {
-      const baseSeconds = Number(localStorage.getItem(secondsKey) || "0");
-      const savedStart = localStorage.getItem(startKey);
-
-      if (!savedStart) {
-        setSeconds(baseSeconds);
-        return;
-      }
-
-      const diff = Math.floor((Date.now() - Number(savedStart)) / 1000);
-      setSeconds(baseSeconds + diff);
-    };
-
-    tick();
-    interval = setInterval(tick, 1000);
-
-    return () => clearInterval(interval);
-  }, [isRunning, id]);
-
-  const startTimer = () => {
-    localStorage.setItem(startKey, Date.now());
-    setIsRunning(true);
-  };
-
-  const pauseTimer = () => {
-    const savedStart = localStorage.getItem(startKey);
-    const baseSeconds = Number(localStorage.getItem(secondsKey) || "0");
-
-    if (savedStart) {
-      const diff = Math.floor((Date.now() - Number(savedStart)) / 1000);
-      const newTotal = baseSeconds + diff;
-
-      localStorage.setItem(secondsKey, String(newTotal));
-      setSeconds(newTotal);
+    if (isRunning) {
+      interval = setInterval(() => {
+        setSeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      clearInterval(interval);
     }
 
-    localStorage.removeItem(startKey);
-    setIsRunning(false);
+    return () => clearInterval(interval);
+  }, [isRunning]);
+
+  /* ================= TIMER ACTIONS (SERVER-SYNC) ================= */
+  const startTimer = async () => {
+    try {
+      const res = await api.post(`/tasks/${id}/timer/start`);
+      // نحدث الحالة بناءً على رد السيرفر لضمان الدقة
+      setSeconds(res.data.timer.totalSeconds);
+      setIsRunning(true);
+    } catch (err) {
+      alert("❌ فشل تشغيل العداد");
+    }
+  };
+
+  const pauseTimer = async () => {
+    try {
+      const res = await api.post(`/tasks/${id}/timer/pause`);
+      // نحدث الحالة بناءً على الوقت الذي تم حفظه في السيرفر
+      setSeconds(res.data.timer.totalSeconds);
+      setIsRunning(false);
+    } catch (err) {
+      alert("❌ فشل إيقاف العداد");
+    }
   };
 
   const finishTask = async () => {
-    pauseTimer();
+    // نقوم بإيقاف العداد في السيرفر أولاً
+    await pauseTimer();
 
-    const finalSeconds = Number(localStorage.getItem(secondsKey) || "0");
-    const totalMinutes = Math.floor(finalSeconds / 60);
+    // نستخدم الوقت الحالي في الواجهة لإرساله كدقائق
+    const totalMinutes = Math.floor(seconds / 60);
 
     try {
       const res = await api.put(`/tasks/${id}/time`, {
@@ -152,10 +142,9 @@ const ViewTask = () => {
       setTask((prev) => ({ ...prev, timeSpent: res.data.timeSpent }));
       alert("✅ Task finished! Time saved: " + totalMinutes + " min");
 
+      // تصفير العداد المحلي بعد النجاح
       setSeconds(0);
       setIsRunning(false);
-      localStorage.removeItem(startKey);
-      localStorage.removeItem(secondsKey);
     } catch {
       alert("❌ Error saving time");
     }
@@ -214,19 +203,15 @@ const ViewTask = () => {
     }
   };
 
-  /* ================= FILE HELPER (MODIFIED TO MATCH SUBMISSIONS) ================= */
+  /* ================= FILE HELPER ================= */
   const handleFilePreview = (file) => {
     const url = file.url?.toLowerCase() || "";
     const name = file.originalName?.toLowerCase() || "";
     const isPDF = url.endsWith(".pdf") || name.endsWith(".pdf") || file.mimeType === "application/pdf";
-    const isImage = file.mimeType?.startsWith("image/");
-    const isVideo = file.mimeType?.startsWith("video/");
-
+    
     if (isPDF) {
-      // فتح الـ PDF مباشرة في تبويب جديد كما في Submissions (دون استبدال fl_attachment لضمان العرض وليس التحميل)
       window.open(file.url, '_blank', 'noopener,noreferrer');
     } else {
-      // الصور والفيديو تفتح المودال
       setPreviewFile(file);
     }
   };
@@ -258,7 +243,7 @@ const ViewTask = () => {
           </div>
         </div>
 
-        {/* ===== TIMER PANEL ===== */}
+        {/* ===== TIMER PANEL (UPDATED) ===== */}
         <div className="timer-box">
           <div className="timer-time">
             {`${String(Math.floor(seconds / 3600)).padStart(2,"0")}:${String(Math.floor((seconds%3600)/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}`}
