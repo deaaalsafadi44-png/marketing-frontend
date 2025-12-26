@@ -31,12 +31,11 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    const isAuthEndpoint =
+   const isAuthEndpoint =
       originalRequest.url.includes("/login") ||
-      originalRequest.url.includes("/refresh") ||
-      originalRequest.url.includes("/auth/me") ||
+      originalRequest.url.includes("/auth/refresh") || // ✅ المسار الصحيح الذي يحتاجه السيرفر
+      originalRequest.url.includes("/auth/me") ||      // 💡 إضافة جيدة لضمان استقرار التحقق من المستخدم
       originalRequest.url.includes("/logout");
-
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
@@ -53,10 +52,10 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await api.post("/refresh");
-        processQueue();
-        return api(originalRequest);
-      } catch (err) {
+  await api.post("/auth/refresh"); // ✅ أضفنا /auth/ قبل refresh
+  processQueue();
+  return api(originalRequest);
+}catch (err) {
         processQueue(err);
         return Promise.reject(err);
       } finally {
