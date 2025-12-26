@@ -139,6 +139,9 @@ const ViewTask = () => {
         timeSpent: totalMinutes,
       });
 
+      // ✅ أضف هذا السطر هنا لتصفير التايمر داخل قاعدة بيانات السيرفر
+      await api.post(`/tasks/${id}/timer/reset`); 
+
       setTask((prev) => ({ ...prev, timeSpent: res.data.timeSpent }));
       alert("✅ Task finished! Time saved: " + totalMinutes + " min");
 
