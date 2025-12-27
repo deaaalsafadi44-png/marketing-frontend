@@ -1,33 +1,24 @@
-/* eslint-disable no-restricted-globals */
-
-// الاستماع لحدث وصول الإشعار من السيرفر
-self.addEventListener('push', function (event) {
-    if (event.data) {
-        const data = event.data.json();
-        
-        const options = {
-            body: data.body,
-            icon: '/logo192.png', // تأكد من وجود أيقونة بهذا الاسم في مجلد public
-            badge: '/logo192.png',
-            data: {
-                url: data.url || '/' // الرابط الذي سيفتح عند الضغط على الإشعار
-            },
-            vibrate: [100, 50, 100], // نمط الاهتزاز للموبايل
-        };
-
-        event.waitUntil(
-            self.registration.showNotification(data.title, options)
-        );
-    }
-});
-
 // الاستماع لحدث الضغط على الإشعار
 self.addEventListener('notificationclick', function (event) {
     event.notification.close(); // إغلاق الإشعار
-    
+
+    // الرابط القادم من السيرفر (مثل: /tasks/view/1765793542)
+    const targetUrl = event.notification.data.url || '/tasks';
+
     event.waitUntil(
-        // فتح الرابط المرفق مع الإشعار في تبويب جديد
-        // eslint-disable-next-line no-undef
-        clients.openWindow(event.notification.data.url)
+        // البحث عن جميع التبويبات المفتوحة للموقع
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
+            // 1. إذا كان الموقع مفتوحاً في أي تبويب، قم بتغيير الرابط في التبويب نفسه
+            for (let client of clientList) {
+                if (client.url.includes(self.location.origin) && 'navigate' in client) {
+                    return client.navigate(targetUrl).then(c => c.focus());
+                }
+            }
+
+            // 2. إذا كان الموقع مغلقاً تماماً، عندها فقط افتح نافذة جديدة
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
+        })
     );
 });
