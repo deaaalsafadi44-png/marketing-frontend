@@ -35,14 +35,27 @@ const DeliverablesBoard = () => {
   const location = useLocation();
 
   /* ================= تنسيق الوقت المستغرق ================= */
-  const formatMinutes = (minutes) => {
-    if (!minutes || minutes <= 0) return "0 min";
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    if (h > 0 && m > 0) return `${h}h ${m}m`;
-    if (h > 0) return `${h}h`;
-    return `${m}m`;
-  };
+ const formatMinutes = (minutes) => {
+  // 1. التحقق من وجود قيمة
+  if (!minutes || minutes <= 0) return "0s";
+
+  // 2. تحويل الدقائق العشرية (مثل 28.43) إلى إجمالي ثوانٍ حقيقية
+  const totalSeconds = Math.round(minutes * 60);
+
+  // 3. توزيع الثواني على ساعات، دقائق، وثوانٍ
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+
+  // 4. بناء نص العرض المنسق
+  const parts = [];
+  if (h > 0) parts.push(`${h}h`);
+  if (m > 0) parts.push(`${m}m`);
+  if (s > 0) parts.push(`${s}s`);
+
+  // إذا كانت النتيجة أقل من ثانية، نعرض 0s
+  return parts.length > 0 ? parts.join(" ") : "0s";
+};
 
   /* ================= LOAD USER ================= */
   useEffect(() => {
