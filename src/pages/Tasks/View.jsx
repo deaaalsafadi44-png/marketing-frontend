@@ -16,17 +16,29 @@ const ViewTask = () => {
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
-  const formatMinutes = (minutes) => {
-    if (!minutes || minutes <= 0) return "0 min";
+ const formatMinutes = (minutes) => {
+  // 1. التعامل مع القيم الفارغة أو الصفرية
+  if (!minutes || minutes <= 0) return "0s";
 
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
+  // 2. تحويل الدقائق (التي قد تكون عشرية مثل 1.5) إلى إجمالي ثوانٍ حقيقية
+  // نستخدم Math.round لتفادي أخطاء الكسور البسيطة في الجافاسكريبت
+  const totalSeconds = Math.round(minutes * 60);
 
-    if (h > 0 && m > 0) return `${h}h ${m}m`;
-    if (h > 0) return `${h}h`;
-    return `${m}m`;
-  };
+  // 3. حساب الساعات والدقائق والثواني من إجمالي الثواني
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
 
+  // 4. بناء النص النهائي للعرض بشكل مرن
+  const parts = [];
+  if (h > 0) parts.push(`${h}h`);
+  if (m > 0) parts.push(`${m}m`);
+  if (s > 0) parts.push(`${s}s`);
+
+  // 5. إذا كان الوقت أقل من دقيقة (ثوانٍ فقط)، نعرض الثواني
+  // إذا كانت الدقائق والساعات صفر، نعرض 0s
+  return parts.length > 0 ? parts.join(" ") : "0s";
+};
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
 
@@ -128,49 +140,47 @@ const ViewTask = () => {
   };
 const finishTask = async () => {
   try {
-    // 1. إيقاف العداد في السيرفر أولاً لجلب الوقت النهائي المستقر
+    // 1. إيقاف العداد في السيرفر لجلب الوقت النهائي
     await pauseTimer();
 
-    // 2. حساب الدقائق والثواني من الحالة المحلية (seconds) قبل تصفيرها
-    // نستخدم متغير ثابت لضمان عدم ضياع القيمة أثناء معالجة الكود
+    // 2. حساب الوقت بالثواني والدقائق (للعرض والحفظ)
     const currentTotalSeconds = seconds; 
+    const preciseMinutes = currentTotalSeconds / 60; // القيمة الدقيقة ككسر (مثلاً 1.5 لدقيقة ونصف)
     const mins = Math.floor(currentTotalSeconds / 60);
     const secs = currentTotalSeconds % 60;
 
-    // 3. حفظ الدقائق في حقل timeSpent (للتوافق مع التقارير القديمة)
+    // 3. حفظ الوقت الدقيق في السيرفر لضمان عدم ضياع الثواني عند التحديث
     const res = await api.put(`/tasks/${id}/time`, {
-      timeSpent: mins,
+      timeSpent: preciseMinutes, 
     });
 
-    // 4. تصفير العداد في قاعدة البيانات بالسيرفر
+    // 4. تصفير العداد في السيرفر
     await api.post(`/tasks/${id}/timer/reset`); 
 
-    // 5. ✅ التعديل الجوهري: تحديث الواجهة مع الحفاظ على الثواني يدوياً
-    // هذا يمنع ظهور "0" بالأسفل لأننا نثبت الثواني داخل الـ task
+    // 5. تحديث الواجهة المحلية
     if (res.data) {
       setTask((prev) => ({ 
         ...prev, 
-        timeSpent: res.data.timeSpent || mins,
+        timeSpent: res.data.timeSpent || preciseMinutes,
         timer: {
           ...prev?.timer,
-          totalSeconds: currentTotalSeconds // نمرر الثواني الكاملة هنا
+          totalSeconds: 0 // نصفر الثواني هنا لأنها انتقلت لحقل timeSpent
         }
       }));
     }
 
-    // 6. إظهار رسالة النجاح بالدقة الكاملة (لن تظهر 0 min مجدداً)
+    // 6. رسالة نجاح دقيقة
     alert(`✅ Task finished! Time saved: ${mins}m ${secs}s`);
 
-    // 7. تصفير العداد المحلي (الأرقام الزرقاء الكبيرة)
+    // 7. تصفير العداد المحلي
     setSeconds(0);
     setIsRunning(false);
 
   } catch (err) {
     console.error("Finish error:", err);
-    alert("❌ Error saving time or resetting timer");
+    alert("❌ Error saving time");
   }
 };
-
   /* ================= UPLOAD ================= */
   const handleFileChange = (e) =>
     setSelectedFiles(Array.from(e.target.files));
