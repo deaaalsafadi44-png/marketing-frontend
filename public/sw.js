@@ -21,35 +21,32 @@ self.addEventListener('push', function (event) {
     }
 });
 
-self.addEventListener('push', function (event) {
-    if (event.data) {
-        const data = event.data.json();
-        
-        const options = {
-            body: data.body,
-            icon: '/logo192.png', 
-            image: 'https://img.freepik.com/free-vector/task-management-abstract-concept-vector-illustration_335657-1679.jpg', 
-            badge: '/logo192.png',
-            actions: [
-                { action: 'view', title: '👁️ عرض المهمة' },
-                { action: 'close', title: '✖️ إغلاق' }
-            ],
-            data: {
-                url: data.url || '/tasks'
-            },
-            vibrate: [200, 100, 200],
-            // ✅ تعديل الـ tag ليكون فريداً لكل إشعار باستخدام الوقت الحالي
-            // هذا يضمن أن الإشعارات الجديدة تظهر دائماً حتى لو المتصفح مغلق
-            tag: 'task-' + Date.now(), 
-            
-            // ✅ هذه الإضافة تجعل الإشعار لا يختفي تلقائياً بل ينتظرك لتفتحه
-            requireInteraction: true, 
-            
-            renotify: true 
-        };
+// الاستماع لحدث الضغط على الإشعار أو الأزرار
+self.addEventListener('notificationclick', function (event) {
+    // 1. إغلاق الإشعار فور الضغط عليه
+    event.notification.close();
 
-        event.waitUntil(
-            self.registration.showNotification(data.title, options)
-        );
+    // 2. إذا ضغط المستخدم على زر "إغلاق"، توقف هنا ولا تفتح أي صفحات
+    if (event.action === 'close') {
+        return;
     }
+
+    // 3. تحديد الرابط الذي سيفتح (الموجود في بيانات الإشعار)
+    const targetUrl = event.notification.data.url || '/tasks';
+
+    event.waitUntil(
+        // البحث عن تبويب مفتوح للموقع لفتحه بدلاً من نافذة جديدة (لتجنب صفحة Login)
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
+            for (let client of clientList) {
+                // إذا وجد تبويب مفتوح، قم بتوجيهه للرابط المطلوب وركز عليه
+                if (client.url.includes(self.location.origin) && 'navigate' in client) {
+                    return client.navigate(targetUrl).then(c => c.focus());
+                }
+            }
+            // إذا لم يجد تبويب مفتوح (المتصفح مغلق)، افتح نافذة جديدة بالرابط
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
+        })
+    );
 });
