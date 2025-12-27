@@ -47,15 +47,25 @@ const getCompanyLogo = (companyName) => {
     UTIL: FORMAT MINUTES
 ============================= */
 const formatMinutesToText = (minutes) => {
+  // 1. التحقق من القيم الفارغة أو الصفرية
   if (!minutes || minutes <= 0) return "0 minutes";
 
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
+  // 2. تحويل الدقائق العشرية إلى إجمالي ثوانٍ (لحل مشكلة الأرقام الطويلة)
+  const totalSeconds = Math.round(minutes * 60);
 
-  if (h > 0 && m > 0)
-    return `${h} hour${h > 1 ? "s" : ""}, ${m} minute${m > 1 ? "s" : ""}`;
-  if (h > 0) return `${h} hour${h > 1 ? "s" : ""}`;
-  return `${m} minute${m > 1 ? "s" : ""}`;
+  // 3. توزيع الثواني على ساعات ودقائق وثوانٍ
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+
+  // 4. بناء مصفوفة النصوص للعرض بشكل مرن
+  const parts = [];
+  if (h > 0) parts.push(`${h} hour${h > 1 ? "s" : ""}`);
+  if (m > 0) parts.push(`${m} minute${m > 1 ? "s" : ""}`);
+  if (s > 0) parts.push(`${s} second${s > 1 ? "s" : ""}`);
+
+  // 5. دمج النصوص بفاصلة (أو عرض 0 minutes إذا كانت النتيجة فارغة)
+  return parts.length > 0 ? parts.join(", ") : "0 minutes";
 };
 
 const Reports = () => {
