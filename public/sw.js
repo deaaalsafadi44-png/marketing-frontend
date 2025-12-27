@@ -27,13 +27,9 @@ self.addEventListener('push', function (event) {
         
         const options = {
             body: data.body,
-            // 1. أيقونة صغيرة تظهر بجانب النص
             icon: '/logo192.png', 
-            // 2. صورة كبيرة تظهر أسفل النص (تجذب الانتباه جداً)
             image: 'https://img.freepik.com/free-vector/task-management-abstract-concept-vector-illustration_335657-1679.jpg', 
-            // 3. أيقونة تظهر في شريط التنبيهات (للأندرويد خاصة)
             badge: '/logo192.png',
-            // 4. إضافة أزرار تفاعلية تحت الإشعار
             actions: [
                 { action: 'view', title: '👁️ عرض المهمة' },
                 { action: 'close', title: '✖️ إغلاق' }
@@ -41,8 +37,14 @@ self.addEventListener('push', function (event) {
             data: {
                 url: data.url || '/tasks'
             },
-            vibrate: [200, 100, 200], // نمط اهتزاز مميز
-            tag: 'task-notification', // لمنع تراكم الإشعارات فوق بعضها
+            vibrate: [200, 100, 200],
+            // ✅ تعديل الـ tag ليكون فريداً لكل إشعار باستخدام الوقت الحالي
+            // هذا يضمن أن الإشعارات الجديدة تظهر دائماً حتى لو المتصفح مغلق
+            tag: 'task-' + Date.now(), 
+            
+            // ✅ هذه الإضافة تجعل الإشعار لا يختفي تلقائياً بل ينتظرك لتفتحه
+            requireInteraction: true, 
+            
             renotify: true 
         };
 
