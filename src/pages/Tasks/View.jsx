@@ -357,10 +357,21 @@ const ViewTask = () => {
             </div>
           </div>
 
-          <div className="info-item">
-            <h3>Time Spent</h3>
-            <p>{task?.timeSpent ? formatMinutes(task.timeSpent) : "—"}</p>
-          </div>
+         <div className="info-item">
+  <h3>Time Spent</h3>
+  <p>
+    {task?.timer?.totalSeconds 
+      ? (() => {
+          const h = Math.floor(task.timer.totalSeconds / 3600);
+          const m = Math.floor((task.timer.totalSeconds % 3600) / 60);
+          const s = task.timer.totalSeconds % 60;
+          return `${h > 0 ? h + 'h ' : ''}${m}m ${s}s`;
+        })()
+      : task?.timeSpent 
+        ? formatMinutes(task.timeSpent) 
+        : "—"}
+  </p>
+</div>
         </div>
       </div>
 
