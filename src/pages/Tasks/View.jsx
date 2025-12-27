@@ -368,17 +368,26 @@ const finishTask = async () => {
   <div className="info-item">
   <h3>Time Spent</h3>
   <p>
-    {/* نستخدم seconds أولاً لأنها هي التي تحتوي على الوقت الفعلي الحالي */}
-    {seconds > 0 
-      ? (() => {
-          const h = Math.floor(seconds / 3600);
-          const m = Math.floor((seconds % 3600) / 60);
-          const s = seconds % 60;
-          return `${h > 0 ? h + 'h ' : ''}${m}m ${s}s`;
-        })()
-      : task?.timeSpent 
-        ? formatMinutes(task.timeSpent) 
-        : "0m 0s"}
+    {(() => {
+      // 1. إذا كان العداد يعمل الآن، نأخذ الوقت من seconds
+      if (isRunning && seconds > 0) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        return `${h > 0 ? h + 'h ' : ''}${m}m ${s}s`;
+      }
+      
+      // 2. إذا توقف العداد، نتحقق من وجود ثوانٍ مخزنة في بيانات المهمة نفسها
+      if (task?.timer?.totalSeconds > 0) {
+        const h = Math.floor(task.timer.totalSeconds / 3600);
+        const m = Math.floor((task.timer.totalSeconds % 3600) / 60);
+        const s = task.timer.totalSeconds % 60;
+        return `${h > 0 ? h + 'h ' : ''}${m}m ${s}s`;
+      }
+
+      // 3. إذا لم يوجد ثوانٍ، نعود للدقائق التقليدية (للمهمات القديمة)
+      return task?.timeSpent ? formatMinutes(task.timeSpent) : "0m 0s";
+    })()}
   </p>
 </div>
         </div>
