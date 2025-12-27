@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 
 // Layout
 import MainLayout from "../layout/MainLayout";
-
+import NotificationsPage from "../pages/NotificationsPage";
 // Components
 import PrivateRoute from "../components/PrivateRoute";
 
@@ -72,6 +72,10 @@ export const router = createBrowserRouter([
     path: "/unauthorized",
     element: <Unauthorized />,
   },
+  {
+  path: "/notifications",
+  element: <NotificationsPage />,
+},
   {
     path: "/",
     element: (
