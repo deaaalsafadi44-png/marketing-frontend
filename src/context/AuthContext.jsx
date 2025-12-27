@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "../services/apiClient";
-
+import { subscribeUserToPush } from "../utils/pushConfig";
 /* =========================
    CONTEXT
 ========================= */
@@ -26,6 +26,9 @@ export const AuthProvider = ({ children }) => {
 
         if (isMounted) {
           setUser(res.data.user || null);
+          if (res.data.user) {
+    subscribeUserToPush(api); // التأكد من أن الإشعارات مفعلة إذا كان المستخدم مسجلاً
+}
         }
       } catch (err) {
         if (isMounted) {
@@ -56,6 +59,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     setUser(res.data.user);
+    await subscribeUserToPush(api); // تفعيل الإشعارات فور الدخول
     return res.data.user;
   };
 
