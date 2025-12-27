@@ -128,30 +128,40 @@ const ViewTask = () => {
   };
 const finishTask = async () => {
   try {
-    // 1. إيقاف العداد في السيرفر أولاً لجلب الوقت النهائي
+    // 1. إيقاف العداد في السيرفر أولاً لجلب الوقت النهائي المستقر
     await pauseTimer();
 
-    // 2. حساب الدقائق والثواني للعرض في الرسالة
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    // 2. حساب الدقائق والثواني من الحالة المحلية (seconds) قبل تصفيرها
+    // نستخدم متغير ثابت لضمان عدم ضياع القيمة أثناء معالجة الكود
+    const currentTotalSeconds = seconds; 
+    const mins = Math.floor(currentTotalSeconds / 60);
+    const secs = currentTotalSeconds % 60;
 
-    // 3. حفظ الدقائق في حقل timeSpent التقليدي (اختياري حسب نظامك)
+    // 3. حفظ الدقائق في حقل timeSpent (للتوافق مع التقارير القديمة)
     const res = await api.put(`/tasks/${id}/time`, {
       timeSpent: mins,
     });
 
-    // 4. ✅ أهم خطوة: تصفير العداد في قاعدة البيانات بالسيرفر
+    // 4. تصفير العداد في قاعدة البيانات بالسيرفر
     await api.post(`/tasks/${id}/timer/reset`); 
 
-    // 5. تحديث حالة المهمة في الواجهة (بأمان)
+    // 5. ✅ التعديل الجوهري: تحديث الواجهة مع الحفاظ على الثواني يدوياً
+    // هذا يمنع ظهور "0" بالأسفل لأننا نثبت الثواني داخل الـ task
     if (res.data) {
-      setTask((prev) => ({ ...prev, timeSpent: res.data.timeSpent || mins }));
+      setTask((prev) => ({ 
+        ...prev, 
+        timeSpent: res.data.timeSpent || mins,
+        timer: {
+          ...prev?.timer,
+          totalSeconds: currentTotalSeconds // نمرر الثواني الكاملة هنا
+        }
+      }));
     }
 
-    // 6. إظهار رسالة النجاح بالدقة الكاملة
+    // 6. إظهار رسالة النجاح بالدقة الكاملة (لن تظهر 0 min مجدداً)
     alert(`✅ Task finished! Time saved: ${mins}m ${secs}s`);
 
-    // 7. ✅ تصفير العداد المحلي في الصفحة فوراً
+    // 7. تصفير العداد المحلي (الأرقام الزرقاء الكبيرة)
     setSeconds(0);
     setIsRunning(false);
 
