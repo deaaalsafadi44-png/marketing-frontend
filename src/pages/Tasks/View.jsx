@@ -127,30 +127,39 @@ const ViewTask = () => {
     }
   };
 const finishTask = async () => {
-  await pauseTimer();
-
-  // الحساب الحالي (يسبب المشكلة لأنه يقرب لأسفل)
-const remainingSeconds = seconds % 60;
-alert(`✅ Task finished! Time saved: ${totalMinutes}m ${remainingSeconds}s`);
-
   try {
+    // 1. إيقاف العداد في السيرفر أولاً لجلب الوقت النهائي
+    await pauseTimer();
+
+    // 2. حساب الدقائق والثواني للعرض في الرسالة
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+
+    // 3. حفظ الدقائق في حقل timeSpent التقليدي (اختياري حسب نظامك)
     const res = await api.put(`/tasks/${id}/time`, {
-      timeSpent: totalMinutes, // سيظل يرسل الدقائق للسيرفر للحقول القديمة
+      timeSpent: mins,
     });
 
+    // 4. ✅ أهم خطوة: تصفير العداد في قاعدة البيانات بالسيرفر
     await api.post(`/tasks/${id}/timer/reset`); 
 
-    setTask((prev) => ({ ...prev, timeSpent: res.data.timeSpent }));
+    // 5. تحديث حالة المهمة في الواجهة (بأمان)
+    if (res.data) {
+      setTask((prev) => ({ ...prev, timeSpent: res.data.timeSpent || mins }));
+    }
 
-    // ✅ تحديث التنبيه ليظهر الدقائق والثواني بدلاً من 0 min
-    alert(`✅ Task finished! Time saved: ${totalMinutes}m ${remainingSeconds}s`);
+    // 6. إظهار رسالة النجاح بالدقة الكاملة
+    alert(`✅ Task finished! Time saved: ${mins}m ${secs}s`);
 
+    // 7. ✅ تصفير العداد المحلي في الصفحة فوراً
     setSeconds(0);
     setIsRunning(false);
-  } catch {
-    alert("❌ Error saving time");
+
+  } catch (err) {
+    console.error("Finish error:", err);
+    alert("❌ Error saving time or resetting timer");
   }
-};;
+};
 
   /* ================= UPLOAD ================= */
   const handleFileChange = (e) =>
