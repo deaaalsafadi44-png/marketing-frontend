@@ -126,32 +126,31 @@ const ViewTask = () => {
       alert("❌ فشل إيقاف العداد");
     }
   };
+const finishTask = async () => {
+  await pauseTimer();
 
-  const finishTask = async () => {
-    // نقوم بإيقاف العداد في السيرفر أولاً
-    await pauseTimer();
+  // الحساب الحالي (يسبب المشكلة لأنه يقرب لأسفل)
+const remainingSeconds = seconds % 60;
+alert(`✅ Task finished! Time saved: ${totalMinutes}m ${remainingSeconds}s`);
 
-    // نستخدم الوقت الحالي في الواجهة لإرساله كدقائق
-    const totalMinutes = Math.floor(seconds / 60);
+  try {
+    const res = await api.put(`/tasks/${id}/time`, {
+      timeSpent: totalMinutes, // سيظل يرسل الدقائق للسيرفر للحقول القديمة
+    });
 
-    try {
-      const res = await api.put(`/tasks/${id}/time`, {
-        timeSpent: totalMinutes,
-      });
+    await api.post(`/tasks/${id}/timer/reset`); 
 
-      // ✅ أضف هذا السطر هنا لتصفير التايمر داخل قاعدة بيانات السيرفر
-      await api.post(`/tasks/${id}/timer/reset`); 
+    setTask((prev) => ({ ...prev, timeSpent: res.data.timeSpent }));
 
-      setTask((prev) => ({ ...prev, timeSpent: res.data.timeSpent }));
-      alert("✅ Task finished! Time saved: " + totalMinutes + " min");
+    // ✅ تحديث التنبيه ليظهر الدقائق والثواني بدلاً من 0 min
+    alert(`✅ Task finished! Time saved: ${totalMinutes}m ${remainingSeconds}s`);
 
-      // تصفير العداد المحلي بعد النجاح
-      setSeconds(0);
-      setIsRunning(false);
-    } catch {
-      alert("❌ Error saving time");
-    }
-  };
+    setSeconds(0);
+    setIsRunning(false);
+  } catch {
+    alert("❌ Error saving time");
+  }
+};;
 
   /* ================= UPLOAD ================= */
   const handleFileChange = (e) =>
@@ -357,19 +356,20 @@ const ViewTask = () => {
             </div>
           </div>
 
-         <div className="info-item">
+  <div className="info-item">
   <h3>Time Spent</h3>
   <p>
-    {task?.timer?.totalSeconds 
+    {/* نستخدم seconds أولاً لأنها هي التي تحتوي على الوقت الفعلي الحالي */}
+    {seconds > 0 
       ? (() => {
-          const h = Math.floor(task.timer.totalSeconds / 3600);
-          const m = Math.floor((task.timer.totalSeconds % 3600) / 60);
-          const s = task.timer.totalSeconds % 60;
+          const h = Math.floor(seconds / 3600);
+          const m = Math.floor((seconds % 3600) / 60);
+          const s = seconds % 60;
           return `${h > 0 ? h + 'h ' : ''}${m}m ${s}s`;
         })()
       : task?.timeSpent 
         ? formatMinutes(task.timeSpent) 
-        : "—"}
+        : "0m 0s"}
   </p>
 </div>
         </div>
