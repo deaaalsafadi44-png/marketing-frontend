@@ -1,16 +1,99 @@
+/* الحاوية الرئيسية */
 .notifications-container {
-    padding: 20px;
-    max-width: 800px;
-    margin: 0 auto;
+  padding: 30px;
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 80vh;
+  direction: rtl; /* لدعم اللغة العربية بشكل صحيح */
 }
+
+.notifications-container h2 {
+  color: #fff;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  border-bottom: 2px solid #333;
+  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* قائمة الإشعارات */
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* بطاقة الإشعار الفردية */
 .notification-item {
-    background: #2a2a2a;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    border-right: 5px solid #ff4d4d;
+  background: #1e1e1e; /* لون غامق يتماشى مع السستم */
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-right: 6px solid #444; /* لون افتراضي رمادي */
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
+
+/* تمييز الإشعارات غير المقروءة */
+.notification-item.unread {
+  background: #252525;
+  border-right-color: #ff4d4d; /* لون أحمر للإشعارات الجديدة */
+}
+
+.notification-item.unread:hover {
+  transform: translateX(-5px);
+  background: #2d2d2d;
+}
+
+/* تمييز الإشعارات المقروءة */
 .notification-item.read {
-    border-right-color: #4caf50;
-    opacity: 0.7;
+  opacity: 0.6;
+  border-right-color: #4caf50; /* لون أخضر للمقروء */
+}
+
+/* محتوى الإشعار */
+.notif-content h4 {
+  color: #fff;
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+}
+
+.notif-content p {
+  color: #bbb;
+  margin: 0 0 10px 0;
+  line-height: 1.5;
+}
+
+.notif-content small {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+/* زر التحديد كمقروء */
+.mark-read-btn {
+  background: transparent;
+  color: #ff4d4d;
+  border: 1px solid #ff4d4d;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.mark-read-btn:hover {
+  background: #ff4d4d;
+  color: #fff;
+}
+
+/* حالة لا توجد إشعارات */
+.no-notifications {
+  text-align: center;
+  color: #888;
+  margin-top: 50px;
+  font-size: 1.2rem;
 }
