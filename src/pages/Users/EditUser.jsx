@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getUserById, updateUserApi } from "../../services/usersService";
 import { useNavigate, useParams } from "react-router-dom";
-
+import { getAllOptions } from "../../services/optionsService";
 
 const EditUser = () => {
   const { id } = useParams(); // Mongo _id
@@ -10,7 +10,7 @@ const EditUser = () => {
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
-
+const [departments, setDepartments] = useState([]); // مصفوفة فارغة في البداية
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -23,34 +23,38 @@ const EditUser = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await getUserById(id);
+ useEffect(() => {
+  const load = async () => {
+    try {
+      // 1. جلب المسميات الوظيفية من السيرفر
+      const optionsRes = await getAllOptions();
+      const titles = optionsRes.jobTitles || [];
+      setDepartments(titles);
 
-        if (!res?.data) {
-          throw new Error("User not found");
-        }
-
-        setForm({
-          name: res.data.name || "",
-          email: res.data.email || "",
-          password: "",
-          confirmPassword: "",
-          role: res.data.role || "Employee",
-          dept: res.data.dept || "Design",
-        });
-      } catch (err) {
-        console.error(err);
-        alert("User not found");
-        navigate("/users");
+      // 2. جلب بيانات المستخدم
+      const res = await getUserById(id);
+      if (!res?.data) {
+        throw new Error("User not found");
       }
 
-      setLoading(false);
-    };
+      setForm({
+        name: res.data.name || "",
+        email: res.data.email || "",
+        password: "",
+        confirmPassword: "",
+        role: res.data.role || "Employee",
+        dept: res.data.dept || (titles.length > 0 ? titles[0] : ""), // إذا لم يوجد قسم نأخذ أول خيار متاح
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Error loading data");
+      navigate("/users");
+    }
+    setLoading(false);
+  };
 
-    load();
-  }, [id, navigate]);
+  load();
+}, [id, navigate]);
 
   const handleChange = (e) => {
     setForm({
@@ -161,14 +165,18 @@ const EditUser = () => {
             <option value="Manager">Manager</option>
             <option value="Employee">Employee</option>
           </select>
-
-          <label>Department</label>
+<label>Department</label>
           <select name="dept" value={form.dept} onChange={handleChange}>
-            <option value="Design">Design</option>
-            <option value="Content">Content</option>
-            <option value="Marketing">Marketing</option>
-            <option value="Video">Video</option>
-            <option value="Finance">Finance</option>
+            {/* نقوم بعمل Loop على الأقسام القادمة من السيرفر */}
+            {departments.length > 0 ? (
+              departments.map((d, index) => (
+                <option key={index} value={d}>
+                  {d}
+                </option>
+              ))
+            ) : (
+              <option value="">No departments available</option>
+            )}
           </select>
 
           <button type="submit" className="btn-save" disabled={saving}>
