@@ -8,16 +8,13 @@ const NotificationsPage = () => {
   const navigate = useNavigate();
 
   /* ==================================================
-      المنطق البرمجي: جلب البيانات وطباعتها للفحص
+      المنطق البرمجي: جلب البيانات (لم يتغير)
   ================================================== */
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         const res = await api.get('/api/notifications');
-        
-        // تم نقل السطر هنا ليعمل بشكل صحيح وتتمكن من رؤية البيانات
-        console.log("بيانات الإشعارات الواصلة:", res.data);
-
+        console.log("بيانات الإشعارات الواصلة:", res.data); // للتدقيق
         setNotifications(res.data);
       } catch (err) {
         console.error("خطأ في جلب الإشعارات", err);
@@ -29,7 +26,9 @@ const NotificationsPage = () => {
   /* ==================================================
       تحديث حالة الإشعار إلى "مقروء"
   ================================================== */
-  const handleMarkAsRead = async (id) => {
+  const handleMarkAsRead = async (id, e) => {
+    // e.stopPropagation تمنع الانتقال لصفحة التاسك عند الضغط على زر "تمت القراءة" فقط
+    e.stopPropagation(); 
     try {
       await api.patch(`/api/notifications/${id}/read`);
       setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
@@ -39,14 +38,19 @@ const NotificationsPage = () => {
   };
 
   /* ==================================================
-      واجهة العرض المحدثة بأيقونة رجوع احترافية
+      دالة الانتقال لرابط التاسك الموجود في البيانات
   ================================================== */
+  const handleNotificationClick = (url) => {
+    if (url) {
+      navigate(url); // الانتقال للرابط الموجود في حقل url
+    }
+  };
+
   return (
     <div className="notifications-container">
       
       <div className="notif-header">
         <div className="header-right">
-          {/* زر الرجوع بالأيقونة فقط */}
           <button className="back-icon-btn" onClick={() => navigate(-1)} title="رجوع">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -64,7 +68,11 @@ const NotificationsPage = () => {
       ) : (
         <div className="notifications-list">
           {notifications.map((n) => (
-            <div key={n._id} className={`notification-item ${n.isRead ? 'read' : 'unread'}`}>
+            <div 
+              key={n._id} 
+              className={`notification-item ${n.isRead ? 'read' : 'unread'} clickable`}
+              onClick={() => handleNotificationClick(n.url)} // استخدام حقل url هنا
+            >
               
               <div className="notif-content-wrapper">
                 <h4>{n.title}</h4>
@@ -82,7 +90,10 @@ const NotificationsPage = () => {
                 </small>
 
                 {!n.isRead && (
-                  <button className="mark-read-btn" onClick={() => handleMarkAsRead(n._id)}>
+                  <button 
+                    className="mark-read-btn" 
+                    onClick={(e) => handleMarkAsRead(n._id, e)}
+                  >
                     تمت القراءة
                   </button>
                 )}
