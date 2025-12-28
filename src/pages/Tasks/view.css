@@ -490,3 +490,50 @@
   height: auto;
   border-radius: 8px;
 }
+/* تنسيق زر القفل والفتح */
+.timer-btn.finish {
+  background-color: #27ae60;
+  color: white;
+}
+
+.timer-btn.unlock-btn {
+  background-color: #e67e22 !important;
+  color: white;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.timer-btn.unlock-btn:hover {
+  background-color: #d35400 !important;
+  transform: translateY(-2px);
+}
+
+/* حالة القفل العامة للكارد */
+.task-locked {
+  position: relative;
+  opacity: 0.85;
+  pointer-events: none; /* يمنع الضغط على أي شيء داخل القسم */
+  filter: grayscale(20%);
+}
+
+/* أيقونة القفل العائمة (اختياري) */
+.locked-badge {
+  background: #c0392b;
+  color: white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  margin-bottom: 10px;
+}
+
+/* تنسيق الأزرار عندما تكون معطلة */
+button:disabled {
+  background-color: #bdc3c7 !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none !important;
+}
