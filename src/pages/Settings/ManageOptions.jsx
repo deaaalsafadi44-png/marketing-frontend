@@ -149,7 +149,7 @@ const ManageOptions = () => {
       </div>
 
       <div className="opt-box">
-        <h2>Status Options</h2>
+<h2>🔄 Status Options</h2>
         <div className="opt-form">
           <input type="text" placeholder="Add new status..." value={newStatus} onChange={(e) => setNewStatus(e.target.value)} />
           <button onClick={addStatus}>Add</button>
