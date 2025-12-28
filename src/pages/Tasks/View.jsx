@@ -139,49 +139,28 @@ const ViewTask = () => {
     }
   };
 const finishTask = async () => {
+  // 1. نافذة تأكيد للموظف لضمان عدم الضغط بالخطأ
+  if (!window.confirm("هل أنت متأكد من إنهاء المهمة؟ سيتم قفل العداد ولا يمكنك تعديله لاحقاً.")) {
+    return;
+  }
+
   try {
-    // 1. إيقاف العداد في السيرفر لجلب الوقت النهائي
-    await pauseTimer();
+    // 2. طلب القفل من السيرفر (يقوم بوقف التايمر وحساب الوقت وقفل المهمة في خطوة واحدة)
+    const res = await lockTaskApi(id);
 
-    // 2. حساب الوقت بالثواني والدقائق (للعرض والحفظ)
-    const currentTotalSeconds = seconds; 
-    const preciseMinutes = currentTotalSeconds / 60; // القيمة الدقيقة ككسر (مثلاً 1.5 لدقيقة ونصف)
-    const mins = Math.floor(currentTotalSeconds / 60);
-    const secs = currentTotalSeconds % 60;
-
-    // 3. حفظ الوقت الدقيق في السيرفر لضمان عدم ضياع الثواني عند التحديث
-    const res = await api.put(`/tasks/${id}/time`, {
-      timeSpent: preciseMinutes, 
-    });
-
-    // 4. تصفير العداد في السيرفر
-    await api.post(`/tasks/${id}/timer/reset`); 
-
-    // 5. تحديث الواجهة المحلية
     if (res.data) {
-      setTask((prev) => ({ 
-        ...prev, 
-        timeSpent: res.data.timeSpent || preciseMinutes,
-        timer: {
-          ...prev?.timer,
-          totalSeconds: 0 // نصفر الثواني هنا لأنها انتقلت لحقل timeSpent
-        }
-      }));
+      // 3. تحديث بيانات المهمة والعداد في الصفحة فوراً
+      setTask(res.data);
+      setSeconds(res.data.timer?.totalSeconds || 0);
+      setIsRunning(false);
+
+      alert("✅ تم إنهاء المهمة وقفل البيانات بنجاح.");
     }
-
-    // 6. رسالة نجاح دقيقة
-    alert(`✅ Task finished! Time saved: ${mins}m ${secs}s`);
-
-    // 7. تصفير العداد المحلي
-    setSeconds(0);
-    setIsRunning(false);
-
   } catch (err) {
     console.error("Finish error:", err);
-    alert("❌ Error saving time");
+    alert("❌ فشل إنهاء المهمة، يرجى المحاولة مرة أخرى.");
   }
-};
-  /* ================= UPLOAD ================= */
+};/* ================= UPLOAD ================= */
   const handleFileChange = (e) =>
     setSelectedFiles(Array.from(e.target.files));
 
@@ -279,16 +258,53 @@ const finishTask = async () => {
           <div className="timer-time">
             {`${String(Math.floor(seconds / 3600)).padStart(2,"0")}:${String(Math.floor((seconds%3600)/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}`}
           </div>
-
-          <div className="timer-actions">
-            {!isRunning ? (
-              <button className="timer-btn start" onClick={startTimer}>▶ Start</button>
-            ) : (
-              <button className="timer-btn pause" onClick={pauseTimer}>⏸ Pause</button>
-            )}
-            <button className="timer-btn finish" onClick={finishTask}>✔ Finish</button>
-          </div>
-
+<div className="timer-actions">
+  {!isRunning ? (
+    <button 
+      className="timer-btn start" 
+      onClick={startTimer} 
+      disabled={task?.isLocked} // 🔒 قفل عند الانتهاء
+    >
+      ▶ Start
+    </button>
+  ) : (
+    <button 
+      className="timer-btn pause" 
+      onClick={pauseTimer} 
+      disabled={task?.isLocked} // 🔒 قفل عند الانتهاء
+    >
+      ⏸ Pause
+    </button>
+  )}
+  
+  <button 
+    className="timer-btn finish" 
+    onClick={finishTask} 
+    disabled={task?.isLocked} // 🔒 الزر نفسه يقفل بعد استخدامه
+  >
+    ✔ Finish
+  </button>
+</div>
+{/* زر فك القفل - يظهر فقط للأدمن وإذا كانت المهمة مقفلة بالفعل */}
+{task?.isLocked && localStorage.getItem("role") === "Admin" && (
+  <button 
+    className="timer-btn unlock-btn" 
+    style={{ backgroundColor: "#e67e22", marginTop: "10px", width: "100%" }}
+    onClick={async () => {
+      if(window.confirm("هل تريد فك قفل هذه المهمة للسماح للموظف بالتعديل مجدداً؟")) {
+        try {
+          const res = await unlockTaskApi(id);
+          setTask(res.data);
+          alert("🔓 تم فك القفل بنجاح، يمكن للموظف الآن استخدام التايمر مجدداً.");
+        } catch (err) {
+          alert("❌ فشل فك القفل");
+        }
+      }
+    }}
+  >
+    🔓 Unlock Task (Admin Only)
+  </button>
+)}
           <div className="upload-section">
             <label className="upload-label">
               📁 Choose files
