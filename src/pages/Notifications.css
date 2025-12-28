@@ -1,99 +1,122 @@
-/* الحاوية الرئيسية */
+/* استيراد خط عصري */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;600&display=swap');
+
 .notifications-container {
-  padding: 30px;
-  max-width: 900px;
-  margin: 0 auto;
-  min-height: 80vh;
-  direction: rtl; /* لدعم اللغة العربية بشكل صحيح */
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    max-width: 850px;
+    margin: 40px auto;
+    padding: 20px;
+    direction: rtl;
+    min-height: 100vh;
 }
 
+/* العنوان الرئيسي */
 .notifications-container h2 {
-  color: #fff;
-  margin-bottom: 25px;
-  font-size: 1.8rem;
-  border-bottom: 2px solid #333;
-  padding-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    color: #1a1a1b;
+    font-weight: 600;
+    font-size: 2rem;
+    margin-bottom: 40px;
 }
 
 /* قائمة الإشعارات */
 .notifications-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-/* بطاقة الإشعار الفردية */
+/* بطاقة الإشعار الزجاجية */
 .notification-item {
-  background: #1e1e1e; /* لون غامق يتماشى مع السستم */
-  border-radius: 12px;
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-right: 6px solid #444; /* لون افتراضي رمادي */
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
 }
 
-/* تمييز الإشعارات غير المقروءة */
+/* شريط جانبي ملون للإشعارات غير المقروءة */
 .notification-item.unread {
-  background: #252525;
-  border-right-color: #ff4d4d; /* لون أحمر للإشعارات الجديدة */
+    border-right: 8px solid #3b82f6; /* أزرق احترافي */
+    background: #ffffff;
 }
 
-.notification-item.unread:hover {
-  transform: translateX(-5px);
-  background: #2d2d2d;
-}
-
-/* تمييز الإشعارات المقروءة */
 .notification-item.read {
-  opacity: 0.6;
-  border-right-color: #4caf50; /* لون أخضر للمقروء */
+    border-right: 8px solid #e5e7eb; /* رمادي خفيف */
+    opacity: 0.8;
 }
 
-/* محتوى الإشعار */
+.notification-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* محتوى النص */
+.notif-content {
+    flex: 1;
+}
+
 .notif-content h4 {
-  color: #fff;
-  margin: 0 0 8px 0;
-  font-size: 1.1rem;
+    margin: 0 0 10px 0;
+    color: #1f2937;
+    font-size: 1.25rem;
+    font-weight: 600;
 }
 
 .notif-content p {
-  color: #bbb;
-  margin: 0 0 10px 0;
-  line-height: 1.5;
+    margin: 0 0 15px 0;
+    color: #4b5563;
+    line-height: 1.6;
+    font-size: 1.05rem;
 }
 
 .notif-content small {
-  color: #666;
-  font-size: 0.85rem;
+    display: inline-block;
+    background: #f3f4f6;
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: #6b7280;
+    font-size: 0.85rem;
 }
 
-/* زر التحديد كمقروء */
+/* زر "تحديد كمقروء" الاحترافي */
 .mark-read-btn {
-  background: transparent;
-  color: #ff4d4d;
-  border: 1px solid #ff4d4d;
-  padding: 8px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+    white-space: nowrap;
+    margin-right: 20px;
 }
 
 .mark-read-btn:hover {
-  background: #ff4d4d;
-  color: #fff;
+    background: #2563eb;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
 }
 
-/* حالة لا توجد إشعارات */
+/* حالة "لا توجد إشعارات" */
 .no-notifications {
-  text-align: center;
-  color: #888;
-  margin-top: 50px;
-  font-size: 1.2rem;
+    text-align: center;
+    padding: 100px 20px;
+    background: #f9fafb;
+    border-radius: 30px;
+    color: #9ca3af;
+    font-size: 1.3rem;
+    border: 2px dashed #e5e7eb;
 }

@@ -26,7 +26,7 @@ const NotificationsPage = () => {
   const handleMarkAsRead = async (id) => {
     try {
       await api.patch(`/api/notifications/${id}/read`);
-      // تحديث القائمة محلياً لتغيير التصميم فوراً
+      // تحديث الحالة محلياً فوراً لتحسين تجربة المستخدم
       setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
     } catch (err) {
       console.error("فشل تحديث حالة الإشعار", err);
@@ -35,26 +35,35 @@ const NotificationsPage = () => {
 
   return (
     <div className="notifications-container">
-      <h2>الإشعارات 🔔</h2>
+      {/* العنوان بشكل عصري مع أيقونة */}
+      <h2><span>🔔</span> مركز الإشعارات</h2>
       
       {notifications.length === 0 ? (
-        <div className="no-notifications">لا توجد إشعارات حالياً</div>
+        <div className="no-notifications">
+          لا توجد تنبيهات جديدة في الوقت الحالي
+        </div>
       ) : (
         <div className="notifications-list">
           {notifications.map((n) => (
-            /* التعديل المضاف هنا: إضافة كلاس unread/read للتحكم في الألوان من CSS */
             <div key={n._id} className={`notification-item ${n.isRead ? 'read' : 'unread'}`}>
               <div className="notif-content">
                 <h4>{n.title}</h4>
                 <p>{n.body}</p>
-                {/* التعديل المضاف هنا: تنسيق الوقت باللغة العربية */}
-                <small>{new Date(n.createdAt).toLocaleString('ar-EG')}</small>
+                {/* تنسيق الوقت بشكل احترافي مع أيقونة الساعة */}
+                <small>
+                  🕒 {new Date(n.createdAt).toLocaleString('ar-EG', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    day: 'numeric', 
+                    month: 'long' 
+                  })}
+                </small>
               </div>
 
-              {/* التعديل المضاف هنا: إضافة كلاس mark-read-btn للزر */}
+              {/* زر القراءة بتصميم جديد */}
               {!n.isRead && (
                 <button className="mark-read-btn" onClick={() => handleMarkAsRead(n._id)}>
-                  تحديد كمقروء
+                  تمت القراءة
                 </button>
               )}
             </div>
