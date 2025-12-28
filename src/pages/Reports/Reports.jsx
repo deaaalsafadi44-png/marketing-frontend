@@ -340,38 +340,28 @@ const filteredTasks = tasks.filter((task) => {
     const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     saveAs(blob, "tasks-report.xlsx");
   }
-
-  return (
+return (
     <div className="reports-page">
       <h1 className="reports-title">Reports Dashboard</h1>
 
-      {/* --- بداية القسم المعدل (الفلاتر والأزرار) --- */}
+      {/* --- قسم الفلاتر والأزرار --- */}
       <div className="reports-controls-container">
         <div className="filters-group">
-          
-          {/* فلتر الموظفين */}
           <div className="filter-item">
             <label>Employee</label>
             <select value={workerFilter} onChange={(e) => setWorkerFilter(e.target.value)}>
               <option value="">All Employees</option>
               {users.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
-                </option>
+                <option key={u.id} value={u.id}>{u.name}</option>
               ))}
             </select>
           </div>
 
-          {/* فلتر الشركات */}
           <div className="filter-item">
             <label>Company</label>
             <div className="select-with-logo">
               {companyFilter && (
-                <img 
-                  src={getCompanyLogo(companyFilter)} 
-                  alt="selected-logo" 
-                  className="mini-logo-inside"
-                />
+                <img src={getCompanyLogo(companyFilter)} alt="logo" className="mini-logo-inside" />
               )}
               <select 
                 value={companyFilter} 
@@ -386,20 +376,17 @@ const filteredTasks = tasks.filter((task) => {
             </div>
           </div>
 
-          {/* فلتر التاريخ من */}
           <div className="filter-item">
             <label>From Date</label>
             <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
           </div>
 
-          {/* فلتر التاريخ إلى */}
           <div className="filter-item">
             <label>To Date</label>
             <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
           </div>
         </div>
 
-        {/* أزرار التصدير */}
         <div className="export-group">
           <button className="btn-export pdf" onClick={exportPDF}>
             <span className="icon">📄</span> Export PDF
@@ -409,9 +396,8 @@ const filteredTasks = tasks.filter((task) => {
           </button>
         </div>
       </div>
-      {/* --- نهاية القسم المعدل --- */}
 
-      {/* ملخص البيانات */}
+      {/* --- ملخص البيانات --- */}
       <div className="reports-summary">
         <div className="summary-item">
           <span>Total Tasks</span>
@@ -427,7 +413,7 @@ const filteredTasks = tasks.filter((task) => {
         </div>
       </div>
 
-      {/* الرسوم البيانية */}
+      {/* --- الرسوم البيانية --- */}
       <div className="reports-charts">
         <div className="reports-card">
           <h3>Tasks by Type</h3>
@@ -436,21 +422,19 @@ const filteredTasks = tasks.filter((task) => {
           </div>
         </div>
 
+        {/* تعديل الكلاس هنا لتوسيط الدائرة */}
         <div className="reports-card">
           <h3>Tasks by Company</h3>
           <div className="company-logos-legend">
             {uniqueCompaniesForCharts.map((company, index) => (
               <div key={index} className="legend-item">
-                <img 
-                  src={getCompanyLogo(company)} 
-                  alt="logo" 
-                />
+                <img src={getCompanyLogo(company)} alt="logo" />
                 <span>{company}</span>
               </div>
             ))}
           </div>
-          <div className="chart-container">
-            <Pie data={pieData} />
+          <div className="chart-container-pie">
+            <Pie data={pieData} options={{ maintainAspectRatio: false }} />
           </div>
         </div>
 
@@ -461,8 +445,45 @@ const filteredTasks = tasks.filter((task) => {
           </div>
         </div>
       </div>
+
+      {/* --- ✅ إضافة الجدول بعرض كامل في الأسفل --- */}
+      <div className="table-container-full">
+        <h3>Detailed Report</h3>
+        <table className="report-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Company</th>
+              <th>Task Type</th>
+              <th>Worker</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTasks.length > 0 ? (
+              filteredTasks.map((t) => (
+                <tr key={t.id}>
+                  <td>#{t.id}</td>
+                  <td>
+                    <img src={getCompanyLogo(t.company)} className="table-logo" alt="logo" />
+                    {t.company || "-"}
+                  </td>
+                  <td>{t.type || "-"}</td>
+                  <td>{t.workerName || "-"}</td>
+                  <td>
+                    {formatMinutesToHM(t.timer?.totalSeconds ? Math.floor(t.timer.totalSeconds / 60) : t.timeSpent)}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>No tasks found for the selected filters.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
-
 export default Reports;
