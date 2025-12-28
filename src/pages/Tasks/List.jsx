@@ -96,22 +96,33 @@ const TasksList = () => {
     }
   };
 
- const handleDelete = async (taskId) => {
-    if (!window.confirm("Are you sure?")) return;
+ /* =============================================
+    🗑️ دالة الحذف الاحترافية (Optimistic Update)
+   ============================================= */
+const handleDelete = async (taskId) => {
+  // 1. طلب التأكيد
+  if (!window.confirm("Are you sure you want to delete this task?")) return;
 
-    // الخطوة السحرية: احذف التاسك من المصفوفة في الواجهة فوراً
-    // هذا السطر يغنيك عن الحاجة لتحديث الصفحة
-    setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
+  // 2. أخذ نسخة احتياطية من الحالة الحالية (للأمان)
+  const previousTasks = [...tasks];
 
-    try {
-        await deleteTaskApi(taskId);
-        // لا داعي لاستدعاء loadTasks() هنا لأننا حذفناه بالفعل من الواجهة
-    } catch (err) {
-        console.error("فشل الحذف، سنعيد التاسك للشاشة");
-        // في حال فشل السيرفر، يفضل إعادة جلب البيانات للتأكد
-        loadTasks(); 
-        alert("Could not delete from server.");
-    }
+  // 3. التحديث الفوري: حذف التاسك من الواجهة فوراً
+  // هذا السطر يخبر React أن يعيد رسم الصفحة بدون التاسك المختار
+  setTasks(tasks.filter(task => task._id !== taskId));
+
+  try {
+    // 4. إرسال طلب الحذف للسيرفر في الخلفية
+    await deleteTaskApi(taskId);
+    console.log("Task deleted successfully");
+  } catch (err) {
+    // 5. في حال فشل السيرفر (مثل الـ 404 أو انقطاع الإنترنت)
+    console.error("Failed to delete task:", err);
+    
+    // إعادة التاسك مكانه فوراً لضمان دقة البيانات
+    setTasks(previousTasks);
+    
+    alert("Something went wrong. The task could not be deleted from the server.");
+  }
 };
   const filteredTasks = tasks.filter((task) => {
     const created = safeDate(task.createdAt);
