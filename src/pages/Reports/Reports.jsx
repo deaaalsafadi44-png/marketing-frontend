@@ -343,41 +343,75 @@ const filteredTasks = tasks.filter((task) => {
 
   return (
     <div className="reports-page">
-      <h1 className="reports-title">Reports</h1>
+      <h1 className="reports-title">Reports Dashboard</h1>
 
-      <div className="reports-card filters-card" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-        <select value={workerFilter} onChange={(e) => setWorkerFilter(e.target.value)}>
-  <option value="">All Employees</option>
-  {users.map((u) => (
-    <option key={u.id} value={u.id}>
-      {u.name}
-    </option>
-  ))}
-</select>
-        {/* ✅ فلتر الشركات مع عرض لوغو الشركة المختارة بجانبه إن وُجدت */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-           {companyFilter && (
-             <img 
-               src={getCompanyLogo(companyFilter)} 
-               alt="selected-logo" 
-               style={{ width: '25px', height: '25px', borderRadius: '50%', border: '1px solid #ddd' }}
-             />
-           )}
-           <select value={companyFilter} onChange={(e) => setCompanyFilter(e.target.value)}>
-             <option value="">All Companies</option>
-             {allUniqueCompanies.map((company, i) => (
-               <option key={i} value={company}>{company}</option>
-             ))}
-           </select>
+      {/* --- بداية القسم المعدل (الفلاتر والأزرار) --- */}
+      <div className="reports-controls-container">
+        <div className="filters-group">
+          
+          {/* فلتر الموظفين */}
+          <div className="filter-item">
+            <label>Employee</label>
+            <select value={workerFilter} onChange={(e) => setWorkerFilter(e.target.value)}>
+              <option value="">All Employees</option>
+              {users.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* فلتر الشركات */}
+          <div className="filter-item">
+            <label>Company</label>
+            <div className="select-with-logo">
+              {companyFilter && (
+                <img 
+                  src={getCompanyLogo(companyFilter)} 
+                  alt="selected-logo" 
+                  className="mini-logo-inside"
+                />
+              )}
+              <select 
+                value={companyFilter} 
+                onChange={(e) => setCompanyFilter(e.target.value)}
+                style={{ paddingLeft: companyFilter ? '35px' : '12px' }}
+              >
+                <option value="">All Companies</option>
+                {allUniqueCompanies.map((company, i) => (
+                  <option key={i} value={company}>{company}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* فلتر التاريخ من */}
+          <div className="filter-item">
+            <label>From Date</label>
+            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+          </div>
+
+          {/* فلتر التاريخ إلى */}
+          <div className="filter-item">
+            <label>To Date</label>
+            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+          </div>
         </div>
 
-        <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
-        <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
-
-        <button className="export-btn" onClick={exportPDF}>Export PDF</button>
-        <button className="export-btn" onClick={exportExcel}>Export Excel</button>
+        {/* أزرار التصدير */}
+        <div className="export-group">
+          <button className="btn-export pdf" onClick={exportPDF}>
+            <span className="icon">📄</span> Export PDF
+          </button>
+          <button className="btn-export excel" onClick={exportExcel}>
+            <span className="icon">📊</span> Export Excel
+          </button>
+        </div>
       </div>
+      {/* --- نهاية القسم المعدل --- */}
 
+      {/* ملخص البيانات */}
       <div className="reports-summary">
         <div className="summary-item">
           <span>Total Tasks</span>
@@ -393,6 +427,7 @@ const filteredTasks = tasks.filter((task) => {
         </div>
       </div>
 
+      {/* الرسوم البيانية */}
       <div className="reports-charts">
         <div className="reports-card">
           <h3>Tasks by Type</h3>
@@ -403,14 +438,12 @@ const filteredTasks = tasks.filter((task) => {
 
         <div className="reports-card">
           <h3>Tasks by Company</h3>
-          {/* ✅ إضافة قائمة الشعارات المصورة فوق الرسم البياني */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '10px', flexWrap: 'wrap' }}>
+          <div className="company-logos-legend">
             {uniqueCompaniesForCharts.map((company, index) => (
-              <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px' }}>
+              <div key={index} className="legend-item">
                 <img 
                   src={getCompanyLogo(company)} 
                   alt="logo" 
-                  style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'contain' }} 
                 />
                 <span>{company}</span>
               </div>
