@@ -1,36 +1,65 @@
-// 🔥 Default values
-const DEFAULT_PRIORITY = ["Low", "Medium", "High", "Critical"];
-const DEFAULT_STATUS = ["New", "In Progress", "Completed"];
+import api from "./apiClient";
 
-// ⏳ Load from LocalStorage or defaults
-export const getPriorityList = () => {
-  return JSON.parse(localStorage.getItem("priorityList")) || DEFAULT_PRIORITY;
+/**
+ * 1. جلب الإعدادات كاملة (وظيفة عامة يستخدمها الكل)
+ */
+export const getAllOptions = async () => {
+  try {
+    const res = await api.get("/options");
+    return res.data || { jobTitles: [], priorities: [], statuses: [] };
+  } catch (err) {
+    console.error("Failed to load options");
+    return { jobTitles: [], priorities: [], statuses: [] };
+  }
 };
 
-export const getStatusList = () => {
-  return JSON.parse(localStorage.getItem("statusList")) || DEFAULT_STATUS;
+/**
+ * 2. المسميات الوظيفية (Job Titles)
+ */
+export const addJobTitle = async (newTitle) => {
+  const current = await getAllOptions();
+  if (!current.jobTitles.includes(newTitle)) {
+    const updated = { ...current, jobTitles: [...current.jobTitles, newTitle] };
+    await api.put("/options", updated);
+  }
 };
 
-// ➕ إضافة عنصر جديد
-export const addPriority = (value) => {
-  const list = getPriorityList();
-  list.push(value);
-  localStorage.setItem("priorityList", JSON.stringify(list));
+export const deleteJobTitle = async (title) => {
+  const current = await getAllOptions();
+  const updated = { ...current, jobTitles: current.jobTitles.filter(t => t !== title) };
+  await api.put("/options", updated);
 };
 
-export const addStatus = (value) => {
-  const list = getStatusList();
-  list.push(value);
-  localStorage.setItem("statusList", JSON.stringify(list));
+/**
+ * 3. الأولوية (Priorities) - للحفاظ على عمل الحقول القديمة
+ */
+export const addPriority = async (newPriority) => {
+  const current = await getAllOptions();
+  if (!current.priorities.includes(newPriority)) {
+    const updated = { ...current, priorities: [...current.priorities, newPriority] };
+    await api.put("/options", updated);
+  }
 };
 
-// ❌ حذف عنصر
-export const deletePriority = (value) => {
-  const list = getPriorityList().filter((item) => item !== value);
-  localStorage.setItem("priorityList", JSON.stringify(list));
+export const deletePriority = async (priority) => {
+  const current = await getAllOptions();
+  const updated = { ...current, priorities: current.priorities.filter(p => p !== priority) };
+  await api.put("/options", updated);
 };
 
-export const deleteStatus = (value) => {
-  const list = getStatusList().filter((item) => item !== value);
-  localStorage.setItem("statusList", JSON.stringify(list));
+/**
+ * 4. الحالة (Statuses) - للحفاظ على عمل الحقول القديمة
+ */
+export const addStatus = async (newStatus) => {
+  const current = await getAllOptions();
+  if (!current.statuses.includes(newStatus)) {
+    const updated = { ...current, statuses: [...current.statuses, newStatus] };
+    await api.put("/options", updated);
+  }
+};
+
+export const deleteStatus = async (status) => {
+  const current = await getAllOptions();
+  const updated = { ...current, statuses: current.statuses.filter(s => s !== status) };
+  await api.put("/options", updated);
 };
