@@ -97,30 +97,21 @@ const TasksList = () => {
   };
 
  const handleDelete = async (taskId) => {
-  // 1. التأكيد (كما كان لديك تماماً)
-  if (!window.confirm("Are you sure you want to delete this task?")) return;
+    if (!window.confirm("Are you sure?")) return;
 
-  // 2. نسخة احتياطية (للحماية)
-  const previousTasks = [...tasks]; 
+    // الخطوة السحرية: احذف التاسك من المصفوفة في الواجهة فوراً
+    // هذا السطر يغنيك عن الحاجة لتحديث الصفحة
+    setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
 
-  // 3. الحذف البصري الفوري (السرعة التي طلبتها)
-  setTasks(tasks.filter(task => task._id !== taskId));
-
-  try {
-    // 4. استدعاء نفس الدالة التي أكدت لي أنها تعمل
-    await deleteTaskApi(taskId); 
-    
-    // نجاح العملية في الخلفية دون أن يشعر المستخدم بالانتظار
-    console.log("Task deleted from server successfully");
-  } catch (err) {
-    // 5. إذا حدث خطأ (مثل الـ 404 المفاجئ)
-    console.error("Error during deletion:", err);
-    
-    // إعادة التاسك مكانه فوراً لكي لا يضيع على المستخدم
-    setTasks(previousTasks);
-    
-    alert("Could not delete task. It has been restored.");
-  }
+    try {
+        await deleteTaskApi(taskId);
+        // لا داعي لاستدعاء loadTasks() هنا لأننا حذفناه بالفعل من الواجهة
+    } catch (err) {
+        console.error("فشل الحذف، سنعيد التاسك للشاشة");
+        // في حال فشل السيرفر، يفضل إعادة جلب البيانات للتأكد
+        loadTasks(); 
+        alert("Could not delete from server.");
+    }
 };
   const filteredTasks = tasks.filter((task) => {
     const created = safeDate(task.createdAt);
