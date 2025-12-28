@@ -8,12 +8,16 @@ const NotificationsPage = () => {
   const navigate = useNavigate();
 
   /* ==================================================
-      المنطق البرمجي (دون تغيير كما طلبت)
+      المنطق البرمجي: جلب البيانات وطباعتها للفحص
   ================================================== */
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         const res = await api.get('/api/notifications');
+        
+        // تم نقل السطر هنا ليعمل بشكل صحيح وتتمكن من رؤية البيانات
+        console.log("بيانات الإشعارات الواصلة:", res.data);
+
         setNotifications(res.data);
       } catch (err) {
         console.error("خطأ في جلب الإشعارات", err);
@@ -22,11 +26,13 @@ const NotificationsPage = () => {
     fetchNotifications();
   }, []);
 
+  /* ==================================================
+      تحديث حالة الإشعار إلى "مقروء"
+  ================================================== */
   const handleMarkAsRead = async (id) => {
     try {
       await api.patch(`/api/notifications/${id}/read`);
       setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
-      console.log("بيانات الإشعارات الواصلة:", res.data);
     } catch (err) {
       console.error("فشل تحديث حالة الإشعار", err);
     }
