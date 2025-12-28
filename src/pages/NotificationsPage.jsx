@@ -8,7 +8,7 @@ const NotificationsPage = () => {
   const navigate = useNavigate();
 
   /* ==================================================
-      منطق جلب البيانات
+      1. جلب البيانات (لم يتغير)
   ================================================== */
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -23,7 +23,33 @@ const NotificationsPage = () => {
   }, []);
 
   /* ==================================================
-      تحديث حالة الإشعار إلى "مقروء"
+      2. دالة الحذف الاحترافية (Optimistic Update)
+  ================================================== */
+  const handleDeleteNotification = async (id, e) => {
+    e.stopPropagation(); // منع الانتقال لصفحة التاسك
+
+    // الاحتفاظ بنسخة احتياطية في حال فشل السيرفر لاحقاً
+    const backupNotifications = [...notifications];
+
+    // تحديث الواجهة فوراً (الحذف البصري)
+    const updatedList = notifications.filter(n => n._id !== id);
+    setNotifications(updatedList);
+
+    try {
+      // إرسال طلب الحذف الفعلي للسيرفر
+      await api.delete(`/api/notifications/${id}`);
+      console.log("تم الحذف من السيرفر بنجاح");
+    } catch (err) {
+      console.error("فشل الحذف من السيرفر:", err);
+      
+      // في حال الفشل، نعيد القائمة كما كانت وننبه المستخدم
+      setNotifications(backupNotifications);
+      alert("عذراً، تعذر حذف الإشعار من السيرفر. تم التراجع عن الحذف.");
+    }
+  };
+
+  /* ==================================================
+      3. الدوال الأخرى (كما هي)
   ================================================== */
   const handleMarkAsRead = async (id, e) => {
     e.stopPropagation(); 
@@ -35,34 +61,12 @@ const NotificationsPage = () => {
     }
   };
 
-  /* ==================================================
-      دالة حذف الإشعار
-  ================================================== */
-  const handleDeleteNotification = async (id, e) => {
-    e.stopPropagation(); // منع الانتقال لصفحة التاسك عند الضغط على الحذف
-    if (window.confirm("هل أنت متأكد من حذف هذا الإشعار؟")) {
-      try {
-        await api.delete(`/api/notifications/${id}`);
-        // تحديث القائمة محلياً بعد الحذف الناجح
-        setNotifications(notifications.filter(n => n._id !== id));
-      } catch (err) {
-        console.error("فشل حذف الإشعار", err);
-      }
-    }
-  };
-
-  /* ==================================================
-      دالة الانتقال
-  ================================================== */
   const handleNotificationClick = (url) => {
-    if (url) {
-      navigate(url);
-    }
+    if (url) navigate(url);
   };
 
   return (
     <div className="notifications-container">
-      
       <div className="notif-header">
         <div className="header-right">
           <button className="back-icon-btn" onClick={() => navigate(-1)} title="رجوع">
@@ -76,7 +80,7 @@ const NotificationsPage = () => {
       </div>
       
       {notifications.length === 0 ? (
-        <div className="no-notifications">لا توجد تنبيهات جديدة حالياً</div>
+        <div className="no-notifications">لا توجد تنبيهات جديدة في الوقت الحالي</div>
       ) : (
         <div className="notifications-list">
           {notifications.map((n) => (
@@ -85,11 +89,10 @@ const NotificationsPage = () => {
               className={`notification-item ${n.isRead ? 'read' : 'unread'} clickable`}
               onClick={() => handleNotificationClick(n.url)}
             >
-              {/* زر الحذف في الزاوية */}
+              {/* زر الحذف */}
               <button 
                 className="delete-notif-btn" 
                 onClick={(e) => handleDeleteNotification(n._id, e)}
-                title="حذف الإشعار"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -108,7 +111,6 @@ const NotificationsPage = () => {
                     hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' 
                   })}
                 </small>
-
                 {!n.isRead && (
                   <button className="mark-read-btn" onClick={(e) => handleMarkAsRead(n._id, e)}>
                     تمت القراءة
