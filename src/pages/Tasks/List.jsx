@@ -105,8 +105,7 @@ const TasksList = () => {
 
     // 2. القضاء على المشكلة: أخبر React أن يمسح المهمة من الشاشة فوراً
     // هذا السطر هو الذي يجعلك لا تحتاج لتحديث الصفحة
-    setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
-
+setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId && task.id !== taskId));
     console.log("Deleted and UI updated!");
   } catch (err) {
     console.error("Error deleting:", err);
