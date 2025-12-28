@@ -286,22 +286,36 @@ const finishTask = async () => {
     ✔ Finish
   </button>
 </div>
-{/* زر فك القفل - يظهر فقط للأدمن وإذا كانت المهمة مقفلة بالفعل */}
+{/* زر فك القفل - تم تعديل الشرط ليتوافق مع بيانات النظام المتاحة */}
 {task?.isLocked && (
-  localStorage.getItem("role")?.toLowerCase() === "admin" || 
-  localStorage.getItem("role")?.toLowerCase() === "super admin" ||
-  localStorage.getItem("role")?.toLowerCase() === "superadmin"
-) && (  <button 
+  // التحقق من الاسم مباشرة لأنه يظهر في الواجهة كـ Super Admin
+  task?.workerName === "Super Admin" || 
+  // أو إذا كان هناك أي وسيلة أخرى يمررها النظام للأدمن
+  localStorage.getItem("userRole") === "Admin" 
+) && (
+  <button 
     className="timer-btn unlock-btn" 
-    style={{ backgroundColor: "#e67e22", marginTop: "10px", width: "100%" }}
+    style={{ 
+      backgroundColor: "#e67e22", 
+      marginTop: "10px", 
+      width: "100%",
+      display: "block", // لضمان أخذ المساحة كاملة
+      opacity: 1,
+      cursor: "pointer"
+    }}
     onClick={async () => {
-      if(window.confirm("هل تريد فك قفل هذه المهمة للسماح للموظف بالتعديل مجدداً؟")) {
+      if(window.confirm("هل أنت متأكد من فك قفل هذه المهمة؟ سيتمكن الموظف من تشغيل التايمر مرة أخرى.")) {
         try {
           const res = await unlockTaskApi(id);
-          setTask(res.data);
-          alert("🔓 تم فك القفل بنجاح، يمكن للموظف الآن استخدام التايمر مجدداً.");
+          if (res.data) {
+            setTask(res.data);
+            setIsRunning(false);
+            setSeconds(res.data.timer?.totalSeconds || 0);
+            alert("🔓 تم فك القفل بنجاح.");
+          }
         } catch (err) {
-          alert("❌ فشل فك القفل");
+          console.error("Unlock error:", err);
+          alert("❌ فشل فك القفل، تأكد من صلاحيات المشرف.");
         }
       }
     }}
