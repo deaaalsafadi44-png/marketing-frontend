@@ -172,3 +172,37 @@
     font-size: 1.7rem;
     color: #1a1a1b;
 }
+/* وضعية بطاقة الإشعار لتسمح بوضع الزر داخلها */
+.notification-item {
+    position: relative; /* ضروري لتموضع زر الحذف */
+    /* ... التنسيقات السابقة كما هي ... */
+}
+
+/* زر الحذف الأنيق */
+.delete-notif-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px; /* بما أن الاتجاه RTL، نضعه في أقصى اليسار */
+    background: transparent;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    opacity: 0; /* يكون مخفي افتراضياً لجمالية التصميم */
+}
+
+/* يظهر الزر بوضوح عند تمرير الماوس على الإشعار */
+.notification-item:hover .delete-notif-btn {
+    opacity: 1;
+    color: #ff4d4f; /* يتحول للون الأحمر عند الاقتراب */
+}
+
+.delete-notif-btn:hover {
+    background: #fff1f0;
+    transform: rotate(90deg); /* حركة دوران بسيطة للأيقونة */
+}

@@ -8,13 +8,12 @@ const NotificationsPage = () => {
   const navigate = useNavigate();
 
   /* ==================================================
-      المنطق البرمجي: جلب البيانات (لم يتغير)
+      منطق جلب البيانات
   ================================================== */
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         const res = await api.get('/api/notifications');
-        console.log("بيانات الإشعارات الواصلة:", res.data); // للتدقيق
         setNotifications(res.data);
       } catch (err) {
         console.error("خطأ في جلب الإشعارات", err);
@@ -27,7 +26,6 @@ const NotificationsPage = () => {
       تحديث حالة الإشعار إلى "مقروء"
   ================================================== */
   const handleMarkAsRead = async (id, e) => {
-    // e.stopPropagation تمنع الانتقال لصفحة التاسك عند الضغط على زر "تمت القراءة" فقط
     e.stopPropagation(); 
     try {
       await api.patch(`/api/notifications/${id}/read`);
@@ -38,11 +36,27 @@ const NotificationsPage = () => {
   };
 
   /* ==================================================
-      دالة الانتقال لرابط التاسك الموجود في البيانات
+      دالة حذف الإشعار
+  ================================================== */
+  const handleDeleteNotification = async (id, e) => {
+    e.stopPropagation(); // منع الانتقال لصفحة التاسك عند الضغط على الحذف
+    if (window.confirm("هل أنت متأكد من حذف هذا الإشعار؟")) {
+      try {
+        await api.delete(`/api/notifications/${id}`);
+        // تحديث القائمة محلياً بعد الحذف الناجح
+        setNotifications(notifications.filter(n => n._id !== id));
+      } catch (err) {
+        console.error("فشل حذف الإشعار", err);
+      }
+    }
+  };
+
+  /* ==================================================
+      دالة الانتقال
   ================================================== */
   const handleNotificationClick = (url) => {
     if (url) {
-      navigate(url); // الانتقال للرابط الموجود في حقل url
+      navigate(url);
     }
   };
 
@@ -62,18 +76,27 @@ const NotificationsPage = () => {
       </div>
       
       {notifications.length === 0 ? (
-        <div className="no-notifications">
-          لا توجد تنبيهات جديدة في الوقت الحالي
-        </div>
+        <div className="no-notifications">لا توجد تنبيهات جديدة حالياً</div>
       ) : (
         <div className="notifications-list">
           {notifications.map((n) => (
             <div 
               key={n._id} 
               className={`notification-item ${n.isRead ? 'read' : 'unread'} clickable`}
-              onClick={() => handleNotificationClick(n.url)} // استخدام حقل url هنا
+              onClick={() => handleNotificationClick(n.url)}
             >
-              
+              {/* زر الحذف في الزاوية */}
+              <button 
+                className="delete-notif-btn" 
+                onClick={(e) => handleDeleteNotification(n._id, e)}
+                title="حذف الإشعار"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+
               <div className="notif-content-wrapper">
                 <h4>{n.title}</h4>
                 <p>{n.body}</p>
@@ -82,23 +105,16 @@ const NotificationsPage = () => {
               <div className="notif-side-actions">
                 <small>
                   🕒 {new Date(n.createdAt).toLocaleString('ar-EG', { 
-                    hour: '2-digit', 
-                    minute: '2-digit', 
-                    day: 'numeric', 
-                    month: 'short' 
+                    hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' 
                   })}
                 </small>
 
                 {!n.isRead && (
-                  <button 
-                    className="mark-read-btn" 
-                    onClick={(e) => handleMarkAsRead(n._id, e)}
-                  >
+                  <button className="mark-read-btn" onClick={(e) => handleMarkAsRead(n._id, e)}>
                     تمت القراءة
                   </button>
                 )}
               </div>
-
             </div>
           ))}
         </div>
