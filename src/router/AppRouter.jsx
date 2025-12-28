@@ -101,23 +101,23 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // Settings (Admin فقط)
-      {
-        path: "settings",
-        element: (
-          <PrivateRoute roles={["Admin", "admin"]}>
-            <Settings />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: "settings/options",
-        element: (
-          <PrivateRoute roles={["Admin", "admin"]}>
-            <ManageOptions />
-          </PrivateRoute>
-        ),
-      },
+      // Settings (Admin + Manager)
+{
+  path: "settings",
+  element: (
+    <PrivateRoute roles={["Admin", "admin", "Manager", "manager"]}>
+      <Settings />
+    </PrivateRoute>
+  ),
+},
+{
+  path: "settings/options",
+  element: (
+    <PrivateRoute roles={["Admin", "admin", "Manager", "manager"]}>
+      <ManageOptions />
+    </PrivateRoute>
+  ),
+},
 
       // Tasks
       {
