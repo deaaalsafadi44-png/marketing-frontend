@@ -87,51 +87,48 @@ const [commentTexts, setCommentTexts] = useState({});
     }
   };
 /* =====================================================
-    🧹 كود تنظيف البيانات اليتيمة (المعدل والمحسّن)
-===================================================== */
-/* =====================================================
     🧹 كود تنظيف البيانات اليتيمة (النسخة النهائية المستقرة)
 ===================================================== */
 useEffect(() => {
   const cleanupOrphanedSubmissions = async () => {
-    // نتحقق من وجود بيانات، وأن المستخدم Admin/Manager، وأن التحميل انتهى
+    // التأكد من وجود بيانات، وأن المستخدم مخول، وأن التحميل الأولي انتهى
     if (!loading && items.length > 0 && isAdminOrManager) {
       try {
-        // 1. جلب التاسكات الحالية
+        // 1. جلب قائمة التاسكات الحالية من السيرفر للتأكد من وجودها
         const tasksRes = await api.get("/tasks"); 
         
-        // 2. تحويل المعرفات لنصوص لضمان دقة المقارنة
-        const existingTaskIds = new Set(tasksRes.data.map(t => String(t.id)));
+        // 2. إنشاء قائمة بمعرفات التاسكات الموجودة فعلياً
+        const existingTaskIds = new Set(tasksRes.data.map(t => String(t.id || t._id)));
 
-        // 3. فحص كل تسليم
+        // 3. فحص كل تسليم (Submission) موجود في الصفحة حالياً
         for (const item of items) {
           const currentId = String(item.taskId);
 
+          // إذا كان معرف التاسك الخاص بالتسليم غير موجود في قائمة التاسكات الأصلية
           if (!existingTaskIds.has(currentId)) {
-            console.warn(`🗑️ Cleaning old orphan: ${item.deliverableId}`);
+            console.warn(`🗑️ Cleaning old orphan deliverable: ${item.deliverableId}`);
 
             try {
-              // حذف من السيرفر
+              // حذفه من قاعدة البيانات عبر السيرفر
               await api.delete(`/deliverables/${item.deliverableId}`);
               
-              // تحديث الواجهة فوراً
+              // تحديث الواجهة فوراً لإزالة العنصر من أمامك
               setItems(prev => prev.filter(i => i.deliverableId !== item.deliverableId));
             } catch (delErr) {
-              console.error("Failed to delete item:", item.deliverableId, delErr);
+              console.error("Failed to delete orphaned item:", item.deliverableId, delErr);
             }
           }
         }
       } catch (err) {
-        console.error("Cleanup process failed:", err);
+        console.error("Cleanup process failed to fetch tasks:", err);
       }
     }
   };
 
-  // استدعاء الدالة للتنفيذ
   cleanupOrphanedSubmissions();
 
-  // مصفوفة التبعيات: نراقب حالة التحميل وصلاحيات المستخدم فقط لتجنب Loop نهائي
-}, [loading, isAdminOrManager]);
+  // نضع [loading] فقط لضمان تشغيلها مرة واحدة بعد انتهاء جلب البيانات الأولي
+}, [loading]);
 
 /* 🆕 استخراج قائمة الشركات الفريدة من البيانات المتاحة للفلترة */
   const companiesList = useMemo(() => {
@@ -450,8 +447,8 @@ const detail = task.taskDetails || {};            return (
                   
                 {/* 1. عرض التعليقات القديمة */}
 <div className="comments-list" style={{ marginBottom: (detail.comments?.length > 0) ? '15px' : '0' }}>
-  {detail.comments?.map((c, index) => (
-    <div key={index} className="comment-item" style={{ 
+{detail.comments?.map((c) => 
+  (  <div key={c._id} className="comment-item"  style={{ 
       marginBottom: '10px', 
       fontSize: '13px',
       display: 'flex', 
