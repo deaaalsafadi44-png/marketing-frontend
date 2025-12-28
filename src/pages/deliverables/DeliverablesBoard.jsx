@@ -134,6 +134,10 @@ useEffect(() => {
 }, [loading, isAdminOrManager]);
 
 /* 🆕 استخراج قائمة الشركات الفريدة من البيانات المتاحة للفلترة */
+  const companiesList = useMemo(() => {
+    const companies = items.map(item => item.taskDetails?.company).filter(Boolean);
+    return [...new Set(companies)];
+  }, [items]);
 
   /* ================= FILTER LOGIC ================= */
   const filteredItems = items.filter((item) => {
@@ -187,15 +191,15 @@ const detail = item.taskDetails || {};    const itemDate = item.createdAt ? new 
   return Object.values(map);
 }, [filteredItems]);
 
-  /* ================= RATE ================= */
   const handleRate = async (task, value) => {
     if (!isAdminOrManager) return;
 
     const newRating = task.rating === value ? 0 : value;
 
+    // تحديث الحالة محلياً فوراً
     setItems((prev) =>
       prev.map((i) =>
-        i.deliverableId === task.deliverableId
+        i.taskId === task.taskId // التغيير هنا ليعتمد على taskId
           ? { ...i, rating: newRating }
           : i
       )
@@ -207,14 +211,7 @@ const detail = item.taskDetails || {};    const itemDate = item.createdAt ? new 
       });
     } catch (err) {
       console.error("Rating failed", err);
-
-      setItems((prev) =>
-        prev.map((i) =>
-          i.deliverableId === task.deliverableId
-            ? { ...i, rating: task.rating }
-            : i
-        )
-      );
+      loadDeliverables(); // إعادة التحميل من السيرفر في حال الفشل
     }
   };
 /* ================= ADD COMMENT FUNCTION ================= */
