@@ -59,7 +59,7 @@ const Settings = () => {
 
           <Link to="/settings/options">
             <button className="manage-options-btn">
-              ⚙ Manage Priority & Status Options
+⚙ Data & Field Settings
             </button>
           </Link>
         </div>
