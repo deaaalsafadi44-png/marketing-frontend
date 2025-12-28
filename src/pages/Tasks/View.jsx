@@ -287,8 +287,11 @@ const finishTask = async () => {
   </button>
 </div>
 {/* زر فك القفل - يظهر فقط للأدمن وإذا كانت المهمة مقفلة بالفعل */}
-{task?.isLocked && localStorage.getItem("role") === "Admin" && (
-  <button 
+{task?.isLocked && (
+  localStorage.getItem("role")?.toLowerCase() === "admin" || 
+  localStorage.getItem("role")?.toLowerCase() === "super admin" ||
+  localStorage.getItem("role")?.toLowerCase() === "superadmin"
+) && (  <button 
     className="timer-btn unlock-btn" 
     style={{ backgroundColor: "#e67e22", marginTop: "10px", width: "100%" }}
     onClick={async () => {
