@@ -351,10 +351,18 @@ const finishTask = async () => {
             <p>{task?.type || "—"}</p>
           </div>
 
-          <div className="info-item">
-            <h3>Assigned To</h3>
-            <p>{task?.workerName || "—"}</p>
-          </div>
+         <div className="info-item">
+  <h3>Assigned To</h3>
+  <p>
+    <strong>{task?.workerName || "—"}</strong>
+    {/* إضافة المسمى الوظيفي هنا بصيغة مميزة */}
+    {task?.workerJobTitle && (
+      <span className="worker-job-badge">
+        {task.workerJobTitle}
+      </span>
+    )}
+  </p>
+</div>
 
           <div className="info-item">
             <h3>Created At</h3>

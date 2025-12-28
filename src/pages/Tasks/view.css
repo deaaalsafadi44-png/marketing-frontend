@@ -536,4 +536,11 @@ button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
   transform: none !important;
+}/* أضف هذا في نهاية ملف view.css */
+.worker-job-badge {
+  display: block;      /* ليظهر في سطر جديد تحت الاسم */
+  font-size: 0.85rem;
+  color: #7f8c8d;      /* لون رمادي احترافي */
+  font-style: italic;
+  margin-top: 4px;
 }

@@ -208,8 +208,17 @@ setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId && task.i
                 </td>
 
                 <td>{task.type || "—"}</td>
-                <td>{task.workerName || "—"}</td>
-
+<td>
+  <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <span style={{ fontWeight: '500' }}>{task.workerName || "—"}</span>
+    {/* عرض المسمى الوظيفي تحت الاسم مباشرة */}
+    {task.workerJobTitle && (
+      <small style={{ color: '#777', fontSize: '11px', fontStyle: 'italic' }}>
+        {task.workerJobTitle}
+      </small>
+    )}
+  </div>
+</td>
                 <td>
                   <span className={`tag tag-${normalizeClass(task.priority)}`}>
                     {task.priority || "—"}

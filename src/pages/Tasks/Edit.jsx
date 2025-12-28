@@ -86,12 +86,13 @@ const EditTask = () => {
     loadData();
   }, [id]);
 
-  const handleChange = (e) => {
+ const handleChange = (e) => {
     const { name, value } = e.target;
 
     setTask((prev) => ({
       ...prev,
-      [name]: name === "workerId" ? Number(value) : value
+      // إذا كان الحقل هو workerId، نتأكد أنه يُرسل كرقم للسيرفر
+      [name]: name === "workerId" ? (value === "" ? "" : Number(value)) : value
     }));
   };
 
@@ -168,23 +169,23 @@ const EditTask = () => {
               required
             />
           </div>
-
-          <div className="form-group">
-            <label>Assigned User</label>
-            <select
-              name="workerId"
-              value={task.workerId}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select User</option>
-              {users.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name} — {u.role}
-                </option>
-              ))}
-            </select>
-          </div>
+<div className="form-group">
+  <label>Assigned User</label>
+  <select
+    name="workerId"
+    value={task.workerId}
+    onChange={handleChange}
+    required
+  >
+    <option value="">Select User</option>
+    {users.map((u) => (
+      <option key={u.id} value={u.id}>
+        {/* أضفنا حقل u.dept هنا ليظهر التخصص بجانب اسم الموظف */}
+        {u.name} — {u.dept || u.role} 
+      </option>
+    ))}
+  </select>
+</div>
 
           <div className="form-group">
             <label>Priority</label>
