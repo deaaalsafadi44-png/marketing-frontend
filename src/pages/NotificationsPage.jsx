@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // استيراد useNavigate للرجوع
+import { useNavigate } from 'react-router-dom';
 import api from '../services/apiClient';
 import './Notifications.css';
 
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
-  const navigate = useNavigate(); // تعريف أداة التنقل
+  const navigate = useNavigate();
 
   /* ==================================================
-      منطق جلب البيانات وتحديثها (لم يتم تغييره)
+      المنطق البرمجي (دون تغيير كما طلبت)
   ================================================== */
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -25,7 +25,6 @@ const NotificationsPage = () => {
   const handleMarkAsRead = async (id) => {
     try {
       await api.patch(`/api/notifications/${id}/read`);
-      // تحديث الحالة محلياً فوراً لتحسين تجربة المستخدم
       setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
     } catch (err) {
       console.error("فشل تحديث حالة الإشعار", err);
@@ -33,20 +32,21 @@ const NotificationsPage = () => {
   };
 
   /* ==================================================
-      واجهة العرض المحدثة (تصميم طولي عريض مع زر الرجوع)
+      واجهة العرض المحدثة بأيقونة رجوع احترافية
   ================================================== */
   return (
     <div className="notifications-container">
       
-      {/* قسم الهيدر الجديد المنظم */}
       <div className="notif-header">
         <div className="header-right">
-          <h2><span>🔔</span> مركز الإشعارات</h2>
-        </div>
-        <div className="header-left">
-          <button className="back-btn" onClick={() => navigate(-1)}>
-            الرجوع للخلف ↩️
+          {/* زر الرجوع بالأيقونة فقط */}
+          <button className="back-icon-btn" onClick={() => navigate(-1)} title="رجوع">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
           </button>
+          <h2>مركز الإشعارات</h2>
         </div>
       </div>
       
@@ -59,13 +59,11 @@ const NotificationsPage = () => {
           {notifications.map((n) => (
             <div key={n._id} className={`notification-item ${n.isRead ? 'read' : 'unread'}`}>
               
-              {/* القسم الأيمن: العنوان والوصف */}
               <div className="notif-content-wrapper">
                 <h4>{n.title}</h4>
                 <p>{n.body}</p>
               </div>
 
-              {/* القسم الأيسر: الوقت وزر التفاعل */}
               <div className="notif-side-actions">
                 <small>
                   🕒 {new Date(n.createdAt).toLocaleString('ar-EG', { 

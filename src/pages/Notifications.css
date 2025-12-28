@@ -128,38 +128,47 @@
         font-size: 1.6rem;
     }
 }
-/* تنسيق الهيدر العلوي ليكون عريضاً ومنظماً */
 .notif-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    justify-content: space-between;
+    margin-bottom: 35px;
     padding-bottom: 15px;
-    border-bottom: 2px solid #f0f2f5;
+    border-bottom: 1px solid #eee;
 }
 
-/* زر الرجوع المنسق */
-.back-btn {
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* المسافة بين السهم والعنوان */
+}
+
+/* زر الأيقونة الاحترافي */
+.back-icon-btn {
     background: #ffffff;
-    color: #4b5563;
-    border: 1px solid #d1d5db;
-    padding: 8px 20px;
-    border-radius: 10px;
-    font-weight: 600;
+    border: 1px solid #e0e0e0;
+    color: #444;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%; /* شكل دائري */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: inherit;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-.back-btn:hover {
-    background: #f9fafb;
+.back-icon-btn:hover {
+    background: #3b82f6; /* يتحول للأزرق عند التمرير */
+    color: #ffffff;
     border-color: #3b82f6;
-    color: #3b82f6;
-    transform: translateX(5px); /* حركة خفيفة لليمين عند التمرير */
+    transform: translateX(4px); /* يتحرك لليمين قليلاً (اتجاه الرجوع) */
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-/* تعديل h2 ليتناسب مع الهيدر */
 .notif-header h2 {
     margin: 0;
-    font-size: 1.8rem;
+    font-size: 1.7rem;
+    color: #1a1a1b;
 }
