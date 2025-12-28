@@ -440,16 +440,49 @@ const handleAddComment = async (taskId) => {
                 {/* ✅ هذا هو المكان الصحيح تماماً لضمان ظهوره داخل كل كارت */}
                 <div className="comments-section" style={{ borderTop: '1px solid #f0f0f0', marginTop: '15px', paddingTop: '15px' }}>
                   
-                  {/* 1. عرض التعليقات القديمة */}
-                  <div className="comments-list" style={{ marginBottom: (detail.comments?.length > 0) ? '15px' : '0' }}>
-                    {detail.comments?.map((c, index) => (
-                      <div key={index} className="comment-item" style={{ marginBottom: '10px', fontSize: '13px' }}>
-                        <span style={{ fontWeight: 'bold', color: '#333' }}>{c.author}: </span>
-                        <span style={{ color: '#555' }}>{c.text}</span>
-                        <div style={{ fontSize: '10px', color: '#999' }}>{new Date(c.createdAt).toLocaleString()}</div>
-                      </div>
-                    ))}
-                  </div>
+                {/* 1. عرض التعليقات القديمة */}
+<div className="comments-list" style={{ marginBottom: (detail.comments?.length > 0) ? '15px' : '0' }}>
+  {detail.comments?.map((c, index) => (
+    <div key={index} className="comment-item" style={{ 
+      marginBottom: '10px', 
+      fontSize: '13px',
+      display: 'flex', 
+      justifyContent: 'space-between', // لجعل زر الحذف على اليمين والنص على اليسار
+      alignItems: 'flex-start',
+      background: '#f9f9f9',
+      padding: '8px',
+      borderRadius: '8px'
+    }}>
+      <div>
+        <span style={{ fontWeight: 'bold', color: '#333' }}>{c.author}: </span>
+        <span style={{ color: '#555' }}>{c.text}</span>
+        <div style={{ fontSize: '10px', color: '#999', marginTop: '4px' }}>
+          {new Date(c.createdAt).toLocaleString()}
+        </div>
+      </div>
+
+      {/* ✅ زر الحذف - يظهر فقط للأدمن والمانجر */}
+      {isAdminOrManager && (
+        <button
+          onClick={() => handleDeleteComment(task.taskId, c._id)} // نستخدم الـ _id الخاص بالتعليق
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#ff4d4f',
+            fontSize: '11px',
+            cursor: 'pointer',
+            padding: '0 5px',
+            opacity: 0.7
+          }}
+          onMouseEnter={(e) => e.target.style.opacity = 1}
+          onMouseLeave={(e) => e.target.style.opacity = 0.7}
+        >
+          Delete
+        </button>
+      )}
+    </div>
+  ))}
+</div>
 
                   {/* 2. صندوق إضافة تعليق */}
                   {isAdminOrManager && (
