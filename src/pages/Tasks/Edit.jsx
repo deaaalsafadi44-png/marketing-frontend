@@ -114,7 +114,19 @@ const EditTask = () => {
       alert("❌ Failed to update task. Try again.");
     }
   };
+const handleWorkerChange = (e) => {
+  const selectedWorkerId = e.target.value;
+  
+  // البحث عن الموظف المختار من قائمة المستخدمين
+  const selectedUser = users.find((u) => String(u.id) === String(selectedWorkerId));
 
+  setTask((prev) => ({
+    ...prev,
+    workerId: selectedWorkerId,
+    // تحديث التايب تلقائياً بناءً على قسم الموظف المختار
+    type: selectedUser ? (selectedUser.dept || "General") : prev.type, 
+  }));
+};
   return (
     <div className="add-page">
       <div className="add-card">
@@ -158,30 +170,29 @@ const EditTask = () => {
               ))}
             </select>
           </div>
-
-          <div className="form-group">
-            <label>Task Type</label>
-            <input
-              type="text"
-              name="type"
-              value={task.type}
-              onChange={handleChange}
-              required
-            />
-          </div>
+<div className="form-group">
+  <label>Task Type (Auto-filled)</label>
+  <input
+    type="text"
+    name="type"
+    value={task.type}
+    required
+    readOnly // حماية الحقل من التعديل اليدوي
+    style={{ backgroundColor: "#ececec", cursor: "not-allowed" }} // تنسيق بسيط ليوضح أنه غير قابل للتعديل
+  />
+</div>
 <div className="form-group">
   <label>Assigned User</label>
   <select
     name="workerId"
     value={task.workerId}
-    onChange={handleChange}
+    onChange={handleWorkerChange} // نستخدم handleWorkerChange بدلاً من handleChange
     required
   >
     <option value="">Select User</option>
     {users.map((u) => (
       <option key={u.id} value={u.id}>
-        {/* أضفنا حقل u.dept هنا ليظهر التخصص بجانب اسم الموظف */}
-        {u.name} — {u.dept || u.role} 
+        {u.name} — ({u.dept || "No Job Title"})
       </option>
     ))}
   </select>

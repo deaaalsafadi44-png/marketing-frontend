@@ -67,29 +67,38 @@ const AddTask = () => {
 
     load();
   }, [navigate]);
+/* ================= HANDLERS ================= */
 
+  // دالة التغيير العامة (للعنوان، الشركة، الأولويات، الحالة)
   const handleChange = (e) => {
     setTask({ ...task, [e.target.name]: e.target.value });
   };
 
-  /* ================= SUBMIT ================= */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // ✅ الدالة الجديدة: مخصصة لاختيار الموظف لربط الـ Type تلقائياً
+  const handleWorkerChange = (e) => {
+    const selectedWorkerId = e.target.value;
+    
+    // البحث عن كائن الموظف المختار من قائمة المستخدمين لديك
+    const selectedUser = users.find((u) => String(u.id) === String(selectedWorkerId));
 
+    setTask((prev) => ({
+      ...prev,
+      workerId: selectedWorkerId,
+      // مزامنة التايب مع قسم الموظف (dept) أو وضع قيمة افتراضية
+      type: selectedUser ? (selectedUser.dept || "General") : "", 
+    }));
+  };
+const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
       await addTaskApi(task);
       alert("✅ Task Added Successfully!");
       navigate("/tasks");
     } catch (err) {
       console.error("Error adding task:", err);
-      alert("❌ Failed to add task. Please try again.");
+      alert("❌ Failed to add task.");
     }
   };
-
-  if (loading) {
-    return <h2 style={{ textAlign: "center", marginTop: 40 }}>Loading...</h2>;
-  }
-
   return (
     /* ✅ هذا هو الحل */
     <div className="page-content full-bg">
@@ -137,26 +146,35 @@ const AddTask = () => {
               </div>
 
               <div className="form-group">
-                <label>Task Type</label>
-                <input
-                  type="text"
-                  name="type"
-                  required
-                  onChange={handleChange}
-                />
-              </div>
+  <label>Task Type (Auto-filled)</label>
+  <input
+    type="text"
+    name="type"
+    value={task.type} 
+    required
+    readOnly // لمنع أي تعديل يدوي يخالف تخصص الموظف
+    className="read-only-input" // يمكنك إضافة تنسيق CSS لجعله يبدو بلون رمادي
+    style={{ backgroundColor: "#ececec", cursor: "not-allowed" }}
+  />
+</div>
 
-              <div className="form-group">
-                <label>Assigned User</label>
-                <select name="workerId" required onChange={handleChange}>
-                  <option value="">Select User</option>
-                  {users.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name} — {u.role}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="form-group">
+  <label>Assigned User</label>
+  <select 
+    name="workerId" 
+    required 
+    value={task.workerId} // ربط القيمة بـ state لضمان التحديث اللحظي
+    onChange={handleWorkerChange} // استخدام الدالة الجديدة التي تربط الموظف بقسمه
+  >
+    <option value="">Select User</option>
+    {users.map((u) => (
+      <option key={u.id} value={u.id}>
+        {/* عرض اسم الموظف مع مسمى وظيفته (dept) لمساعدة المدير في الاختيار */}
+        {u.name} — ({u.dept || "No Job Title"})
+      </option>
+    ))}
+  </select>
+</div>
 
               <div className="form-group">
                 <label>Priority</label>
