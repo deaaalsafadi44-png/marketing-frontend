@@ -112,16 +112,22 @@ useEffect(() => {
           </>
         )}
 
-      {/* ✅ تم التعديل ليظهر للـ Admin والـ Manager معاً */}
+/* =============================================
+   ⭐ روابط الإدارة المخصصة (بناءً على الدور)
+   ============================================= */
+
+{/* 1. خيار الإعدادات: يظهر للأدمن والمانجر معاً */}
 {(user.role === "Admin" || user.role === "Manager") && (
-  <>
-    <NavLink to="/users" className="nav-link">
-      Users
-    </NavLink>
-    <NavLink to="/settings" className="nav-link">
-      Settings
-    </NavLink>
-  </>
+  <NavLink to="/settings" className="nav-link">
+    Settings
+  </NavLink>
+)}
+
+{/* 2. خيار المستخدمين: يظهر للأدمن فقط */}
+{user.role === "Admin" && (
+  <NavLink to="/users" className="nav-link">
+    Users
+  </NavLink>
 )}
 
         {/* ✅ أيقونة الإشعارات الجديدة */}
