@@ -38,26 +38,27 @@ function Navbar() {
     return () => clearInterval(interval);
   }, [user]);
 
-  /* ================================
-      ⭐ اسم السيستم
-  ================================ */
-  const [systemName, setSystemName] = useState("System");
+ /* ================================
+    ⭐ اسم السيستم (متاح للجميع)
+================================ */
+const [systemName, setSystemName] = useState("System");
 
-  useEffect(() => {
-    // 🔒 لا نطلب الإعدادات إلا من Admin
-    if (!user || user.role !== "Admin") return;
+useEffect(() => {
+  // نحذف شرط الـ Admin لكي يظهر الاسم للكل
+  if (!user) return; 
 
-    const loadSystemName = async () => {
-      try {
-        const res = await api.get("/settings");
-        setSystemName(res.data.systemName || "System");
-      } catch (err) {
-        console.error("Failed to load system name:", err);
-      }
-    };
+  const loadSystemName = async () => {
+    try {
+      const res = await api.get("/settings");
+      setSystemName(res.data.systemName || "System");
+    } catch (err) {
+      console.error("Failed to load system name:", err);
+      // في حال فشل الطلب نترك القيمة الافتراضية
+    }
+  };
 
-    loadSystemName();
-  }, [user]);
+  loadSystemName();
+}, [user]);
 
   // أثناء التحقق من الجلسة
   if (loading) return null;
