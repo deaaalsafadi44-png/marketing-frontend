@@ -20,7 +20,9 @@ export const addJobTitle = async (newTitle) => {
   const current = await getAllOptions();
   if (!current.jobTitles.includes(newTitle)) {
     const updated = { ...current, jobTitles: [...current.jobTitles, newTitle] };
-    await api.put("/options", updated);
+    // 🔥 يجب إضافة return و await لضمان انتهاء الطلب
+    const res = await api.put("/options", updated);
+    return res.data; 
   }
 };
 
