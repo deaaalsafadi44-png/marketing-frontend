@@ -21,8 +21,6 @@ const DeliverablesBoard = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  // حالة تشمل تفاصيل المهمة (العنوان، الحالة، الوقت، والشركة)
-  const [tasksData, setTasksData] = useState({});
 
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
@@ -75,6 +73,7 @@ const [commentTexts, setCommentTexts] = useState({});
     try {
       setLoading(true);
       const res = await api.get("/deliverables/submissions");
+      // السيرفر الآن يرسل taskDetails مع كل عنصر
       setItems(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Failed to load deliverables:", err);
@@ -83,61 +82,17 @@ const [commentTexts, setCommentTexts] = useState({});
     }
   };
 
-  useEffect(() => {
-    loadDeliverables();
-  }, [location.pathname]);
-
-  /* ================= LOAD TASK DETAILS (Title, Status, Time, Company) ================= */
-  useEffect(() => {
-    const loadDetails = async () => {
-      const missingIds = items
-        .map((i) => i.taskId)
-        .filter((id) => id && !tasksData[id]);
-
-      if (!missingIds.length) return;
-
-      const newDetails = {};
-
-      for (const id of missingIds) {
-        try {
-          const res = await api.get(`/tasks/${id}`);
-          newDetails[id] = {
-            title: res.data?.title || `Task #${id}`,
-            status: res.data?.status || "Unknown",
-            timeSpent: res.data?.timeSpent || 0,
-            company: res.data?.company || "No Company",
-            // ✅ تم إضافة هذا السطر فقط لجلب التعليقات دون تغيير المنطق الأصلي
-            comments: res.data?.comments || [] 
-          };
-        } catch {
-          newDetails[id] = { 
-            title: `Task #${id}`, 
-            status: "Error", 
-            timeSpent: 0,
-            company: "Error",
-            // ✅ ضمان وجود مصفوفة فارغة في حالة الخطأ لتجنب توقف التطبيق
-            comments: [] 
-          };
-        }
-      }
-
-      setTasksData((prev) => ({ ...prev, ...newDetails }));
-    };
-
-    if (items.length) loadDetails();
-  }, [items, tasksData]);
   /* 🆕 استخراج قائمة الشركات الفريدة من البيانات المتاحة للفلترة */
   const companiesList = useMemo(() => {
-    const companies = Object.values(tasksData)
-      .map((d) => d.company)
-      .filter((c) => c && c !== "No Company" && c !== "Error");
-    return [...new Set(companies)]; // حذف التكرار
-  }, [tasksData]);
+  const companies = items
+    .map((item) => item.taskDetails?.company)
+    .filter((c) => c && c !== "No Company" && c !== "Error");
+  return [...new Set(companies)];
+}, [items]);
 
   /* ================= FILTER LOGIC ================= */
   const filteredItems = items.filter((item) => {
-    const detail = tasksData[item.taskId] || {};
-    const itemDate = item.createdAt ? new Date(item.createdAt) : null;
+const detail = item.taskDetails || {};    const itemDate = item.createdAt ? new Date(item.createdAt) : null;
     
     // فلتر التاريخ
     if (itemDate) {
@@ -162,28 +117,30 @@ const [commentTexts, setCommentTexts] = useState({});
   });
 
   /* ================= GROUP BY TASK ================= */
-  const groupedItems = useMemo(() => {
-    const map = {};
+ const groupedItems = useMemo(() => {
+  const map = {};
 
-    filteredItems.forEach((item) => {
-      if (!map[item.taskId]) {
-        map[item.taskId] = {
-          deliverableId: item.deliverableId,
-          taskId: item.taskId,
-          submittedByName: item.submittedByName,
-          createdAt: item.createdAt,
-          files: [],
-          rating: item.rating || 0,
-        };
-      }
+  filteredItems.forEach((item) => {
+    if (!map[item.taskId]) {
+      map[item.taskId] = {
+        deliverableId: item.deliverableId,
+        taskId: item.taskId,
+        submittedByName: item.submittedByName,
+        createdAt: item.createdAt,
+        files: [],
+        rating: item.rating || 0,
+        // ⭐ هنا نأخذ التفاصيل التي دمجناها في السيرفر
+        taskDetails: item.taskDetails 
+      };
+    }
 
-      if (item.files?.length) {
-        map[item.taskId].files.push(...item.files);
-      }
-    });
+    if (item.files?.length) {
+      map[item.taskId].files.push(...item.files);
+    }
+  });
 
-    return Object.values(map);
-  }, [filteredItems]);
+  return Object.values(map);
+}, [filteredItems]);
 
   /* ================= RATE ================= */
   const handleRate = async (task, value) => {
@@ -221,22 +178,16 @@ const handleAddComment = async (taskId) => {
   if (!text || !text.trim()) return;
 
   try {
-    const res = await api.post(`/tasks/${taskId}/comments`, { text });
+    await api.post(`/tasks/${taskId}/comments`, { text });
     
-    // تحديث البيانات محلياً لإظهار التعليق فوراً دون إعادة تحميل الصفحة
-    setTasksData(prev => ({
-      ...prev,
-      [taskId]: {
-        ...prev[taskId],
-        comments: [...(prev[taskId].comments || []), res.data.comment]
-      }
-    }));
-
     // مسح صندوق النص بعد الإرسال
     setCommentTexts(prev => ({ ...prev, [taskId]: "" }));
+
+    // ✅ تحديث الصفحة فوراً لجلب التعليقات الجديدة من السيرفر
+    loadDeliverables(); 
   } catch (err) {
     console.error("Failed to add comment:", err);
-    alert("Error adding comment. Please try again.");
+    alert("Error adding comment.");
   }
 };
 /* ✅ اضف الدالة هنا - قبل الـ return مباشرة */
@@ -246,16 +197,11 @@ const handleDeleteComment = async (taskId, commentId) => {
   try {
     await api.delete(`/tasks/${taskId}/comments/${commentId}`);
 
-    setTasksData((prev) => ({
-      ...prev,
-      [taskId]: {
-        ...prev[taskId],
-        comments: prev[taskId].comments.filter((c) => c._id !== commentId),
-      },
-    }));
+    // ✅ تحديث البيانات من السيرفر لتعكس الحذف فوراً
+    loadDeliverables(); 
   } catch (err) {
     console.error("Failed to delete comment:", err);
-    alert("Error deleting comment. Please try again.");
+    alert("Error deleting comment.");
   }
 }
 
@@ -358,8 +304,7 @@ const handleDeleteComment = async (taskId, commentId) => {
 
         <div className="deliverables-feed">
           {groupedItems.map((task) => {
-            const detail = tasksData[task.taskId] || {};
-            return (
+const detail = task.taskDetails || {};            return (
               <div key={task.taskId} className="submission-card">
                 <div className="submission-card-top-header">
                   <div className="title-section">
