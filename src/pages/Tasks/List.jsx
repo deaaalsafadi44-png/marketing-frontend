@@ -180,8 +180,7 @@ setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId && task.i
         </thead>
 
         <tbody>
-          {filteredTasks.map((task) => {
-            // ✅ تم التعديل هنا: أي مستخدم مسجل دخول يمكنه الآن تغيير الحالة
+{[...filteredTasks].reverse().map((task) => {            // ✅ تم التعديل هنا: أي مستخدم مسجل دخول يمكنه الآن تغيير الحالة
             // القيد المرتبط باسم الموظف تمت إزالته بناءً على طلبك
             const canChangeStatus = true;
 
