@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // أضفنا useEffect
 import { addUserApi } from "../../services/usersService";
+import { getAllOptions } from "../../services/options"; // 🔥 استيراد الدالة التي جهزناها سابقاً
 import { useNavigate } from "react-router-dom";
 import "./addUser.css"; // 🔥 ملف تنسيقات جديد
 
@@ -12,14 +13,36 @@ const AddUser = () => {
 
   const [error, setError] = useState("");
 
+  // 1. حالة لتخزين الأقسام القادمة من السيرفر
+  const [departments, setDepartments] = useState([]);
+
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
     role: "Employee",
-    dept: "Design",
+    dept: "", // جعلناها فارغة لتبدأ بأول قيمة من السيرفر
   });
+
+  // 2. جلب الأقسام من السيرفر بمجرد تحميل الصفحة
+  useEffect(() => {
+    const fetchDocs = async () => {
+      try {
+        const data = await getAllOptions();
+        const titles = data.jobTitles || [];
+        setDepartments(titles);
+        
+        // تعيين أول قسم كخيار افتراضي إذا كانت القائمة ليست فارغة
+        if (titles.length > 0) {
+          setForm(prev => ({ ...prev, dept: titles[0] }));
+        }
+      } catch (err) {
+        console.error("Error fetching departments:", err);
+      }
+    };
+    fetchDocs();
+  }, []);
 
   const handleChange = (e) => {
     setForm({
@@ -141,27 +164,29 @@ const AddUser = () => {
               <option value="Employee">Employee</option>
             </select>
 
-            {/* Department */}
+            {/* Department - 🔥 أصبحت ديناميكية تسحب من السيرفر الآن */}
             <label>Department</label>
             <select name="dept" value={form.dept} onChange={handleChange}>
-              <option value="Design">Design</option>
-              <option value="Content">Content</option>
-              <option value="Marketing">Marketing</option>
-              <option value="Video">Video</option>
-              <option value="Finance">Finance</option>
+              {departments.length > 0 ? (
+                departments.map((d, index) => (
+                  <option key={index} value={d}>
+                    {d}
+                  </option>
+                ))
+              ) : (
+                <option value="">Loading departments...</option>
+              )}
             </select>
 
-<button
-  type="submit"
-  className={`btn-save ${loading ? "loading" : ""}`}
-  disabled={loading}
->
-  <span className="btn-content">
-    {loading ? "Saving..." : "Add User"}
-  </span>
-</button>
-
-
+            <button
+              type="submit"
+              className={`btn-save ${loading ? "loading" : ""}`}
+              disabled={loading}
+            >
+              <span className="btn-content">
+                {loading ? "Saving..." : "Add User"}
+              </span>
+            </button>
 
           </form>
         </div>
