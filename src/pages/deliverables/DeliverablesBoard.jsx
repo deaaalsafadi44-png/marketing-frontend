@@ -163,7 +163,7 @@ const detail = item.taskDetails || {};    const itemDate = item.createdAt ? new 
   });
 
   /* ================= GROUP BY TASK ================= */
- const groupedItems = useMemo(() => {
+const groupedItems = useMemo(() => {
   const map = {};
 
   filteredItems.forEach((item) => {
@@ -175,7 +175,6 @@ const detail = item.taskDetails || {};    const itemDate = item.createdAt ? new 
         createdAt: item.createdAt,
         files: [],
         rating: item.rating || 0,
-        // ⭐ هنا نأخذ التفاصيل التي دمجناها في السيرفر
         taskDetails: item.taskDetails 
       };
     }
@@ -185,7 +184,10 @@ const detail = item.taskDetails || {};    const itemDate = item.createdAt ? new 
     }
   });
 
-  return Object.values(map);
+  // ✅ نستخدم sort لضمان الترتيب حسب التاريخ (من الأحدث للأقدم)
+  return Object.values(map).sort((a, b) => {
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
 }, [filteredItems]);
 
   const handleRate = async (task, value) => {
