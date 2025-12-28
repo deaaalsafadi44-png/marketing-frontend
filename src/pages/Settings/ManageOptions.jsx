@@ -109,13 +109,13 @@ const ManageOptions = () => {
 
   return (
     <div className="opt-container">
-      <h1 className="opt-title">Manage Options</h1>
+<h1 className="opt-title">Data & Field Settings</h1>
       {error && <p className="opt-error">{error}</p>}
 
       {/* --- قسم المسميات الوظيفية الجديد --- */}
       <div className="opt-box">
-        <h2>Job Titles (Positions)</h2>
-        <div className="opt-form">
+<h2>👤 Job Titles (Positions)</h2>  
+      <div className="opt-form">
           <input
             type="text"
             placeholder="e.g. Graphic Designer, Web Developer..."
@@ -136,8 +136,8 @@ const ManageOptions = () => {
 
       {/* باقي الأقسام القديمة كما هي */}
       <div className="opt-box">
-        <h2>Priority Options</h2>
-        <div className="opt-form">
+<h2>🚩 Priority Options</h2>
+ <div className="opt-form">
           <input type="text" placeholder="Add new priority..." value={newPriority} onChange={(e) => setNewPriority(e.target.value)} />
           <button onClick={addPriority}>Add</button>
         </div>
@@ -162,7 +162,7 @@ const ManageOptions = () => {
       </div>
 
       <div className="opt-box">
-        <h2>Companies</h2>
+<h2>🏢 Companies</h2>
         <div className="opt-form">
           <input type="text" placeholder="Add new company..." value={newCompany} onChange={(e) => setNewCompany(e.target.value)} />
           <button onClick={addCompany}>Add</button>
