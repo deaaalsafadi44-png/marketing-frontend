@@ -96,12 +96,29 @@ const TasksList = () => {
     }
   };
 
-  const handleDelete = async (taskId) => {
+ const handleDelete = async (taskId) => {
     if (!window.confirm("Are you sure you want to delete this task?")) return;
-    await deleteTaskApi(taskId);
-    loadTasks();
-  };
 
+    // 1. الاحتفاظ بنسخة احتياطية للتراجع عند الخطأ
+    const previousTasks = [...tasks]; 
+
+    // 2. التحديث المتفائل: حذف التاسك من الشاشة فوراً
+    // (افترضت أن اسم المصفوفة عندك هو tasks، إذا كان مختلفاً غيره هنا)
+    setTasks(tasks.filter(task => task._id !== taskId));
+
+    try {
+      // 3. الحذف من السيرفر في الخلفية
+      await deleteTaskApi(taskId);
+      console.log("Task deleted successfully from server");
+    } catch (err) {
+      // 4. إذا فشل السيرفر، نعيد التاسك مكانه وننبه المستخدم
+      console.error("Failed to delete task from server", err);
+      setTasks(previousTasks);
+      alert("Something went wrong. The task could not be deleted from the server.");
+    }
+    
+    // ملاحظة: لم نعد بحاجة لاستدعاء loadTasks() لأننا حدثنا الحالة يدوياً بنجاح
+  };
   const filteredTasks = tasks.filter((task) => {
     const created = safeDate(task.createdAt);
     return (
