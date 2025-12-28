@@ -87,17 +87,12 @@ useEffect(() => {
       </div>
 
       <div className="nav-right">
-       {/* ✅ تعديل: السماح للمانجر برؤية روابط Users و Settings */}
-{(user.role === "Admin" || user.role === "Manager") && (
-  <>
-    <NavLink to="/users" className="nav-link">
-      Users
-    </NavLink>
-    <NavLink to="/settings" className="nav-link">
-      Settings
-    </NavLink>
-  </>
-)}
+        {/* ✅ Dashboard تظهر فقط لـ Admin و Manager */}
+        {(user.role === "Admin" || user.role === "Manager") && (
+          <NavLink to="/" end className="nav-link">
+            Dashboard
+          </NavLink>
+        )}
 
         <NavLink to="/tasks" className="nav-link">
           Tasks
@@ -117,17 +112,17 @@ useEffect(() => {
           </>
         )}
 
-        {/* ✅ Admin فقط */}
-        {user.role === "Admin" && (
-          <>
-            <NavLink to="/users" className="nav-link">
-              Users
-            </NavLink>
-            <NavLink to="/settings" className="nav-link">
-              Settings
-            </NavLink>
-          </>
-        )}
+      {/* ✅ تم التعديل ليظهر للـ Admin والـ Manager معاً */}
+{(user.role === "Admin" || user.role === "Manager") && (
+  <>
+    <NavLink to="/users" className="nav-link">
+      Users
+    </NavLink>
+    <NavLink to="/settings" className="nav-link">
+      Settings
+    </NavLink>
+  </>
+)}
 
         {/* ✅ أيقونة الإشعارات الجديدة */}
         <div 
