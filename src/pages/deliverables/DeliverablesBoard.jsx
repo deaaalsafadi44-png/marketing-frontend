@@ -33,7 +33,8 @@ const DeliverablesBoard = () => {
   const [currentUser, setCurrentUser] = useState(null);
 
   const location = useLocation();
-
+// حالة لكتابة تعليق جديد (نخزنها كمصطلح: معرف المهمة -> نص التعليق)
+const [commentTexts, setCommentTexts] = useState({});
   /* ================= تنسيق الوقت المستغرق ================= */
  const formatMinutes = (minutes) => {
   // 1. التحقق من وجود قيمة
@@ -104,14 +105,18 @@ const DeliverablesBoard = () => {
             title: res.data?.title || `Task #${id}`,
             status: res.data?.status || "Unknown",
             timeSpent: res.data?.timeSpent || 0,
-            company: res.data?.company || "No Company" 
+            company: res.data?.company || "No Company",
+            // ✅ تم إضافة هذا السطر فقط لجلب التعليقات دون تغيير المنطق الأصلي
+            comments: res.data?.comments || [] 
           };
         } catch {
           newDetails[id] = { 
             title: `Task #${id}`, 
             status: "Error", 
             timeSpent: 0,
-            company: "Error"
+            company: "Error",
+            // ✅ ضمان وجود مصفوفة فارغة في حالة الخطأ لتجنب توقف التطبيق
+            comments: [] 
           };
         }
       }
@@ -121,7 +126,6 @@ const DeliverablesBoard = () => {
 
     if (items.length) loadDetails();
   }, [items, tasksData]);
-
   /* 🆕 استخراج قائمة الشركات الفريدة من البيانات المتاحة للفلترة */
   const companiesList = useMemo(() => {
     const companies = Object.values(tasksData)
@@ -211,7 +215,30 @@ const DeliverablesBoard = () => {
       );
     }
   };
+/* ================= ADD COMMENT FUNCTION ================= */
+const handleAddComment = async (taskId) => {
+  const text = commentTexts[taskId];
+  if (!text || !text.trim()) return;
 
+  try {
+    const res = await api.post(`/tasks/${taskId}/comments`, { text });
+    
+    // تحديث البيانات محلياً لإظهار التعليق فوراً دون إعادة تحميل الصفحة
+    setTasksData(prev => ({
+      ...prev,
+      [taskId]: {
+        ...prev[taskId],
+        comments: [...(prev[taskId].comments || []), res.data.comment]
+      }
+    }));
+
+    // مسح صندوق النص بعد الإرسال
+    setCommentTexts(prev => ({ ...prev, [taskId]: "" }));
+  } catch (err) {
+    console.error("Failed to add comment:", err);
+    alert("Error adding comment. Please try again.");
+  }
+};
   /* ================= HELPERS ================= */
   const getFileType = (file) => {
     const url = file.url?.toLowerCase() || "";
@@ -409,12 +436,63 @@ const DeliverablesBoard = () => {
                     );
                   })}
                 </div>
-              </div>
+
+                {/* ✅ هذا هو المكان الصحيح تماماً لضمان ظهوره داخل كل كارت */}
+                <div className="comments-section" style={{ borderTop: '1px solid #f0f0f0', marginTop: '15px', paddingTop: '15px' }}>
+                  
+                  {/* 1. عرض التعليقات القديمة */}
+                  <div className="comments-list" style={{ marginBottom: (detail.comments?.length > 0) ? '15px' : '0' }}>
+                    {detail.comments?.map((c, index) => (
+                      <div key={index} className="comment-item" style={{ marginBottom: '10px', fontSize: '13px' }}>
+                        <span style={{ fontWeight: 'bold', color: '#333' }}>{c.author}: </span>
+                        <span style={{ color: '#555' }}>{c.text}</span>
+                        <div style={{ fontSize: '10px', color: '#999' }}>{new Date(c.createdAt).toLocaleString()}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 2. صندوق إضافة تعليق */}
+                  {isAdminOrManager && (
+                    <div className="comment-input-wrapper" style={{ display: 'flex', gap: '8px' }}>
+                      <input
+                        type="text"
+                        placeholder="Write a feedback..."
+                        value={commentTexts[task.taskId] || ""}
+                        onChange={(e) => setCommentTexts(prev => ({ ...prev, [task.taskId]: e.target.value }))}
+                        style={{
+                          flex: 1,
+                          padding: '8px 12px',
+                          borderRadius: '20px',
+                          border: '1px solid #ddd',
+                          fontSize: '13px',
+                          outline: 'none'
+                        }}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddComment(task.taskId)}
+                      />
+                      <button 
+                        onClick={() => handleAddComment(task.taskId)}
+                        style={{
+                          backgroundColor: '#000',
+                          color: '#fff',
+                          border: 'none',
+                          padding: '8px 15px',
+                          borderRadius: '20px',
+                          cursor: 'pointer',
+                          fontSize: '12px'
+                        }}
+                      >
+                        Send
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {/* ✅ نهاية قسم التعليقات */}
+
+              </div> // نهاية الـ submission-card
             );
           })}
         </div>
       </div>
-
       {/* ================= FILE MODAL ================= */}
       {selectedFile && getFileType(selectedFile) !== "pdf" && (
         <div
