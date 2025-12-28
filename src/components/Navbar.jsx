@@ -87,12 +87,17 @@ useEffect(() => {
       </div>
 
       <div className="nav-right">
-        {/* ✅ Dashboard تظهر فقط لـ Admin و Manager */}
-        {(user.role === "Admin" || user.role === "Manager") && (
-          <NavLink to="/" end className="nav-link">
-            Dashboard
-          </NavLink>
-        )}
+       {/* ✅ تعديل: السماح للمانجر برؤية روابط Users و Settings */}
+{(user.role === "Admin" || user.role === "Manager") && (
+  <>
+    <NavLink to="/users" className="nav-link">
+      Users
+    </NavLink>
+    <NavLink to="/settings" className="nav-link">
+      Settings
+    </NavLink>
+  </>
+)}
 
         <NavLink to="/tasks" className="nav-link">
           Tasks
