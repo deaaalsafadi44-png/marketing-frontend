@@ -239,6 +239,27 @@ const handleAddComment = async (taskId) => {
     alert("Error adding comment. Please try again.");
   }
 };
+/* ✅ اضف الدالة هنا - قبل الـ return مباشرة */
+const handleDeleteComment = async (taskId, commentId) => {
+  if (!window.confirm("Are you sure you want to delete this comment?")) return;
+
+  try {
+    await api.delete(`/tasks/${taskId}/comments/${commentId}`);
+
+    setTasksData((prev) => ({
+      ...prev,
+      [taskId]: {
+        ...prev[taskId],
+        comments: prev[taskId].comments.filter((c) => c._id !== commentId),
+      },
+    }));
+  } catch (err) {
+    console.error("Failed to delete comment:", err);
+    alert("Error deleting comment. Please try again.");
+  }
+}
+
+
   /* ================= HELPERS ================= */
   const getFileType = (file) => {
     const url = file.url?.toLowerCase() || "";
@@ -268,7 +289,7 @@ const handleAddComment = async (taskId) => {
       return name;
     }
   };
-
+/* ✅ أضف هذا الجزء هنا بالضبط */
   if (loading) {
     return <div className="deliverables-loading">Loading submissions...</div>;
   }
