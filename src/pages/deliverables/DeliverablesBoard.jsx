@@ -87,48 +87,53 @@ const [commentTexts, setCommentTexts] = useState({});
     }
   };
 /* =====================================================
-   🧹 كود تنظيف البيانات اليتيمة (Orphaned Data Cleanup)
+    🧹 كود تنظيف البيانات اليتيمة (المعدل والمحسّن)
+===================================================== */
+/* =====================================================
+    🧹 كود تنظيف البيانات اليتيمة (النسخة النهائية المستقرة)
 ===================================================== */
 useEffect(() => {
   const cleanupOrphanedSubmissions = async () => {
-    // نتحقق أولاً أن البيانات محملة وليست فارغة
-    if (items.length === 0) return;
+    // نتحقق من وجود بيانات، وأن المستخدم Admin/Manager، وأن التحميل انتهى
+    if (!loading && items.length > 0 && isAdminOrManager) {
+      try {
+        // 1. جلب التاسكات الحالية
+        const tasksRes = await api.get("/tasks"); 
+        
+        // 2. تحويل المعرفات لنصوص لضمان دقة المقارنة
+        const existingTaskIds = new Set(tasksRes.data.map(t => String(t.id)));
 
-    try {
-      // 1. جلب كل التاسكات الموجودة حالياً للتأكد من وجودها
-      const tasksRes = await api.get("/tasks"); 
-      const existingTaskIds = new Set(tasksRes.data.map(t => String(t.id)));
+        // 3. فحص كل تسليم
+        for (const item of items) {
+          const currentId = String(item.taskId);
 
-      // 2. فحص التسليمات الموجودة في الـ state
-      for (const item of items) {
-        // إذا كان التاسك الخاص بالتسليم غير موجود في قائمة التاسكات
-        if (!existingTaskIds.has(String(item.taskId))) {
-          console.warn(`Cleaning up orphaned submission: ${item.deliverableId}`);
-          
-          // 3. حذف التسليم من قاعدة البيانات نهائياً
-          await api.delete(`/deliverables/${item.deliverableId}`); 
-          
-          // 4. تحديث الواجهة فوراً
-          setItems(prev => prev.filter(i => i.deliverableId !== item.deliverableId));
+          if (!existingTaskIds.has(currentId)) {
+            console.warn(`🗑️ Cleaning old orphan: ${item.deliverableId}`);
+
+            try {
+              // حذف من السيرفر
+              await api.delete(`/deliverables/${item.deliverableId}`);
+              
+              // تحديث الواجهة فوراً
+              setItems(prev => prev.filter(i => i.deliverableId !== item.deliverableId));
+            } catch (delErr) {
+              console.error("Failed to delete item:", item.deliverableId, delErr);
+            }
+          }
         }
+      } catch (err) {
+        console.error("Cleanup process failed:", err);
       }
-    } catch (err) {
-      console.error("Cleanup process failed:", err);
     }
   };
 
-  // تشغيل التنظيف فقط إذا كان المستخدم Admin أو Manager لضمان صلاحية الحذف
-  if (isAdminOrManager && items.length > 0) {
-    cleanupOrphanedSubmissions();
-  }
-}, [items, isAdminOrManager]);
-  /* 🆕 استخراج قائمة الشركات الفريدة من البيانات المتاحة للفلترة */
-  const companiesList = useMemo(() => {
-  const companies = items
-    .map((item) => item.taskDetails?.company)
-    .filter((c) => c && c !== "No Company" && c !== "Error");
-  return [...new Set(companies)];
-}, [items]);
+  // استدعاء الدالة للتنفيذ
+  cleanupOrphanedSubmissions();
+
+  // مصفوفة التبعيات: نراقب حالة التحميل وصلاحيات المستخدم فقط لتجنب Loop نهائي
+}, [loading, isAdminOrManager]);
+
+/* 🆕 استخراج قائمة الشركات الفريدة من البيانات المتاحة للفلترة */
 
   /* ================= FILTER LOGIC ================= */
   const filteredItems = items.filter((item) => {
