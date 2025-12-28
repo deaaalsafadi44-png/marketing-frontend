@@ -86,7 +86,42 @@ const [commentTexts, setCommentTexts] = useState({});
       setLoading(false);
     }
   };
+/* =====================================================
+   🧹 كود تنظيف البيانات اليتيمة (Orphaned Data Cleanup)
+===================================================== */
+useEffect(() => {
+  const cleanupOrphanedSubmissions = async () => {
+    // نتحقق أولاً أن البيانات محملة وليست فارغة
+    if (items.length === 0) return;
 
+    try {
+      // 1. جلب كل التاسكات الموجودة حالياً للتأكد من وجودها
+      const tasksRes = await api.get("/tasks"); 
+      const existingTaskIds = new Set(tasksRes.data.map(t => String(t.id)));
+
+      // 2. فحص التسليمات الموجودة في الـ state
+      for (const item of items) {
+        // إذا كان التاسك الخاص بالتسليم غير موجود في قائمة التاسكات
+        if (!existingTaskIds.has(String(item.taskId))) {
+          console.warn(`Cleaning up orphaned submission: ${item.deliverableId}`);
+          
+          // 3. حذف التسليم من قاعدة البيانات نهائياً
+          await api.delete(`/deliverables/${item.deliverableId}`); 
+          
+          // 4. تحديث الواجهة فوراً
+          setItems(prev => prev.filter(i => i.deliverableId !== item.deliverableId));
+        }
+      }
+    } catch (err) {
+      console.error("Cleanup process failed:", err);
+    }
+  };
+
+  // تشغيل التنظيف فقط إذا كان المستخدم Admin أو Manager لضمان صلاحية الحذف
+  if (isAdminOrManager && items.length > 0) {
+    cleanupOrphanedSubmissions();
+  }
+}, [items, isAdminOrManager]);
   /* 🆕 استخراج قائمة الشركات الفريدة من البيانات المتاحة للفلترة */
   const companiesList = useMemo(() => {
   const companies = items
