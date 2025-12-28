@@ -42,7 +42,6 @@ const getCompanyLogo = (companyName) => {
   if (name === "syrian united co") return "/logos/syrian united co.png"; 
   return "/logos/laffah.png"; 
 };
-
 /* =============================
     UTIL: FORMAT MINUTES
 ============================= */
@@ -78,21 +77,25 @@ const Reports = () => {
   const [companyFilter, setCompanyFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+const [workerFilter, setWorkerFilter] = useState(""); // لتخزين ID الموظف المختار
+  const [users, setUsers] = useState([]); // لتخزين قائمة الموظفين من السيستم
 
   useEffect(() => {
-    const loadTasks = async () => {
+    const loadData = async () => {
       try {
-        const res = await api.get("/tasks");
-        setTasks(res.data);
+        const resTasks = await api.get("/tasks");
+        setTasks(resTasks.data);
+
+        // جلب الموظفين لعرضهم في الفلتر
+        const resUsers = await api.get("/users"); 
+        setUsers(resUsers.data || []);
       } catch (err) {
         console.error(err);
-        setError("Failed to load tasks.");
+        setError("Failed to load initial data.");
       }
     };
-
-    loadTasks();
+    loadData();
   }, []);
-
   useEffect(() => {
     const loadSummary = async () => {
       setLoading(true);
@@ -123,11 +126,14 @@ const Reports = () => {
   if (error) return <div className="error-box">{error}</div>;
   if (!summary) return <div className="loading">Preparing summary...</div>;
 
-  const filteredTasks = tasks.filter((task) => {
+const filteredTasks = tasks.filter((task) => {
     if (!task.createdAt) return false;
 
     const taskDate = new Date(task.createdAt);
     const matchCompany = companyFilter === "" || task.company === companyFilter;
+    
+    // ✅ إضافة شرط الموظف هنا
+    const matchWorker = workerFilter === "" || Number(task.workerId) === Number(workerFilter);
 
     let matchDateFrom = true;
     if (dateFrom) {
@@ -143,7 +149,8 @@ const Reports = () => {
       matchDateTo = taskDate <= dTo;
     }
 
-    return matchCompany && matchDateFrom && matchDateTo;
+    // تأكد من إضافة matchWorker في النتيجة النهائية
+    return matchCompany && matchDateFrom && matchDateTo && matchWorker;
   });
 
   const localTotalTasks = filteredTasks.length;
@@ -339,6 +346,14 @@ const Reports = () => {
       <h1 className="reports-title">Reports</h1>
 
       <div className="reports-card filters-card" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <select value={workerFilter} onChange={(e) => setWorkerFilter(e.target.value)}>
+  <option value="">All Employees</option>
+  {users.map((u) => (
+    <option key={u.id} value={u.id}>
+      {u.name}
+    </option>
+  ))}
+</select>
         {/* ✅ فلتر الشركات مع عرض لوغو الشركة المختارة بجانبه إن وُجدت */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
            {companyFilter && (
