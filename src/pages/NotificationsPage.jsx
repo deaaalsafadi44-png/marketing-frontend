@@ -26,6 +26,7 @@ const NotificationsPage = () => {
     try {
       await api.patch(`/api/notifications/${id}/read`);
       setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
+      console.log("بيانات الإشعارات الواصلة:", res.data);
     } catch (err) {
       console.error("فشل تحديث حالة الإشعار", err);
     }
