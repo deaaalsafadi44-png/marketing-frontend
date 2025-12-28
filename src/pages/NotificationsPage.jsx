@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // استيراد useNavigate للرجوع
 import api from '../services/apiClient';
 import './Notifications.css';
 
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
+  const navigate = useNavigate(); // تعريف أداة التنقل
 
   /* ==================================================
       منطق جلب البيانات وتحديثها (لم يتم تغييره)
@@ -23,6 +25,7 @@ const NotificationsPage = () => {
   const handleMarkAsRead = async (id) => {
     try {
       await api.patch(`/api/notifications/${id}/read`);
+      // تحديث الحالة محلياً فوراً لتحسين تجربة المستخدم
       setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
     } catch (err) {
       console.error("فشل تحديث حالة الإشعار", err);
@@ -30,11 +33,22 @@ const NotificationsPage = () => {
   };
 
   /* ==================================================
-      واجهة العرض المحدثة (تصميم طولي عريض)
+      واجهة العرض المحدثة (تصميم طولي عريض مع زر الرجوع)
   ================================================== */
   return (
     <div className="notifications-container">
-      <h2><span>🔔</span> مركز الإشعارات</h2>
+      
+      {/* قسم الهيدر الجديد المنظم */}
+      <div className="notif-header">
+        <div className="header-right">
+          <h2><span>🔔</span> مركز الإشعارات</h2>
+        </div>
+        <div className="header-left">
+          <button className="back-btn" onClick={() => navigate(-1)}>
+            الرجوع للخلف ↩️
+          </button>
+        </div>
+      </div>
       
       {notifications.length === 0 ? (
         <div className="no-notifications">

@@ -128,3 +128,38 @@
         font-size: 1.6rem;
     }
 }
+/* تنسيق الهيدر العلوي ليكون عريضاً ومنظماً */
+.notif-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f2f5;
+}
+
+/* زر الرجوع المنسق */
+.back-btn {
+    background: #ffffff;
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+    padding: 8px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.back-btn:hover {
+    background: #f9fafb;
+    border-color: #3b82f6;
+    color: #3b82f6;
+    transform: translateX(5px); /* حركة خفيفة لليمين عند التمرير */
+}
+
+/* تعديل h2 ليتناسب مع الهيدر */
+.notif-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
+}
