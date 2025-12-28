@@ -57,11 +57,16 @@ const [commentTexts, setCommentTexts] = useState({});
 };
 
   /* ================= LOAD USER ================= */
+/* ================= LOAD DATA ON START ================= */
   useEffect(() => {
+    // 1. جلب بيانات المستخدم
     api
       .get("/auth/me")
       .then((res) => setCurrentUser(res.data?.user))
       .catch(() => setCurrentUser(null));
+
+    // 2. ✅ تشغيل دالة جلب البيانات فوراً عند فتح الصفحة
+    loadDeliverables(); 
   }, []);
 
   // ✅ التعديل هنا ليتناسب مع حالة الأحرف Admin و Manager
