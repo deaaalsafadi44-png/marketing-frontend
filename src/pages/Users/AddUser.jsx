@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"; // أضفنا useEffect
 import { addUserApi } from "../../services/usersService";
-import { getAllOptions } from "../../services/options"; // 🔥 استيراد الدالة التي جهزناها سابقاً
+import { getAllOptions } from "../../services/options.js";
 import { useNavigate } from "react-router-dom";
 import "./addUser.css"; // 🔥 ملف تنسيقات جديد
 
