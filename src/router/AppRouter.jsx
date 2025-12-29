@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import ScheduledTasks from "../pages/ScheduledTasks"; // تأكد من اسم المجلد لديك
+import ScheduledTasks from "../pages/Tasks/ScheduledTasks"; // تأكد من اسم المجلد لديك
 // Layout
 import MainLayout from "../layout/MainLayout";
 import NotificationsPage from "../pages/NotificationsPage";

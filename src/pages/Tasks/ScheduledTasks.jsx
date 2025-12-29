@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getScheduledTemplatesApi, deleteTaskApi } from "../services/tasksService";
+import { getScheduledTemplatesApi, deleteTaskApi } from "../../services/tasksService";
 import { Link } from "react-router-dom";
 import "./scheduled.css"; // سننشئ ملف التنسيق لاحقاً
 
