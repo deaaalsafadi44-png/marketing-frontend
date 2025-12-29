@@ -145,14 +145,19 @@ const { user } = useAuth();
     }
   };
 const finishTask = async () => {
-  // 1. نافذة تأكيد
-  if (!window.confirm("هل أنت متأكد من إنهاء المهمة؟ سيتم اعتماد المرفقات كـ 'تسليم نهائي' وقفل العداد.")) {
+  if (!window.confirm("هل أنت متأكد من إنهاء المهمة؟ سيتم اعتماد الوقت المسجل وقفل العداد.")) {
     return;
   }
 
   try {
-    // 2. خطوة إضافية: التأكد من وجود سجل تسليم
-    // إذا لم يرفع الموظف أي ملفات (مصفوفة الـ deliverables فارغة)، ننشئ له سجلاً فارغاً
+    // 1. تحديث الوقت النهائي في السيرفر أولاً لضمان عدم ضياع الثواني
+    // نقوم بتحويل الثواني إلى دقائق للسيرفر إذا كان يحتاج دقائق، أو نرسلها كما هي
+    await api.patch(`/tasks/${id}`, { 
+      timeSpent: seconds / 60, // تحويل لثواني إلى دقائق كسرية
+      totalSeconds: seconds    // إرسال الثواني كاملة للدقة
+    });
+
+    // 2. إذا لم يرفع الموظف ملفات، ننشئ سجلاً فارغاً كما فعلنا سابقاً
     if (deliverables.length === 0) {
       await api.post("/deliverables", {
         taskId: id,
@@ -160,23 +165,18 @@ const finishTask = async () => {
       });
     }
 
-    // 3. طلب القفل من السيرفر (كودك الأصلي)
+    // 3. طلب القفل النهائي
     const res = await lockTaskApi(id);
 
     if (res.data) {
-      // 4. تحديث الحالة في الصفحة
       setTask(res.data);
-      setSeconds(res.data.timer?.totalSeconds || 0);
       setIsRunning(false);
-
-      alert("✅ تم إنهاء المهمة بنجاح وتوثيقها في التسليمات.");
-      
-      // 5. التوجه لصفحة التسليمات
+      alert("✅ تم إنهاء المهمة وحفظ الوقت بنجاح.");
       navigate("/submissions");
     }
   } catch (err) {
     console.error("Finish error:", err);
-    alert("❌ فشل إنهاء المهمة، يرجى المحاولة مرة أخرى.");
+    alert("❌ فشل إنهاء المهمة أو حفظ الوقت.");
   }
 };/* ================= UPLOAD ================= */
   const handleFileChange = (e) =>

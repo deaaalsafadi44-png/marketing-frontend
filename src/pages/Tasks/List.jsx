@@ -159,11 +159,34 @@ setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId && task.i
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        {(user.role === "Admin" || user.role === "Manager") && (
-          <Link to="/tasks/add" className="add-task-btn">
-            + Add New Task
-          </Link>
-        )}
+      {/* منطقة الأزرار: تظهر فقط للأدمن والمدير */}
+{(user.role === "Admin" || user.role === "Manager" || user.role === "admin" || user.role === "manager") && (
+  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+    
+    {/* زر إدارة الجدولة والأتمتة */}
+    <Link to="/tasks/scheduled" className="scheduled-tasks-btn" style={{
+      backgroundColor: "#673ab7", 
+      color: "#fff",
+      padding: "10px 15px",
+      borderRadius: "8px",
+      textDecoration: "none",
+      fontSize: "13px",
+      fontWeight: "600",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      transition: "0.3s"
+    }}>
+      <span style={{ fontSize: "16px" }}>🕒</span> Scheduled Tasks
+    </Link>
+
+    {/* زر إضافة مهمة جديدة */}
+    <Link to="/tasks/add" className="add-task-btn" style={{ margin: 0 }}>
+      + Add New Task
+    </Link>
+    
+  </div>
+)}
       </div>
 
       <table className="tasks-table">

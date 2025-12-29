@@ -3,6 +3,12 @@ import api from "./apiClient";
 export const getTasks = () => api.get("/tasks");
 export const getTaskById = (id) => api.get(`/tasks/${id}`);
 export const addTaskApi = (data) => api.post("/tasks", data);
+/* =========================
+   GET ALL SCHEDULED TEMPLATES
+========================= */
+export const getScheduledTemplatesApi = async () => {
+  return await api.get("/tasks/scheduled/all"); // تم تغيير API إلى api لتناسب باقي الملف
+};
 export const updateTaskApi = (id, data) => api.put(`/tasks/${id}`, data);
 export const deleteTaskApi = (id) => api.delete(`/tasks/${id}`);
 
@@ -21,4 +27,4 @@ export const resetTimerApi = (id) => api.post(`/tasks/${id}/timer/reset`);
 
 // دوال القفل (ملاحظات المدير)
 export const lockTaskApi = (id) => api.post(`/tasks/${id}/lock`);
-export const unlockTaskApi = (id) => api.post(`/tasks/${id}/unlock`);
+export const unlockTaskApi = (id) => api.post(`/tasks/${id}/unlock`);   

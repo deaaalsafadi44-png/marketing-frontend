@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-
+import ScheduledTasks from "../pages/ScheduledTasks"; // تأكد من اسم المجلد لديك
 // Layout
 import MainLayout from "../layout/MainLayout";
 import NotificationsPage from "../pages/NotificationsPage";
@@ -110,16 +110,9 @@ export const router = createBrowserRouter([
     </PrivateRoute>
   ),
 },
-{
-  path: "settings/options",
-  element: (
-    <PrivateRoute roles={["Admin", "admin", "Manager", "manager"]}>
-      <ManageOptions />
-    </PrivateRoute>
-  ),
-},
 
-      // Tasks
+
+ // Tasks
       {
         path: "tasks",
         children: [
@@ -128,6 +121,23 @@ export const router = createBrowserRouter([
             element: (
               <PrivateRoute>
                 <List />
+              </PrivateRoute>
+            ),
+          },
+          // ✅ إضافة مسار المهام المجدولة هنا
+          {
+            path: "scheduled",
+            element: (
+              <PrivateRoute roles={["Admin", "Manager", "admin", "manager"]}>
+                <ScheduledTasks />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "add",
+            element: (
+              <PrivateRoute roles={["Admin", "Manager", "admin", "manager"]}>
+                <Add />
               </PrivateRoute>
             ),
           },

@@ -216,3 +216,8 @@
   .add-task-btn { justify-content: center; }
   .tasks-table { table-layout: auto; } /* السماح للجدول بالتمدد في الموبايل */
 }
+.scheduled-tasks-btn:hover {
+  background-color: #5e35b1;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}

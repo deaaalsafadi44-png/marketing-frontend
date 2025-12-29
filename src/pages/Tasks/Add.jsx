@@ -26,6 +26,10 @@ const AddTask = () => {
     workerId: "",
     priority: "",
     status: "",
+
+    isScheduled: false,
+    frequency: "none",
+    nextRun: null,
   });
 
   const [loading, setLoading] = useState(true);
@@ -86,6 +90,28 @@ const [isSubmitting, setIsSubmitting] = useState(false);
       workerId: selectedWorkerId,
       // مزامنة التايب مع قسم الموظف (dept) أو وضع قيمة افتراضية
       type: selectedUser ? (selectedUser.dept || "General") : "", 
+    }));
+  };
+  // دالة لتحديث بيانات الجدولة بناءً على الاختيار
+  const handleScheduleChange = (e) => {
+    const freq = e.target.value;
+    let nextDate = new Date();
+
+    if (freq === "daily") {
+      nextDate.setDate(nextDate.getDate() + 1);
+    } else if (freq === "weekly") {
+      nextDate.setDate(nextDate.getDate() + 7);
+    } else if (freq === "monthly") {
+      nextDate.setMonth(nextDate.getMonth() + 1);
+    } else {
+      nextDate = null;
+    }
+
+    setTask(prev => ({
+      ...prev,
+      frequency: freq,
+      isScheduled: freq !== "none",
+      nextRun: nextDate
     }));
   };
 const handleSubmit = async (e) => {
@@ -209,6 +235,32 @@ const handleSubmit = async (e) => {
             </div>
 
        {/* ===== SUBMIT ===== */}
+       {/* ===== SCHEDULED TASK SECTION ===== */}
+            <div className="schedule-section" style={{ marginTop: "20px", padding: "15px", border: "1px dashed #ccc", borderRadius: "8px" }}>
+              <label style={{ fontWeight: "bold", display: "block", marginBottom: "10px" }}>
+                🕒 Task Scheduling
+              </label>
+              <div className="form-group">
+                <select 
+                  name="frequency" 
+                  value={task.frequency} 
+                  onChange={handleScheduleChange}
+                  className="schedule-select"
+                >
+                  <option value="none">No Repeat (Normal Task)</option>
+                  <option value="daily">Repeat Daily</option>
+                  <option value="weekly">Repeat Weekly</option>
+                  <option value="monthly">Repeat Monthly</option>
+                </select>
+              </div>
+              
+              {task.isScheduled && (
+                <p style={{ fontSize: "12px", color: "#666", marginTop: "5px" }}>
+                  ℹ️ This task will automatically appear for the worker every <strong>{task.frequency}</strong>. 
+                  First auto-run will be on: {task.nextRun?.toLocaleDateString()}
+                </p>
+              )}
+            </div>
 <button 
   type="submit" 
   className="submit-btn" 
