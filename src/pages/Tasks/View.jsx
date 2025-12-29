@@ -4,11 +4,16 @@ import { getTaskById, lockTaskApi, unlockTaskApi } from "../../services/tasksSer
 import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../../services/apiClient";
 import "./view.css";
-
+import { useAuth } from "../../context/AuthContext"; // تأكد من صحة المسار لمجلد context
 const ViewTask = () => {
+
+const { user } = useAuth();
+
   const { id } = useParams();
   const navigate = useNavigate();
 
+
+  
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -299,60 +304,55 @@ const finishTask = async () => {
   </button>
 </div>
 {/* زر فك القفل - محمي للعرض للأدمن فقط */}
-{/* فحص الأدمن عبر فك تشفير التوكن مباشرة */}
+{/* زر فك القفل - يظهر للأدمن فقط بناءً على AuthContext */}
 {(() => {
-    try {
-        const token = localStorage.getItem("token");
-        if (!token) return null;
+    // 1. استخراج الدور بنفس منطق PrivateRoute
+    let userRole = null;
+    if (typeof user?.role === "string") {
+        userRole = user.role;
+    } else if (typeof user?.role === "object" && user?.role !== null) {
+        userRole = user.role.name || user.role.role;
+    }
 
-        // فك تشفير الجزء الأوسط من التوكن (Payload)
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const payload = JSON.parse(window.atob(base64));
+    const normalizedUserRole = userRole?.toLowerCase().trim();
+    const isAdmin = normalizedUserRole === "admin";
+    
+    // 2. فحص حالة المهمة
+    const isTaskLocked = task?.isLocked || task?.status === "Completed";
 
-        // استخراج الدور (نبحث عن role في التوكن)
-        const userRole = payload.role?.name || payload.role || "";
-        const isAdmin = userRole.toLowerCase().trim() === "admin";
-        
-        // شرط حالة المهمة
-        const isTaskLocked = task?.isLocked || task?.status === "Completed";
-
-        if (isAdmin && isTaskLocked) {
-            return (
-                <button 
-                    className="timer-btn unlock-btn" 
-                    style={{ 
-                        backgroundColor: "#e67e22", 
-                        marginTop: "15px", 
-                        width: "100%",
-                        color: "white",
-                        fontWeight: "bold",
-                        padding: "14px",
-                        borderRadius: "8px",
-                        border: "none",
-                        cursor: "pointer",
-                        display: "block"
-                    }}
-                    onClick={async () => {
-                        if(window.confirm("🔓 هل تريد فك القفل؟")) {
-                            try {
-                                const res = await unlockTaskApi(id);
-                                if (res.data) {
-                                    alert("✅ تم فك القفل.");
-                                    window.location.reload();
-                                }
-                            } catch (err) {
-                                alert("❌ فشل فك القفل.");
+    // 3. القرار النهائي للعرض
+    if (isAdmin && isTaskLocked) {
+        return (
+            <button 
+                className="timer-btn unlock-btn" 
+                style={{ 
+                    backgroundColor: "#e67e22", 
+                    marginTop: "15px", 
+                    width: "100%",
+                    color: "white",
+                    fontWeight: "bold",
+                    padding: "14px",
+                    borderRadius: "8px",
+                    border: "none",
+                    cursor: "pointer"
+                }}
+                onClick={async () => {
+                    if(window.confirm("🔓 هل تريد فك القفل؟")) {
+                        try {
+                            const res = await unlockTaskApi(id);
+                            if (res.data) {
+                                alert("✅ تم فك القفل بنجاح.");
+                                window.location.reload();
                             }
+                        } catch (err) {
+                            alert("❌ فشل فك القفل.");
                         }
-                    }}
-                >
-                    🔓 Unlock Task (Admin Controls)
-                </button>
-            );
-        }
-    } catch (e) {
-        console.error("Token parsing error", e);
+                    }
+                }}
+            >
+                🔓 Unlock Task (Admin Access)
+            </button>
+        );
     }
     return null;
 })()}
