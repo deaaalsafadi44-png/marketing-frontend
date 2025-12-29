@@ -75,23 +75,31 @@ const Reports = () => {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [workerFilter, setWorkerFilter] = useState(""); 
-  const [statusFilter, setStatusFilter] = useState(""); // الحالة الجديدة لفلتر الستاتوس
+  const [statusFilter, setStatusFilter] = useState(""); 
+  const [statusOptions, setStatusOptions] = useState([]); // لتخزين الحالات القادمة من السيتينغس
   const [users, setUsers] = useState([]); 
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const resTasks = await api.get("/tasks");
-        setTasks(resTasks.data);
-        const resUsers = await api.get("/users"); 
-        setUsers(resUsers.data || []);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load initial data.");
+useEffect(() => {
+  const loadData = async () => {
+    try {
+      const resTasks = await api.get("/tasks");
+      setTasks(resTasks.data);
+
+      const resUsers = await api.get("/users");
+      setUsers(resUsers.data || []);
+
+      // جلب الخيارات (بما فيها الحالات) من السيرفر
+      const resOpts = await api.get("/settings/options"); // تأكد من أن هذا المسار هو الصحيح لجلب خيارات السيتينغس عندك
+      if (resOpts.data && resOpts.data.status) {
+        setStatusOptions(resOpts.data.status);
       }
-    };
-    loadData();
-  }, []);
+    } catch (err) {
+      console.error("Error loading data:", err);
+      setError("Failed to load initial data.");
+    }
+  };
+  loadData();
+}, []);
 
   useEffect(() => {
     const loadSummary = async () => {
@@ -240,36 +248,41 @@ return matchCompany && matchDateFrom && matchDateTo && matchWorker && matchStatu
       <h1 className="reports-title">Reports Dashboard</h1>
 
       <div className="reports-controls-container">
-        <div className="filters-group">
-          <div className="filter-item">
-            <label>Employee</label>
-            <select value={workerFilter} onChange={(e) => setWorkerFilter(e.target.value)}>
-              <option value="">All Employees</option>
-              {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-            </select>
-          </div>
-{/* إضافة فلتر الحالة بعد فلتر الشركة */}
-<div className="filter-item">
-  <label>Status</label>
-  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-    <option value="">All Status</option>
-    <option value="Pending">Pending</option>
-    <option value="Accepted">Accepted</option>
-    <option value="In Progress">In Progress</option>
-    <option value="Completed">Completed</option>
-    <option value="Canceled">Canceled</option>
-  </select>
-</div>
-          <div className="filter-item">
-            <label>Company</label>
-            <div className="select-with-logo">
-              {companyFilter && <img src={getCompanyLogo(companyFilter)} alt="logo" className="mini-logo-inside" />}
-              <select value={companyFilter} onChange={(e) => setCompanyFilter(e.target.value)} style={{ paddingLeft: companyFilter ? '35px' : '12px' }}>
-                <option value="">All Companies</option>
-                {allUniqueCompanies.map((company, i) => <option key={i} value={company}>{company}</option>)}
-              </select>
-            </div>
-          </div>
+    <div className="filters-group">
+  {/* 1. فلتر الموظف */}
+  <div className="filter-item">
+    <label>Employee</label>
+    <select value={workerFilter} onChange={(e) => setWorkerFilter(e.target.value)}>
+      <option value="">All Employees</option>
+      {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+    </select>
+  </div>
+
+  {/* 2. فلتر الحالة (الديناميكي فقط) */}
+  <div className="filter-item">
+    <label>Status</label>
+    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+      <option value="">All Status</option>
+      {/* هذا هو الربط الصحيح مع السيتينغس */}
+      {statusOptions.map((s, i) => (
+        <option key={i} value={s}>
+          {s}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  {/* 3. فلتر الشركة */}
+  <div className="filter-item">
+    <label>Company</label>
+    <div className="select-with-logo">
+      {companyFilter && <img src={getCompanyLogo(companyFilter)} alt="logo" className="mini-logo-inside" />}
+      <select value={companyFilter} onChange={(e) => setCompanyFilter(e.target.value)} style={{ paddingLeft: companyFilter ? '35px' : '12px' }}>
+        <option value="">All Companies</option>
+        {allUniqueCompanies.map((company, i) => <option key={i} value={company}>{company}</option>)}
+      </select>
+    </div>
+  </div>
 
           <div className="filter-item">
             <label>From Date</label>
