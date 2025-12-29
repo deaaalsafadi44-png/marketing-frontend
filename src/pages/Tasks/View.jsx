@@ -298,17 +298,13 @@ const finishTask = async () => {
     ✔ Finish
   </button>
 </div>
-{/* زر فك القفل - تم التعديل بناءً على تحليل لقطات الشاشة */}
-{task?.isLocked && (
+{/* زر فك القفل - النسخة المصححة بناءً على تدقيق الـ Backend والـ Console */}
+{(task?.isLocked || task?.status === "Completed") && (
   (() => {
-    // التحقق من وجود توكن صالح (لأن الـ localStorage لا يحتوي على role)
+    // جلب التوكن للتأكد أن المستخدم مسجل دخول (بما أنه وصل هنا فهو أدمن)
     const hasToken = !!localStorage.getItem("token");
-    
-    // التحقق الاحتياطي من الاسم (اختياري)
-    const isSuperAdmin = task?.workerName === "Super Admin";
 
-    // إذا وجد التوكن، نظهر الزر فوراً للأدمن
-    if (hasToken || isSuperAdmin) {
+    if (hasToken) {
       return (
         <button 
           className="timer-btn unlock-btn" 
@@ -323,21 +319,27 @@ const finishTask = async () => {
             border: "none",
             cursor: "pointer",
             fontSize: "16px",
-            display: "block" // ضمان الظهور ككتلة واضحة
+            boxShadow: "0 4px 8px rgba(230, 126, 34, 0.3)"
           }}
           onClick={async () => {
-            if(window.confirm("⚠️ هل أنت متأكد من فك القفل؟ سيتمكن الموظف من تشغيل التايمر مرة أخرى.")) {
+            if(window.confirm("🔓 هل تريد فك قفل هذه المهمة؟ سيتمكن الموظف من تعديل الوقت مجدداً.")) {
               try {
                 const res = await unlockTaskApi(id);
                 if (res.data) {
+                  // تحديث البيانات فوراً في الواجهة
                   setTask(res.data);
                   setIsRunning(false);
                   setSeconds(res.data.timer?.totalSeconds || 0);
                   alert("✅ تم فك القفل بنجاح.");
+                  // اختياري: إعادة تحميل الصفحة لضمان مزامنة كل شيء
+                  window.location.reload();
                 }
               } catch (err) {
                 console.error("Unlock Error:", err);
-                alert("❌ فشل فك القفل، تأكد من صلاحياتك.");
+                // إذا فشل بسبب الـ Role (Admin vs admin)
+                alert(err.response?.status === 403 
+                  ? "❌ خطأ في الصلاحيات: السيرفر يتوقع 'Admin' وأنت 'admin'" 
+                  : "❌ فشل الاتصال بالسيرفر");
               }
             }
           }}
