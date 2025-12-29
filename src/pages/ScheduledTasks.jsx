@@ -39,7 +39,7 @@ const ScheduledTasks = () => {
     <div className="page-content">
       <div className="header-flex">
         <h2>📅 Scheduled Task Templates</h2>
-        <Link to="/tasks/add" className="add-btn">+ Create New Schedule</Link>
+<Link to="/tasks/add" state={{ fromScheduled: true }} className="add-btn">+ Create New Schedule</Link>
       </div>
 
       <div className="scheduled-grid">

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { addTaskApi, getOptions } from "../../services/tasksService";
 import { getUsers } from "../../services/usersService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 import "./add.css";
@@ -34,6 +34,19 @@ const AddTask = () => {
 
   const [loading, setLoading] = useState(true);
 const [isSubmitting, setIsSubmitting] = useState(false);
+const location = useLocation(); // لا تنسَ إضافة useLocation في الـ imports بالأعلى
+
+useEffect(() => {
+  // إذا جاء المستخدم من صفحة الجدولة، قم بتفعيل الجدولة تلقائياً
+  if (location.state?.fromScheduled) {
+    setTask(prev => ({
+      ...prev,
+      isScheduled: true,
+      frequency: "daily", // أو أي قيمة افتراضية
+      nextRun: new Date(new Date().setDate(new Date().getDate() + 1))
+    }));
+  }
+}, [location.state]);
   /* ================= ROLE GUARD ================= */
   useEffect(() => {
     if (!user) return;
@@ -116,19 +129,32 @@ const [isSubmitting, setIsSubmitting] = useState(false);
   };
 const handleSubmit = async (e) => {
   e.preventDefault();
-  
-  // 1. تشغيل وضع الإرسال (لقفل الزر)
   setIsSubmitting(true); 
 
   try {
-    await addTaskApi(task);
+    // 1. استخراج بيانات الموظف المختار كاملة (الاسم والقسم)
+    const selectedUser = users.find((u) => String(u.id) === String(task.workerId));
+
+    // 2. دمج اسم الموظف مع بيانات المهمة قبل إرسالها للباك إند
+    const finalTaskData = {
+      ...task,
+      workerName: selectedUser ? selectedUser.name : "",
+      workerJobTitle: selectedUser ? selectedUser.dept : ""
+    };
+
+    await addTaskApi(finalTaskData);
     alert("✅ Task Added Successfully!");
-    navigate("/tasks");
+    
+    // 3. التوجيه الذكي بناءً على نوع المهمة (مجدولة أم عادية)
+    if (task.isScheduled) {
+      navigate("/tasks/scheduled");
+    } else {
+      navigate("/tasks");
+    }
+
   } catch (err) {
     console.error("Error adding task:", err);
     alert("❌ Failed to add task.");
-    
-    // 2. إعادة فتح الزر في حال حدوث خطأ ليتمكن المستخدم من المحاولة مجدداً
     setIsSubmitting(false); 
   }
 };
