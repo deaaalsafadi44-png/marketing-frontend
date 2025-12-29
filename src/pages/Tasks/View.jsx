@@ -299,54 +299,44 @@ const finishTask = async () => {
   </button>
 </div>
 {/* زر فك القفل - تم تعديله ليعتمد على حالة المهمة الظاهرة في النظام */}
-{task?.status === "Completed" && (
-  (() => {
-    // بما أن الـ Console أظهر 'admin' في فحص الـ Private Route
-    // وبما أنك تملك توكن (Token) في المتصفح، فهذا كافٍ لإظهار الزر
-    const hasToken = !!localStorage.getItem("token");
-
-    if (hasToken) {
-      return (
-        <button 
-          className="timer-btn unlock-btn" 
-          style={{ 
-            backgroundColor: "#e67e22", 
-            marginTop: "15px", 
-            width: "100%",
-            color: "white",
-            fontWeight: "bold",
-            padding: "14px",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "16px",
-            display: "block"
-          }}
-          onClick={async () => {
-            if(window.confirm("🔓 هل تريد فك القفل؟ سيتمكن الموظف من تشغيل العداد مجدداً.")) {
-              try {
-                const res = await unlockTaskApi(id);
-                if (res.data) {
-                  // تحديث البيانات المحلية بعد فك القفل
-                  setTask(res.data);
-                  setIsRunning(false);
-                  setSeconds(res.data.timer?.totalSeconds || 0);
-                  alert("✅ تم فك القفل بنجاح.");
-                  window.location.reload(); // إعادة تحميل لضمان تحديث الأزرار الأخرى
-                }
-              } catch (err) {
-                console.error("Unlock Error:", err);
-                alert("❌ فشل فك القفل. تأكد من أن السيرفر يدعم هذه العملية.");
-              }
-            }
-          }}
-        >
-          🔓 Unlock Task (Admin Access)
-        </button>
-      );
-    }
-    return null;
-  })()
+{/* زر فك القفل - نسخة الأدمن النهائية */}
+{(task?.isLocked || task?.status === "Completed") && (
+  <button 
+    className="timer-btn unlock-btn" 
+    style={{ 
+      backgroundColor: "#e67e22", 
+      marginTop: "15px", 
+      width: "100%",
+      color: "white",
+      fontWeight: "bold",
+      padding: "14px",
+      borderRadius: "8px",
+      border: "none",
+      cursor: "pointer",
+      fontSize: "16px",
+      display: "block"
+    }}
+    onClick={async () => {
+      if(window.confirm("🔓 هل تريد فك القفل؟ سيتمكن الموظف من تشغيل العداد مجدداً.")) {
+        try {
+          const res = await unlockTaskApi(id);
+          if (res.data) {
+            setTask(res.data);
+            setIsRunning(false);
+            setSeconds(res.data.timer?.totalSeconds || 0);
+            alert("✅ تم فك القفل بنجاح.");
+            // تحديث فوري للحالة
+            window.location.reload(); 
+          }
+        } catch (err) {
+          console.error("Unlock Error:", err);
+          alert("❌ فشل فك القفل. تأكد من صلاحيات الأدمن.");
+        }
+      }
+    }}
+  >
+    🔓 Unlock Task (Admin Controls)
+  </button>
 )}
           <div className="upload-section">
             <label className="upload-label">
