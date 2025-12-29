@@ -82,20 +82,30 @@ const Reports = () => {
 useEffect(() => {
   const loadData = async () => {
     try {
+      // 1. جلب البيانات الأساسية (Tasks & Users)
       const resTasks = await api.get("/tasks");
       setTasks(resTasks.data);
 
       const resUsers = await api.get("/users");
       setUsers(resUsers.data || []);
 
-      // جلب الخيارات (بما فيها الحالات) من السيرفر
-      const resOpts = await api.get("/settings/options"); // تأكد من أن هذا المسار هو الصحيح لجلب خيارات السيتينغس عندك
-      if (resOpts.data && resOpts.data.status) {
-        setStatusOptions(resOpts.data.status);
+      // 2. جلب الخيارات من الرابط الصحيح "/options"
+      // وضعناها في try/catch منفصل لضمان استمرار الصفحة حتى لو فشل هذا الطلب
+      try {
+        const resOpts = await api.get("/options"); // تم تعديل المسار هنا
+        if (resOpts.data && resOpts.data.status) {
+          setStatusOptions(resOpts.data.status);
+        }
+      } catch (optErr) {
+        console.error("Dynamic options failed to load:", optErr);
       }
+
     } catch (err) {
-      console.error("Error loading data:", err);
+      console.error("Critical Error loading data:", err);
       setError("Failed to load initial data.");
+    } finally {
+      // إنهاء حالة التحميل في كل الأحوال
+      setLoading(false);
     }
   };
   loadData();
