@@ -222,35 +222,146 @@ return matchCompany && matchDateFrom && matchDateTo && matchWorker && matchStatu
     labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
     datasets: [{ label: "Hours per Month", data: monthlyHours, borderColor: "#2e7d32", backgroundColor: "#2e7d32", tension: 0.3 }],
   };
-
-  function exportPDF() {
+function exportPDF() {
     const doc = new jsPDF();
     const today = new Date().toLocaleString();
-    doc.setFontSize(16); doc.text("Tasks Report", 14, 15);
-    doc.setFontSize(10); doc.text(`Date: ${today}`, 14, 28);
-    doc.text(`Total Tasks: ${localTotalTasks}`, 14, 48);
-    doc.text(`Total Time: ${formatMinutesToHM(localTotalMinutes)}`, 14, 54);
 
-    const tableData = filteredTasks.map((t) => [
-      t.id, t.company || "-", t.type || "-", t.workerName || "-",
-      formatMinutesToHM(t.timer?.totalSeconds ? Math.floor(t.timer.totalSeconds / 60) : t.timeSpent),
-    ]);
+    // عنوان التقرير الرئيسي
+    doc.setFontSize(18);
+    doc.setTextColor(25, 118, 210); // لون أزرق احترافي
+    doc.text("Detailed Performance Report", 14, 15);
 
-    autoTable(doc, { startY: 70, head: [["ID", "Company", "Type", "Worker", "Time"]], body: tableData });
-    doc.save("tasks-report.pdf");
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Generated on: ${today}`, 14, 22);
+    doc.text(`Total Tasks in Report: ${localTotalTasks}`, 14, 27);
+    doc.text(`Overall Time: ${formatMinutesToHM(localTotalMinutes)}`, 14, 32);
+
+    let finalY = 40; // نقطة البداية للرسم
+
+    // 1. تجميع المهام حسب الموظف
+    const workersNames = [...new Set(filteredTasks.map(t => t.workerName || "Unassigned"))];
+
+    workersNames.forEach((worker) => {
+      const workerTasks = filteredTasks.filter(t => t.workerName === worker);
+      
+      // حساب إحصائيات الموظف الحالي
+      const workerTotalTasks = workerTasks.length;
+      const workerTotalMinutes = workerTasks.reduce((acc, t) => {
+        const mins = t.timer?.totalSeconds ? Math.floor(t.timer.totalSeconds / 60) : t.timeSpent || 0;
+        return acc + mins;
+      }, 0);
+
+      // إضافة اسم الموظف كعنوان جانبي
+      doc.setFontSize(14);
+      doc.setTextColor(0);
+      doc.text(`Employee: ${worker}`, 14, finalY + 10);
+      
+      doc.setFontSize(10);
+      doc.setTextColor(50);
+      doc.text(`Tasks: ${workerTotalTasks} | Time Spent: ${formatMinutesToHM(workerTotalMinutes)}`, 14, finalY + 16);
+
+      // 2. بناء الجدول الخاص بهذا الموظف مع إضافة عمود الحالة
+      const tableData = workerTasks.map((t) => [
+        t.id,
+        t.company || "-",
+        t.type || "-",
+        t.status || "New", // عمود الحالة الجديد
+        formatMinutesToHM(t.timer?.totalSeconds ? Math.floor(t.timer.totalSeconds / 60) : t.timeSpent),
+      ]);
+
+      autoTable(doc, {
+        startY: finalY + 20,
+        head: [["ID", "Company", "Task Type", "Status", "Duration"]],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [46, 125, 50] }, // لون أخضر للجداول
+        margin: { left: 14 },
+        didDrawPage: (data) => {
+          finalY = data.cursor.y; // تحديث الإحداثي Y لكي لا تتداخل الجداول
+        }
+      });
+
+      finalY = doc.lastAutoTable.finalY + 10; // إضافة مساحة قبل الموظف التالي
+
+      // التحقق من المساحة المتبقية في الصفحة لإضافة صفحة جديدة إذا لزم الأمر
+      if (finalY > 250) {
+        doc.addPage();
+        finalY = 20;
+      }
+    });
+
+    doc.save(`Performance-Report-${new Date().toLocaleDateString()}.pdf`);
   }
 
-  function exportExcel() {
-    const tasksData = filteredTasks.map((t) => ({
-      ID: t.id, Company: t.company, Type: t.type, Worker: t.workerName,
-      Time: formatMinutesToHM(t.timer?.totalSeconds ? Math.floor(t.timer.totalSeconds / 60) : t.timeSpent),
-    }));
+ function exportExcel() {
     const workbook = XLSX.utils.book_new();
-    const tasksSheet = XLSX.utils.json_to_sheet(tasksData);
-    XLSX.utils.book_append_sheet(workbook, tasksSheet, "Tasks");
+    let finalData = [];
+
+    // 1. الحصول على قائمة الموظفين الفريدة
+    const workersNames = [...new Set(filteredTasks.map(t => t.workerName || "Unassigned"))];
+
+    workersNames.forEach((worker) => {
+      const workerTasks = filteredTasks.filter(t => t.workerName === worker);
+
+      // حساب الإحصائيات الخاصة بهذا الموظف
+      const workerTotalTasks = workerTasks.length;
+      const workerTotalMinutes = workerTasks.reduce((acc, t) => {
+        const mins = t.timer?.totalSeconds ? Math.floor(t.timer.totalSeconds / 60) : t.timeSpent || 0;
+        return acc + mins;
+      }, 0);
+
+      // إضافة سطر عنوان باسم الموظف (لتمييزه في الإكسيل)
+      finalData.push({ 
+        ID: `--- Employee: ${worker.toUpperCase()} ---`, 
+        Company: "", 
+        Type: "", 
+        Status: "", 
+        Time: "" 
+      });
+
+      // إضافة مهام هذا الموظف مع عمود الحالة
+      workerTasks.forEach(t => {
+        finalData.push({
+          ID: t.id,
+          Company: t.company || "-",
+          Type: t.type || "-",
+          Status: t.status || "New", // إضافة عمود الحالة
+          Time: formatMinutesToHM(t.timer?.totalSeconds ? Math.floor(t.timer.totalSeconds / 60) : t.timeSpent),
+        });
+      });
+
+      // إضافة سطر ملخص لهذا الموظف
+      finalData.push({
+        ID: "Summary:",
+        Company: `Total Tasks: ${workerTotalTasks}`,
+        Type: "",
+        Status: "Total Time:",
+        Time: formatMinutesToHM(workerTotalMinutes),
+      });
+
+      // إضافة سطر فارغ للفصل بين الموظفين
+      finalData.push({ ID: "", Company: "", Type: "", Status: "", Time: "" });
+    });
+
+    // تحويل البيانات المجمعة إلى شيت إكسيل
+    const tasksSheet = XLSX.utils.json_to_sheet(finalData);
+
+    // تحسين عرض الأعمدة (اختياري لجعل الملف أرتب)
+    tasksSheet["!cols"] = [
+      { wch: 25 }, // ID/Name
+      { wch: 20 }, // Company
+      { wch: 20 }, // Type
+      { wch: 15 }, // Status
+      { wch: 15 }, // Time
+    ];
+
+    XLSX.utils.book_append_sheet(workbook, tasksSheet, "Staff Performance");
+
+    // استخراج الملف
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    saveAs(blob, "tasks-report.xlsx");
+    saveAs(blob, `Staff-Report-${new Date().toLocaleDateString()}.xlsx`);
   }
 
   return (
