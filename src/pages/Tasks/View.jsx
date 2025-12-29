@@ -298,10 +298,11 @@ const finishTask = async () => {
     ✔ Finish
   </button>
 </div>
-{/* زر فك القفل - النسخة المصححة بناءً على تدقيق الـ Backend والـ Console */}
-{(task?.isLocked || task?.status === "Completed") && (
+{/* زر فك القفل - تم تعديله ليعتمد على حالة المهمة الظاهرة في النظام */}
+{task?.status === "Completed" && (
   (() => {
-    // جلب التوكن للتأكد أن المستخدم مسجل دخول (بما أنه وصل هنا فهو أدمن)
+    // بما أن الـ Console أظهر 'admin' في فحص الـ Private Route
+    // وبما أنك تملك توكن (Token) في المتصفح، فهذا كافٍ لإظهار الزر
     const hasToken = !!localStorage.getItem("token");
 
     if (hasToken) {
@@ -319,32 +320,28 @@ const finishTask = async () => {
             border: "none",
             cursor: "pointer",
             fontSize: "16px",
-            boxShadow: "0 4px 8px rgba(230, 126, 34, 0.3)"
+            display: "block"
           }}
           onClick={async () => {
-            if(window.confirm("🔓 هل تريد فك قفل هذه المهمة؟ سيتمكن الموظف من تعديل الوقت مجدداً.")) {
+            if(window.confirm("🔓 هل تريد فك القفل؟ سيتمكن الموظف من تشغيل العداد مجدداً.")) {
               try {
                 const res = await unlockTaskApi(id);
                 if (res.data) {
-                  // تحديث البيانات فوراً في الواجهة
+                  // تحديث البيانات المحلية بعد فك القفل
                   setTask(res.data);
                   setIsRunning(false);
                   setSeconds(res.data.timer?.totalSeconds || 0);
                   alert("✅ تم فك القفل بنجاح.");
-                  // اختياري: إعادة تحميل الصفحة لضمان مزامنة كل شيء
-                  window.location.reload();
+                  window.location.reload(); // إعادة تحميل لضمان تحديث الأزرار الأخرى
                 }
               } catch (err) {
                 console.error("Unlock Error:", err);
-                // إذا فشل بسبب الـ Role (Admin vs admin)
-                alert(err.response?.status === 403 
-                  ? "❌ خطأ في الصلاحيات: السيرفر يتوقع 'Admin' وأنت 'admin'" 
-                  : "❌ فشل الاتصال بالسيرفر");
+                alert("❌ فشل فك القفل. تأكد من أن السيرفر يدعم هذه العملية.");
               }
             }
           }}
         >
-          🔓 Unlock Task (Admin Controls)
+          🔓 Unlock Task (Admin Access)
         </button>
       );
     }
