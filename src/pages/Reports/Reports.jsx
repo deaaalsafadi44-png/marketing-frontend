@@ -75,6 +75,7 @@ const Reports = () => {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [workerFilter, setWorkerFilter] = useState(""); 
+  const [statusFilter, setStatusFilter] = useState(""); // الحالة الجديدة لفلتر الستاتوس
   const [users, setUsers] = useState([]); 
 
   useEffect(() => {
@@ -125,6 +126,8 @@ const Reports = () => {
     const matchCompany = companyFilter === "" || task.company === companyFilter;
     const matchWorker = workerFilter === "" || Number(task.workerId) === Number(workerFilter);
 
+const matchStatus = statusFilter === "" || task.status === statusFilter;
+
     let matchDateFrom = true;
     if (dateFrom) {
       const dFrom = new Date(dateFrom);
@@ -137,8 +140,7 @@ const Reports = () => {
       dTo.setHours(23, 59, 59, 999);
       matchDateTo = taskDate <= dTo;
     }
-    return matchCompany && matchDateFrom && matchDateTo && matchWorker;
-  });
+return matchCompany && matchDateFrom && matchDateTo && matchWorker && matchStatus;  });
 
   const localTotalTasks = filteredTasks.length;
   const localTotalMinutes = filteredTasks.reduce((acc, task) => {
@@ -246,7 +248,18 @@ const Reports = () => {
               {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
             </select>
           </div>
-
+{/* إضافة فلتر الحالة بعد فلتر الشركة */}
+<div className="filter-item">
+  <label>Status</label>
+  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+    <option value="">All Status</option>
+    <option value="Pending">Pending</option>
+    <option value="Accepted">Accepted</option>
+    <option value="In Progress">In Progress</option>
+    <option value="Completed">Completed</option>
+    <option value="Canceled">Canceled</option>
+  </select>
+</div>
           <div className="filter-item">
             <label>Company</label>
             <div className="select-with-logo">
