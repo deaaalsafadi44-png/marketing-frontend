@@ -270,22 +270,22 @@ const handleSubmit = async (e) => {
         <option value="monthly">Repeat Monthly</option>
       </select>
     </div>
-
-    {/* الحقل الجديد: اختيار تاريخ البداية (يظهر فقط إذا تم تفعيل الجدولة أو التكرار) */}
-    {task.frequency !== "none" && (
-      <div className="form-group">
-        <label>Start Date (When to appear?)</label>
-        <input 
-          type="date"
-          name="startDate"
-          // نستخدم value من الـ state ونضمن أنها بصيغة YYYY-MM-DD
-          value={task.startDate || ""} 
-          required
-          onChange={(e) => setTask({ ...task, startDate: e.target.value })}
-          min={new Date().toISOString().split('T')[0]} // يمنع اختيار تاريخ قديم
-        />
-      </div>
-    )}
+{/* الحقل المطور: اختيار التاريخ والوقت بدقة */}
+{task.frequency !== "none" && (
+  <div className="form-group">
+    <label>Start Date & Time (When to appear?)</label>
+    <input 
+      type="datetime-local" // 👈 التغيير هنا: من date إلى datetime-local
+      name="startDate"
+      // القيمة ستبقى مخزنة في task.startDate ولكنها ستحتوي على الوقت أيضاً
+      value={task.startDate || ""} 
+      required
+      onChange={(e) => setTask({ ...task, startDate: e.target.value })}
+      // يمنع اختيار وقت مضى (يأخذ التاريخ والوقت الحاليين)
+      min={new Date().toISOString().slice(0, 16)} 
+    />
+  </div>
+)}
   </div>
   
   {task.frequency !== "none" && (
