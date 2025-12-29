@@ -298,14 +298,16 @@ const finishTask = async () => {
     ✔ Finish
   </button>
 </div>
-{/* زر فك القفل - نسخة معدلة لتعمل مع نظام الصلاحيات الخاص بك */}
+{/* زر فك القفل - تم التعديل بناءً على تحليل لقطات الشاشة */}
 {task?.isLocked && (
   (() => {
-    // جلب التوكن والتحقق من اسم المشرف
+    // التحقق من وجود توكن صالح (لأن الـ localStorage لا يحتوي على role)
     const hasToken = !!localStorage.getItem("token");
+    
+    // التحقق الاحتياطي من الاسم (اختياري)
     const isSuperAdmin = task?.workerName === "Super Admin";
 
-    // إذا وجد توكن (مما يعني أنك مسجل دخول) وكان لديك حق الوصول لهذه الصفحة
+    // إذا وجد التوكن، نظهر الزر فوراً للأدمن
     if (hasToken || isSuperAdmin) {
       return (
         <button 
@@ -316,14 +318,15 @@ const finishTask = async () => {
             width: "100%",
             color: "white",
             fontWeight: "bold",
-            padding: "12px",
+            padding: "14px",
             borderRadius: "8px",
             border: "none",
             cursor: "pointer",
-            fontSize: "16px"
+            fontSize: "16px",
+            display: "block" // ضمان الظهور ككتلة واضحة
           }}
           onClick={async () => {
-            if(window.confirm("⚠️ هل أنت متأكد من فك قفل المهمة؟ سيتمكن الموظف من تشغيل العداد مجدداً.")) {
+            if(window.confirm("⚠️ هل أنت متأكد من فك القفل؟ سيتمكن الموظف من تشغيل التايمر مرة أخرى.")) {
               try {
                 const res = await unlockTaskApi(id);
                 if (res.data) {
@@ -334,12 +337,12 @@ const finishTask = async () => {
                 }
               } catch (err) {
                 console.error("Unlock Error:", err);
-                alert("❌ فشل فك القفل من السيرفر.");
+                alert("❌ فشل فك القفل، تأكد من صلاحياتك.");
               }
             }
           }}
         >
-          🔓 Unlock Task (Admin Access)
+          🔓 Unlock Task (Admin Controls)
         </button>
       );
     }
