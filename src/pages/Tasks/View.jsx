@@ -224,7 +224,7 @@ const finishTask = async () => {
       alert("❌ فشل حذف الملف");
       console.error(err);
     }
-  };
+  };  
 
   /* ================= FILE HELPER ================= */
   const handleFilePreview = (file) => {
@@ -298,29 +298,57 @@ const finishTask = async () => {
     ✔ Finish
   </button>
 </div>
-{/* زر فك القفل - نسخة التشخيص والإصلاح */}
-{task?.isLocked ? (
-  // هنا نفحص الصلاحية بشكل مرن جداً
+{/* زر فك القفل - الإصلاح النهائي بناءً على فحص الـ Console */}
+{task?.isLocked && (
   (() => {
-    const userRole = (localStorage.getItem("userRole") || localStorage.getItem("role") || "").toLowerCase();
-    const isAdmin = userRole === "admin" || userRole === "superadmin";
-    
-    // إذا كنت أدمن، اظهر الزر فوراً
+    // 1. محاولة جلب بيانات المستخدم ككائن (Object)
+    const storedUser = localStorage.getItem("user");
+    let isAdmin = false;
+
+    if (storedUser) {
+      try {
+        const userObj = JSON.parse(storedUser);
+        // فحص كل المسميات الممكنة داخل الكائن (role أو userRole)
+        const role = userObj.role || userObj.userRole || "";
+        if (role.toLowerCase() === 'admin') isAdmin = true;
+      } catch (e) {
+        console.error("Error parsing user object");
+      }
+    }
+
+    // 2. إذا فشل الكائن، نجرب الفحص اليدوي المباشر (للطوارئ)
+    if (!isAdmin) {
+      isAdmin = task?.workerName === "Super Admin";
+    }
+
     if (isAdmin) {
       return (
         <button 
           className="timer-btn unlock-btn" 
-          style={{ backgroundColor: "#e67e22", marginTop: "10px", width: "100%", color: "white", fontWeight: "bold", cursor: "pointer", padding: "12px", borderRadius: "8px", border: "none" }}
+          style={{ 
+            backgroundColor: "#e67e22", 
+            marginTop: "10px", 
+            width: "100%",
+            color: "white",
+            fontWeight: "bold",
+            padding: "12px",
+            borderRadius: "8px",
+            border: "none",
+            cursor: "pointer"
+          }}
           onClick={async () => {
-            if(window.confirm("هل تريد فك القفل؟")) {
+            if(window.confirm("🔓 هل أنت متأكد من فك القفل للسماح للموظف بالعمل مجدداً؟")) {
               try {
                 const res = await unlockTaskApi(id);
                 if (res.data) {
                   setTask(res.data);
                   setIsRunning(false);
-                  alert("🔓 تم فك القفل.");
+                  setSeconds(res.data.timer?.totalSeconds || 0);
+                  alert("✅ تم فك القفل بنجاح.");
                 }
-              } catch (err) { alert("❌ فشل في السيرفر"); }
+              } catch (err) {
+                alert("❌ فشل فك القفل من السيرفر.");
+              }
             }
           }}
         >
@@ -328,9 +356,9 @@ const finishTask = async () => {
         </button>
       );
     }
-    return null; // إذا لم يكن أدمن لا يظهر شيء
+    return null;
   })()
-) : null}
+)}
           <div className="upload-section">
             <label className="upload-label">
               📁 Choose files
