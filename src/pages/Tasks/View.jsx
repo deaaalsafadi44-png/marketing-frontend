@@ -299,42 +299,63 @@ const finishTask = async () => {
   </button>
 </div>
 {/* زر فك القفل - محمي للعرض للأدمن فقط */}
-{((task?.isLocked || task?.status === "Completed") && 
-  (localStorage.getItem("userRole")?.toLowerCase() === "admin" || 
-   JSON.parse(localStorage.getItem("user") || "{}")?.role?.toLowerCase() === "admin")) && (
-  <button 
-    className="timer-btn unlock-btn" 
-    style={{ 
-      backgroundColor: "#e67e22", 
-      marginTop: "15px", 
-      width: "100%",
-      color: "white",
-      fontWeight: "bold",
-      padding: "14px",
-      borderRadius: "8px",
-      border: "none",
-      cursor: "pointer",
-      fontSize: "16px",
-      display: "block"
-    }}
-    onClick={async () => {
-      if(window.confirm("🔓 هل تريد فك القفل؟ سيتمكن الموظف من تشغيل العداد مجدداً.")) {
-        try {
-          const res = await unlockTaskApi(id);
-          if (res.data) {
-            alert("✅ تم فك القفل بنجاح.");
-            window.location.reload(); 
-          }
-        } catch (err) {
-          console.error("Unlock Error:", err);
-          alert("❌ فشل فك القفل.");
+{/* فحص الأدمن عبر فك تشفير التوكن مباشرة */}
+{(() => {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) return null;
+
+        // فك تشفير الجزء الأوسط من التوكن (Payload)
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(window.atob(base64));
+
+        // استخراج الدور (نبحث عن role في التوكن)
+        const userRole = payload.role?.name || payload.role || "";
+        const isAdmin = userRole.toLowerCase().trim() === "admin";
+        
+        // شرط حالة المهمة
+        const isTaskLocked = task?.isLocked || task?.status === "Completed";
+
+        if (isAdmin && isTaskLocked) {
+            return (
+                <button 
+                    className="timer-btn unlock-btn" 
+                    style={{ 
+                        backgroundColor: "#e67e22", 
+                        marginTop: "15px", 
+                        width: "100%",
+                        color: "white",
+                        fontWeight: "bold",
+                        padding: "14px",
+                        borderRadius: "8px",
+                        border: "none",
+                        cursor: "pointer",
+                        display: "block"
+                    }}
+                    onClick={async () => {
+                        if(window.confirm("🔓 هل تريد فك القفل؟")) {
+                            try {
+                                const res = await unlockTaskApi(id);
+                                if (res.data) {
+                                    alert("✅ تم فك القفل.");
+                                    window.location.reload();
+                                }
+                            } catch (err) {
+                                alert("❌ فشل فك القفل.");
+                            }
+                        }
+                    }}
+                >
+                    🔓 Unlock Task (Admin Controls)
+                </button>
+            );
         }
-      }
-    }}
-  >
-    🔓 Unlock Task (Admin Controls)
-  </button>
-)}
+    } catch (e) {
+        console.error("Token parsing error", e);
+    }
+    return null;
+})()}
           <div className="upload-section">
             <label className="upload-label">
               📁 Choose files
