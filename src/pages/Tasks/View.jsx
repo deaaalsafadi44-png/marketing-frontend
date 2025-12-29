@@ -298,9 +298,10 @@ const finishTask = async () => {
     ✔ Finish
   </button>
 </div>
-{/* زر فك القفل - تم تعديله ليعتمد على حالة المهمة الظاهرة في النظام */}
-{/* زر فك القفل - نسخة الأدمن النهائية */}
-{(task?.isLocked || task?.status === "Completed") && (
+{/* زر فك القفل - محمي للعرض للأدمن فقط */}
+{((task?.isLocked || task?.status === "Completed") && 
+  (localStorage.getItem("userRole")?.toLowerCase() === "admin" || 
+   JSON.parse(localStorage.getItem("user") || "{}")?.role?.toLowerCase() === "admin")) && (
   <button 
     className="timer-btn unlock-btn" 
     style={{ 
@@ -321,16 +322,12 @@ const finishTask = async () => {
         try {
           const res = await unlockTaskApi(id);
           if (res.data) {
-            setTask(res.data);
-            setIsRunning(false);
-            setSeconds(res.data.timer?.totalSeconds || 0);
             alert("✅ تم فك القفل بنجاح.");
-            // تحديث فوري للحالة
             window.location.reload(); 
           }
         } catch (err) {
           console.error("Unlock Error:", err);
-          alert("❌ فشل فك القفل. تأكد من صلاحيات الأدمن.");
+          alert("❌ فشل فك القفل.");
         }
       }
     }}
