@@ -298,12 +298,13 @@ const finishTask = async () => {
     ✔ Finish
   </button>
 </div>
-{/* زر فك القفل - تم تعديل الشرط ليتوافق مع بيانات النظام المتاحة */}
+{/* زر فك القفل - نسخة محسنة ومضمونة الظهور للأدمن */}
 {task?.isLocked && (
-  // التحقق من الاسم مباشرة لأنه يظهر في الواجهة كـ Super Admin
-  task?.workerName === "Super Admin" || 
-  // أو إذا كان هناك أي وسيلة أخرى يمررها النظام للأدمن
-  localStorage.getItem("userRole") === "Admin" 
+  // 1. التحقق من الـ LocalStorage بكل المسميات المحتملة
+  localStorage.getItem("userRole")?.toLowerCase() === "admin" || 
+  localStorage.getItem("role")?.toLowerCase() === "admin" ||
+  // 2. أو إذا كان المستخدم الحالي هو السوبر أدمن (كاحتياط)
+  task?.workerName === "Super Admin"
 ) && (
   <button 
     className="timer-btn unlock-btn" 
@@ -311,28 +312,35 @@ const finishTask = async () => {
       backgroundColor: "#e67e22", 
       marginTop: "10px", 
       width: "100%",
-      display: "block", // لضمان أخذ المساحة كاملة
-      opacity: 1,
-      cursor: "pointer"
+      display: "flex", // لجعل النص والأيقونة في المنتصف
+      justifyContent: "center",
+      alignItems: "center",
+      gap: "8px",
+      cursor: "pointer",
+      fontWeight: "bold",
+      color: "white",
+      padding: "12px",
+      border: "none",
+      borderRadius: "8px"
     }}
     onClick={async () => {
-      if(window.confirm("هل أنت متأكد من فك قفل هذه المهمة؟ سيتمكن الموظف من تشغيل التايمر مرة أخرى.")) {
+      if(window.confirm("⚠️ تنبيه للأدمن: هل أنت متأكد من فك قفل هذه المهمة؟ هذا سيسمح للموظف بتعديل الوقت مرة أخرى.")) {
         try {
           const res = await unlockTaskApi(id);
           if (res.data) {
             setTask(res.data);
             setIsRunning(false);
             setSeconds(res.data.timer?.totalSeconds || 0);
-            alert("🔓 تم فك القفل بنجاح.");
+            alert("🔓 تم فك قفل المهمة بنجاح. الموظف يمكنه الآن استئناف العمل.");
           }
         } catch (err) {
           console.error("Unlock error:", err);
-          alert("❌ فشل فك القفل، تأكد من صلاحيات المشرف.");
+          alert("❌ فشل فك القفل. قد تكون الجلسة انتهت أو لا تملك صلاحية Admin.");
         }
       }
     }}
   >
-    🔓 Unlock Task (Admin Only)
+    <span>🔓</span> Unlock Task (Manager Access)
   </button>
 )}
           <div className="upload-section">
