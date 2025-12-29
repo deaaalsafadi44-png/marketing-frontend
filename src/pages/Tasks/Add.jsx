@@ -29,7 +29,7 @@ const AddTask = () => {
   });
 
   const [loading, setLoading] = useState(true);
-
+const [isSubmitting, setIsSubmitting] = useState(false);
   /* ================= ROLE GUARD ================= */
   useEffect(() => {
     if (!user) return;
@@ -89,16 +89,23 @@ const AddTask = () => {
     }));
   };
 const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await addTaskApi(task);
-      alert("✅ Task Added Successfully!");
-      navigate("/tasks");
-    } catch (err) {
-      console.error("Error adding task:", err);
-      alert("❌ Failed to add task.");
-    }
-  };
+  e.preventDefault();
+  
+  // 1. تشغيل وضع الإرسال (لقفل الزر)
+  setIsSubmitting(true); 
+
+  try {
+    await addTaskApi(task);
+    alert("✅ Task Added Successfully!");
+    navigate("/tasks");
+  } catch (err) {
+    console.error("Error adding task:", err);
+    alert("❌ Failed to add task.");
+    
+    // 2. إعادة فتح الزر في حال حدوث خطأ ليتمكن المستخدم من المحاولة مجدداً
+    setIsSubmitting(false); 
+  }
+};
   return (
     /* ✅ هذا هو الحل */
     <div className="page-content full-bg">
@@ -201,10 +208,18 @@ const handleSubmit = async (e) => {
               </div>
             </div>
 
-            {/* ===== SUBMIT ===== */}
-            <button type="submit" className="submit-btn">
-              + Add Task
-            </button>
+       {/* ===== SUBMIT ===== */}
+<button 
+  type="submit" 
+  className="submit-btn" 
+  // قفل الزر برمجياً لمنع الضغط المتكرر
+  disabled={isSubmitting} 
+  // اختيارياً: يمكنك إضافة تنسيق بسيط ليوضح للمستخدم أن الزر معطل
+  style={{ opacity: isSubmitting ? 0.6 : 1, cursor: isSubmitting ? "not-allowed" : "pointer" }}
+>
+  {/* تغيير النص ليظهر للمستخدم أن العملية جارية */}
+  {isSubmitting ? "Adding Task..." : "+ Add Task"}
+</button>
           </form>
         </div>
       </div>

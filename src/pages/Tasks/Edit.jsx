@@ -22,16 +22,18 @@ const EditTask = () => {
 
   const [users, setUsers] = useState([]);
 
-  const [task, setTask] = useState({
-    title: "",
-    description: "",
-    company: "",
-    type: "",
-    workerId: "",
-    priority: "",
-    status: ""
-  });
+const [task, setTask] = useState({
+  title: "",
+  description: "",
+  company: "",
+  type: "",
+  workerId: "",
+  priority: "",
+  status: ""
+});
 
+// السطر الجديد هنا
+const [isSubmitting, setIsSubmitting] = useState(false);
   useEffect(() => {
     if (user && user.role === "Employee") {
       alert("❌ غير مسموح للموظف تعديل المهام");
@@ -97,23 +99,29 @@ const EditTask = () => {
   };
 
   const handleSave = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      await updateTaskApi(id, task);
-      alert("✅ Task updated successfully!");
-      navigate(`/tasks/view/${id}`);
-    } catch (err) {
-      console.error("Error updating task:", err);
+  // 1. تفعيل وضع الإرسال فوراً لقفل الزر
+  setIsSubmitting(true);
 
-      if (err?.response?.status === 403) {
-        alert("❌ فقط الأدمن أو المدير يمكنه تعديل المهام");
-        return;
-      }
+  try {
+    await updateTaskApi(id, task);
+    alert("✅ Task updated successfully!");
+    navigate(`/tasks/view/${id}`);
+  } catch (err) {
+    console.error("Error updating task:", err);
 
-      alert("❌ Failed to update task. Try again.");
+    // 2. إعادة فتح الزر في حال حدوث خطأ ليتمكن المستخدم من التصحيح والمحاولة مجدداً
+    setIsSubmitting(false);
+
+    if (err?.response?.status === 403) {
+      alert("❌ فقط الأدمن أو المدير يمكنه تعديل المهام");
+      return;
     }
-  };
+
+    alert("❌ Failed to update task. Try again.");
+  }
+};
 const handleWorkerChange = (e) => {
   const selectedWorkerId = e.target.value;
   
@@ -230,9 +238,17 @@ const handleWorkerChange = (e) => {
             </select>
           </div>
 
-          <button type="submit" className="submit-btn">
-            Save Changes
-          </button>
+          <button 
+  type="submit" 
+  className="submit-btn" 
+  // قفل الزر برمجياً لمنع الضغط المتكرر أثناء التحديث
+  disabled={isSubmitting}
+  // تغيير الشكل ليعرف المستخدم أن الزر معطل
+  style={{ opacity: isSubmitting ? 0.6 : 1, cursor: isSubmitting ? "not-allowed" : "pointer" }}
+>
+  {/* تغيير النص بناءً على حالة الإرسال */}
+  {isSubmitting ? "Updating..." : "Update Task"}
+</button>
         </form>
       </div>
     </div>
