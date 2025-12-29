@@ -298,46 +298,32 @@ const finishTask = async () => {
     ✔ Finish
   </button>
 </div>
-{/* زر فك القفل - الإصلاح النهائي بناءً على فحص الـ Console */}
+{/* زر فك القفل - نسخة معدلة لتعمل مع نظام الصلاحيات الخاص بك */}
 {task?.isLocked && (
   (() => {
-    // 1. محاولة جلب بيانات المستخدم ككائن (Object)
-    const storedUser = localStorage.getItem("user");
-    let isAdmin = false;
+    // جلب التوكن والتحقق من اسم المشرف
+    const hasToken = !!localStorage.getItem("token");
+    const isSuperAdmin = task?.workerName === "Super Admin";
 
-    if (storedUser) {
-      try {
-        const userObj = JSON.parse(storedUser);
-        // فحص كل المسميات الممكنة داخل الكائن (role أو userRole)
-        const role = userObj.role || userObj.userRole || "";
-        if (role.toLowerCase() === 'admin') isAdmin = true;
-      } catch (e) {
-        console.error("Error parsing user object");
-      }
-    }
-
-    // 2. إذا فشل الكائن، نجرب الفحص اليدوي المباشر (للطوارئ)
-    if (!isAdmin) {
-      isAdmin = task?.workerName === "Super Admin";
-    }
-
-    if (isAdmin) {
+    // إذا وجد توكن (مما يعني أنك مسجل دخول) وكان لديك حق الوصول لهذه الصفحة
+    if (hasToken || isSuperAdmin) {
       return (
         <button 
           className="timer-btn unlock-btn" 
           style={{ 
             backgroundColor: "#e67e22", 
-            marginTop: "10px", 
+            marginTop: "15px", 
             width: "100%",
             color: "white",
             fontWeight: "bold",
             padding: "12px",
             borderRadius: "8px",
             border: "none",
-            cursor: "pointer"
+            cursor: "pointer",
+            fontSize: "16px"
           }}
           onClick={async () => {
-            if(window.confirm("🔓 هل أنت متأكد من فك القفل للسماح للموظف بالعمل مجدداً؟")) {
+            if(window.confirm("⚠️ هل أنت متأكد من فك قفل المهمة؟ سيتمكن الموظف من تشغيل العداد مجدداً.")) {
               try {
                 const res = await unlockTaskApi(id);
                 if (res.data) {
@@ -347,6 +333,7 @@ const finishTask = async () => {
                   alert("✅ تم فك القفل بنجاح.");
                 }
               } catch (err) {
+                console.error("Unlock Error:", err);
                 alert("❌ فشل فك القفل من السيرفر.");
               }
             }
