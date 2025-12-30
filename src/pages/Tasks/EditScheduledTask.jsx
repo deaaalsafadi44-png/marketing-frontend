@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getTaskByIdApi, updateScheduledTaskApi } from "../../services/tasksService";
+// ✅ تعديل هنا: استدعاء getTaskById بدلاً من getTaskByIdApi
+import { getTaskById, updateScheduledTaskApi } from "../../services/tasksService";
 
 const EditScheduledTask = () => {
   const { id } = useParams();
@@ -15,9 +16,10 @@ const EditScheduledTask = () => {
   useEffect(() => {
     const fetchTask = async () => {
       try {
-        const res = await getTaskByIdApi(id);
+        // ✅ تعديل هنا: استخدام getTaskById
+        const res = await getTaskById(id);
         const task = res.data;
-        // تعبئة النموذج بالبيانات الحالية
+        
         setFormData({
           title: task.title || "",
           frequency: task.frequency || "daily",

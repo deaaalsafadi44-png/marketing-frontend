@@ -28,3 +28,5 @@ export const resetTimerApi = (id) => api.post(`/tasks/${id}/timer/reset`);
 // دوال القفل (ملاحظات المدير)
 export const lockTaskApi = (id) => api.post(`/tasks/${id}/lock`);
 export const unlockTaskApi = (id) => api.post(`/tasks/${id}/unlock`);   
+// إضافة دالة التحديث الخاصة بالمهام المجدولة فقط
+export const updateScheduledTaskApi = (id, data) => api.put(`/tasks/scheduled/${id}`, data);
