@@ -150,22 +150,28 @@ const finishTask = async () => {
   }
 
   try {
-    // 1. تحديث الوقت النهائي في السيرفر أولاً لضمان عدم ضياع الثواني
-    // نقوم بتحويل الثواني إلى دقائق للسيرفر إذا كان يحتاج دقائق، أو نرسلها كما هي
-    await api.patch(`/tasks/${id}`, { 
-      timeSpent: seconds / 60, // تحويل لثواني إلى دقائق كسرية
-      totalSeconds: seconds    // إرسال الثواني كاملة للدقة
+    // 1. استخدام دالة updateTaskApi (التي تستخدم PUT) بدلاً من api.patch اليدوية
+    // نرسل الـ status كـ Completed لضمان تحديث حالة المهمة في قاعدة البيانات
+    await updateTaskApi(id, { 
+      timeSpent: seconds / 60, 
+      totalSeconds: seconds,
+      status: "Completed" 
     });
 
-    // 2. إذا لم يرفع الموظف ملفات، ننشئ سجلاً فارغاً كما فعلنا سابقاً
+    // 2. معالجة المخرجات (Deliverables)
     if (deliverables.length === 0) {
-      await api.post("/deliverables", {
-        taskId: id,
-        notes: "تم إنهاء المهمة (بدون مرفقات)",
-      });
+      try {
+        await api.post("/deliverables", {
+          taskId: id,
+          notes: "تم إنهاء المهمة (بدون مرفقات)",
+        });
+      } catch (delError) {
+        console.warn("Deliverable record creation skipped or failed:", delError);
+        // لا نوقف العملية هنا إذا فشل مجرد سجل الملاحظات
+      }
     }
 
-    // 3. طلب القفل النهائي
+    // 3. طلب القفل النهائي (Lock)
     const res = await lockTaskApi(id);
 
     if (res.data) {
@@ -175,8 +181,14 @@ const finishTask = async () => {
       navigate("/submissions");
     }
   } catch (err) {
-    console.error("Finish error:", err);
-    alert("❌ فشل إنهاء المهمة أو حفظ الوقت.");
+    console.error("Finish error details:", err.response || err);
+    
+    // تنبيه مخصص إذا كان الخطأ 404
+    if (err.response?.status === 404) {
+        alert("❌ خطأ 404: السيرفر لم يجد مسار التحديث. تأكد من أن المهمة موجودة وليست محذوفة.");
+    } else {
+        alert("❌ فشل إنهاء المهمة. تأكد من اتصال الإنترنت أو صلاحيات الوصول.");
+    }
   }
 };/* ================= UPLOAD ================= */
   const handleFileChange = (e) =>
