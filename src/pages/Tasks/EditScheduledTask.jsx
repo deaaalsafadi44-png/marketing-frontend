@@ -1,38 +1,49 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-// ✅ تعديل هنا: استدعاء getTaskById بدلاً من getTaskByIdApi
-import { getTaskById, updateScheduledTaskApi } from "../../services/tasksService";
+// استدعاء الدوال الأصلية من ملف الخدمة الخاص بك
+import { getTaskById, updateScheduledTaskApi, getOptions } from "../../services/tasksService";
 
 const EditScheduledTask = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [workers, setWorkers] = useState([]); // لتخزين قائمة الموظفين
   const [formData, setFormData] = useState({
     title: "",
     frequency: "",
-    startDate: ""
+    startDate: "",
+    executionTime: "09:00", // وقت افتراضي
+    assignedTo: "" // المعرف الخاص بالموظف
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTask = async () => {
+    const fetchData = async () => {
       try {
-        // ✅ تعديل هنا: استخدام getTaskById
-        const res = await getTaskById(id);
-        const task = res.data;
-        
+        // 1. جلب بيانات المهمة المجدولة
+        const taskRes = await getTaskById(id);
+        const task = taskRes.data;
+
+        // 2. جلب قائمة الموظفين من الإعدادات/الخيارات
+        const optionsRes = await getOptions();
+        setWorkers(optionsRes.data.workers || []);
+
+        // تعبئة النموذج بالبيانات المسترجعة
         setFormData({
           title: task.title || "",
           frequency: task.frequency || "daily",
-          startDate: task.nextRun ? new Date(task.nextRun).toISOString().split('T')[0] : ""
+          assignedTo: task.assignedTo || "",
+          // فصل التاريخ عن الوقت إذا كانا مخزنين معاً
+          startDate: task.nextRun ? new Date(task.nextRun).toISOString().split('T')[0] : "",
+          executionTime: task.executionTime || "09:00"
         });
       } catch (err) {
-        console.error("Error fetching task", err);
-        alert("Could not load task data.");
+        console.error("Error fetching data", err);
+        alert("Could not load data.");
       } finally {
         setLoading(false);
       }
     };
-    fetchTask();
+    fetchData();
   }, [id]);
 
   const handleSubmit = async (e) => {
@@ -47,7 +58,7 @@ const EditScheduledTask = () => {
     }
   };
 
-  if (loading) return <div style={{ padding: "50px", textAlign: "center" }}>Loading Template Data...</div>;
+  if (loading) return <div style={{ padding: "50px", textAlign: "center" }}>Loading...</div>;
 
   return (
     <div style={{ padding: "30px", maxWidth: "500px", margin: "40px auto", backgroundColor: "#fff", borderRadius: "12px", boxShadow: "0 4px 15px rgba(0,0,0,0.1)" }}>
@@ -55,12 +66,13 @@ const EditScheduledTask = () => {
         📝 Edit Schedule
       </h2>
       
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
         
+        {/* العنوان */}
         <div>
-          <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Task Title</label>
+          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Task Title</label>
           <input 
-            style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "14px" }}
+            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
             type="text" 
             value={formData.title} 
             onChange={(e) => setFormData({...formData, title: e.target.value})} 
@@ -68,10 +80,27 @@ const EditScheduledTask = () => {
           />
         </div>
 
+        {/* الموظف المسؤول */}
         <div>
-          <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Frequency</label>
+          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Assign To (الموظف)</label>
           <select 
-            style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "14px", backgroundColor: "white" }}
+            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd", backgroundColor: "white" }}
+            value={formData.assignedTo} 
+            onChange={(e) => setFormData({...formData, assignedTo: e.target.value})}
+            required
+          >
+            <option value="">Select Worker...</option>
+            {workers.map(worker => (
+              <option key={worker._id} value={worker._id}>{worker.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* التكرار */}
+        <div>
+          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Frequency</label>
+          <select 
+            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd", backgroundColor: "white" }}
             value={formData.frequency} 
             onChange={(e) => setFormData({...formData, frequency: e.target.value})}
           >
@@ -81,10 +110,11 @@ const EditScheduledTask = () => {
           </select>
         </div>
 
+        {/* تاريخ التنفيذ القادم */}
         <div>
-          <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Next Execution Date</label>
+          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Next Date</label>
           <input 
-            style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "14px" }}
+            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
             type="date" 
             value={formData.startDate} 
             onChange={(e) => setFormData({...formData, startDate: e.target.value})} 
@@ -92,7 +122,19 @@ const EditScheduledTask = () => {
           />
         </div>
 
-        <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+        {/* وقت التنفيذ */}
+        <div>
+          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Execution Time (الساعة)</label>
+          <input 
+            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
+            type="time" 
+            value={formData.executionTime} 
+            onChange={(e) => setFormData({...formData, executionTime: e.target.value})} 
+            required 
+          />
+        </div>
+
+        <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
           <button type="submit" style={{ flex: 1, backgroundColor: "#4caf50", color: "white", padding: "12px", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}>
             Save Changes
           </button>
