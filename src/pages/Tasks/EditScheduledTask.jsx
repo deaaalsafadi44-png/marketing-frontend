@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+// تأكدنا من مطابقة المسميات مع ملف tasksService.js الخاص بك
 import { getTaskById, updateScheduledTaskApi, getOptions } from "../../services/tasksService";
 
 const EditScheduledTask = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  // حالات تخزين البيانات (Options)
-  const [options, setOptions] = useState({ companies: [], workers: [], priorities: ["Low", "Medium", "High", "Urgent"] });
+  // 🛡️ حماية 1: تهيئة الخيارات بمصفوفات فارغة لضمان عدم حدوث خطأ .map قبل التحميل
+  const [options, setOptions] = useState({ 
+    companies: [], 
+    workers: [], 
+    priorities: ["Low", "Medium", "High", "Urgent"] 
+  });
   
-  // حالة النموذج (Form State) لتشمل كل الحقول كما في صفحة Add
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -27,28 +31,39 @@ const EditScheduledTask = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // جلب البيانات بالتوازي لسرعة الأداء
         const [taskRes, optionsRes] = await Promise.all([
           getTaskById(id),
           getOptions()
         ]);
 
-        const task = taskRes.data;
-        setOptions(optionsRes.data);
+        // 🛡️ حماية 2: تحديث الخيارات فقط إذا كانت البيانات موجودة فعلاً
+        if (optionsRes && optionsRes.data) {
+          setOptions({
+            companies: optionsRes.data.companies || [],
+            workers: optionsRes.data.workers || [],
+            priorities: optionsRes.data.priorities || ["Low", "Medium", "High", "Urgent"]
+          });
+        }
 
-        // ملء الحقول بالبيانات القادمة من الباك إند
-        setFormData({
-          title: task.title || "",
-          description: task.description || "",
-          company: task.company || "",
-          assignedTo: task.workerId || task.assignedTo || "",
-          priority: task.priority || "Medium",
-          status: task.status || "Pending",
-          frequency: task.frequency || "daily",
-          startDate: task.nextRun ? new Date(task.nextRun).toISOString().split('T')[0] : "",
-          executionTime: task.executionTime || "09:00"
-        });
+        if (taskRes && taskRes.data) {
+          const task = taskRes.data;
+          setFormData({
+            title: task.title || "",
+            description: task.description || "",
+            company: task.company || "",
+            // ضمان الربط الصحيح للموظف
+            assignedTo: task.workerId || task.assignedTo || "",
+            priority: task.priority || "Medium",
+            status: task.status || "Pending",
+            frequency: task.frequency || "daily",
+            // تحويل التاريخ لتنسيق input date (YYYY-MM-DD)
+            startDate: task.nextRun ? new Date(task.nextRun).toISOString().split('T')[0] : "",
+            executionTime: task.executionTime || "09:00"
+          });
+        }
       } catch (err) {
-        console.error("Error loading data", err);
+        console.error("Error loading task data:", err);
       } finally {
         setLoading(false);
       }
@@ -67,20 +82,18 @@ const EditScheduledTask = () => {
     }
   };
 
-  if (loading) return <div style={{textAlign: 'center', padding: '50px'}}>Loading Task Details...</div>;
+  if (loading) return <div style={{textAlign: 'center', padding: '50px', fontSize: '18px'}}>Loading Task Details...</div>;
 
   return (
     <div style={{ backgroundColor: "#f4f7f6", minHeight: "100vh", padding: "40px 20px" }}>
       <div style={{ maxWidth: "800px", margin: "0 auto", backgroundColor: "#fff", borderRadius: "15px", boxShadow: "0 10px 25px rgba(0,0,0,0.05)", overflow: "hidden" }}>
         
-        {/* Header مشابه للصور */}
         <div style={{ padding: "20px", borderBottom: "1px solid #eee", textAlign: "center" }}>
           <h2 style={{ color: "#673ab7", margin: 0 }}>📝 Edit Scheduled Task</h2>
         </div>
 
         <form onSubmit={handleSubmit} style={{ padding: "30px" }}>
           
-          {/* Title & Description */}
           <div style={{ marginBottom: "20px" }}>
             <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Task Title</label>
             <input 
@@ -97,13 +110,13 @@ const EditScheduledTask = () => {
             />
           </div>
 
-          {/* Row: Company & Assigned User */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
             <div>
               <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Company</label>
               <select style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
                 value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})}>
                 <option value="">Select Company</option>
+                {/* 🛡️ حماية 3: Optional chaining (?.) لمنع انهيار الصفحة (الصورة 1179) */}
                 {options.companies?.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
               </select>
             </div>
@@ -117,13 +130,12 @@ const EditScheduledTask = () => {
             </div>
           </div>
 
-          {/* Row: Priority & Status */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "30px" }}>
             <div>
               <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Priority</label>
               <select style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
                 value={formData.priority} onChange={(e) => setFormData({...formData, priority: e.target.value})}>
-                {options.priorities.map(p => <option key={p} value={p}>{p}</option>)}
+                {options.priorities?.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
             <div>
@@ -137,7 +149,6 @@ const EditScheduledTask = () => {
             </div>
           </div>
 
-          {/* Task Scheduling Section - مشابه للصورة 1178 */}
           <div style={{ border: "2px dashed #673ab744", borderRadius: "12px", padding: "20px", backgroundColor: "#f9f9ff" }}>
             <h4 style={{ margin: "0 0 15px 0", color: "#673ab7", display: "flex", alignItems: "center", gap: "10px" }}>
               🕒 Task Scheduling
@@ -164,13 +175,13 @@ const EditScheduledTask = () => {
             </div>
           </div>
 
-          {/* Buttons */}
           <div style={{ marginTop: "30px", display: "flex", gap: "15px" }}>
-            <button type="submit" style={{ flex: 1, padding: "15px", backgroundColor: "#3f51b5", color: "#white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", fontSize: "16px" }}>
+            {/* تم تصحيح كلمة white هنا */}
+            <button type="submit" style={{ flex: 1, padding: "15px", backgroundColor: "#3f51b5", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", fontSize: "16px" }}>
                Update Task
             </button>
-            <button type="button" onClick={() => navigate("/tasks/scheduled")} style={{ flex: 1, padding: "15px", backgroundColor: "#f44336", color: "#white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", fontSize: "16px" }}>
-              Cancel
+            <button type="button" onClick={() => navigate("/tasks/scheduled")} style={{ flex: 1, padding: "15px", backgroundColor: "#f44336", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", fontSize: "16px" }}>
+               Cancel
             </button>
           </div>
         </form>
