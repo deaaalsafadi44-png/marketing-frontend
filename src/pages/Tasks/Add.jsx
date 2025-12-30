@@ -122,20 +122,38 @@ const handleSubmit = async (e) => {
   setIsSubmitting(true); 
 
   try {
-    // 1. استخراج بيانات الموظف المختار كاملة (الاسم والقسم)
+    // 1. استخراج بيانات الموظف المختار كاملة
     const selectedUser = users.find((u) => String(u.id) === String(task.workerId));
 
-    // 2. دمج اسم الموظف مع بيانات المهمة قبل إرسالها للباك إند
+    // 2. معالجة التواريخ لضمان التوافق مع السيرفر (UTC)
+    let nextRunValue = null;
+    
+    if (task.isScheduled && task.startDate) {
+      // تحويل تاريخ البداية المختار من الجهاز إلى كائن تاريخ حقيقي
+      const dateObj = new Date(task.startDate);
+      
+      // التأكد من صحة التاريخ ثم تحويله لصيغة ISO String
+      if (!isNaN(dateObj.getTime())) {
+        nextRunValue = dateObj.toISOString(); 
+      }
+    }
+
+    // 3. تجهيز البيانات النهائية للإرسال
     const finalTaskData = {
       ...task,
       workerName: selectedUser ? selectedUser.name : "",
-      workerJobTitle: selectedUser ? selectedUser.dept : ""
+      workerJobTitle: selectedUser ? selectedUser.dept : "",
+      // نرسل التاريخ بصيغة ISO لكي يتعرف عليه MongoDB كـ Date وليس String
+      nextRun: nextRunValue,
+      // نضمن إرسال التاريخ المختار كـ ISO أيضاً لاتساق البيانات
+      startDate: task.startDate ? new Date(task.startDate).toISOString() : null
     };
+
+    console.log("📤 Sending Task Data:", finalTaskData);
 
     await addTaskApi(finalTaskData);
     alert("✅ Task Added Successfully!");
     
-    // 3. التوجيه الذكي بناءً على نوع المهمة (مجدولة أم عادية)
     if (task.isScheduled) {
       navigate("/tasks/scheduled");
     } else {
@@ -144,7 +162,7 @@ const handleSubmit = async (e) => {
 
   } catch (err) {
     console.error("Error adding task:", err);
-    alert("❌ Failed to add task.");
+    alert("❌ Failed to add task. Check console for details.");
     setIsSubmitting(false); 
   }
 };
