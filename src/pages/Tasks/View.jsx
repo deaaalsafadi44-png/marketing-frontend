@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 // استبدل السطر القديم بهذا السطر الشامل
-import { getTaskById, lockTaskApi, unlockTaskApi } from "../../services/tasksService";
+// أضفنا updateTaskApi للقائمة
+import { getTaskById, lockTaskApi, unlockTaskApi, updateTaskApi } from "../../services/tasksService";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../../services/apiClient";
 import "./view.css";
