@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-// التأكد من استيراد الدوال الصحيحة من ملف الخدمات
 import { getTaskById, updateScheduledTaskApi, getOptions } from "../../services/tasksService";
 
 const EditScheduledTask = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  // 🛡️ الحل لمنع خطأ الـ Map: تهيئة الخيارات بمصفوفات فارغة
+  // تهيئة الخيارات بمصفوفات فارغة لضمان عدم حدوث خطأ .map (صورة 1179)
   const [options, setOptions] = useState({ 
     companies: [], 
     workers: [], 
@@ -32,13 +31,13 @@ const EditScheduledTask = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // جلب بيانات المهمة والخيارات (الموظفين والشركات)
+        // جلب البيانات من السيرفر
         const [taskRes, optionsRes] = await Promise.all([
           getTaskById(id),
           getOptions()
         ]);
 
-        // ربط الخيارات بالقوائم المنسدلة لضمان ظهور الموظفين
+        // 1. ملء القوائم المنسدلة (الشركات والموظفين)
         if (optionsRes?.data) {
           setOptions({
             companies: optionsRes.data.companies || [],
@@ -47,24 +46,25 @@ const EditScheduledTask = () => {
           });
         }
 
-        // تعبئة النموذج ببيانات المهمة الحالية
+        // 2. ملء حقول النموذج ببيانات المهمة (حل مشكلة الحقول الفارغة في صورة 1182)
         if (taskRes?.data) {
           const task = taskRes.data;
           setFormData({
             title: task.title || "",
             description: task.description || "",
             company: task.company || "",
-            assignedTo: task.workerId || task.assignedTo || "",
+            // التأكد من ربط ID الموظف بشكل صحيح
+            assignedTo: task.workerId || task.assignedTo || "", 
             priority: task.priority || "Medium",
             status: task.status || "Pending",
             frequency: task.frequency || "daily",
-            // تحويل التاريخ لتنسيق يفهمه المتصفح YYYY-MM-DD
+            // تحويل التاريخ لصيغة YYYY-MM-DD ليعمل مع input date
             startDate: task.nextRun ? new Date(task.nextRun).toISOString().split('T')[0] : "",
             executionTime: task.executionTime || "09:00"
           });
         }
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error("Error loading data:", err);
       } finally {
         setLoading(false);
       }
@@ -75,26 +75,23 @@ const EditScheduledTask = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // إرسال التحديثات للباك إند
       await updateScheduledTaskApi(id, formData);
-      alert("تم تحديث الجدولة بنجاح! ✅");
+      alert("تم تحديث المهمة بنجاح! ✅");
       navigate("/tasks/scheduled");
     } catch (err) {
-      alert("فشل تحديث الجدولة! ❌");
+      alert("فشل التحديث! ❌");
     }
   };
 
-  if (loading) return <div style={{textAlign: 'center', padding: '50px'}}>جاري جلب البيانات...</div>;
+  if (loading) return <div style={{textAlign: 'center', padding: '50px'}}>جاري تحميل بيانات المهمة...</div>;
 
   return (
     <div style={{ backgroundColor: "#f4f7f6", minHeight: "100vh", padding: "40px 20px" }}>
-      <div style={{ maxWidth: "800px", margin: "0 auto", backgroundColor: "#fff", borderRadius: "15px", boxShadow: "0 10px 25px rgba(0,0,0,0.05)" }}>
+      <div style={{ maxWidth: "600px", margin: "0 auto", backgroundColor: "#fff", borderRadius: "15px", boxShadow: "0 10px 25px rgba(0,0,0,0.05)", padding: "30px" }}>
         
-        <div style={{ padding: "20px", borderBottom: "1px solid #eee", textAlign: "center" }}>
-          <h2 style={{ color: "#673ab7", margin: 0 }}>📝 Edit Scheduled Task</h2>
-        </div>
+        <h2 style={{ color: "#673ab7", textAlign: "center", marginBottom: "30px" }}>📝 Edit Scheduled Task</h2>
 
-        <form onSubmit={handleSubmit} style={{ padding: "30px" }}>
+        <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: "20px" }}>
             <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Task Title</label>
             <input 
@@ -109,7 +106,6 @@ const EditScheduledTask = () => {
               <select style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
                 value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})}>
                 <option value="">Select Company</option>
-                {/* 🛡️ استخدام ?. يمنع انهيار الصفحة إذا كانت المصفوفة فارغة */}
                 {options.companies?.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
               </select>
             </div>
@@ -123,8 +119,7 @@ const EditScheduledTask = () => {
             </div>
           </div>
 
-          {/* قسم الجدولة المطابق للصورة 1178 */}
-          <div style={{ border: "2px dashed #673ab744", borderRadius: "12px", padding: "20px", backgroundColor: "#f9f9ff" }}>
+          <div style={{ border: "2px dashed #673ab744", borderRadius: "12px", padding: "20px", backgroundColor: "#f9f9ff", marginBottom: "30px" }}>
             <h4 style={{ margin: "0 0 15px 0", color: "#673ab7" }}>🕒 Task Scheduling</h4>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
               <select style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
@@ -138,11 +133,11 @@ const EditScheduledTask = () => {
             </div>
           </div>
 
-          <div style={{ marginTop: "30px", display: "flex", gap: "15px" }}>
-            <button type="submit" style={{ flex: 1, padding: "15px", backgroundColor: "#3f51b5", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold" }}>
+          <div style={{ display: "flex", gap: "15px" }}>
+            <button type="submit" style={{ flex: 1, padding: "15px", backgroundColor: "#3f51b5", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>
                Update Task
             </button>
-            <button type="button" onClick={() => navigate("/tasks/scheduled")} style={{ flex: 1, padding: "15px", backgroundColor: "#f44336", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold" }}>
+            <button type="button" onClick={() => navigate("/tasks/scheduled")} style={{ flex: 1, padding: "15px", backgroundColor: "#f44336", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>
                Cancel
             </button>
           </div>
