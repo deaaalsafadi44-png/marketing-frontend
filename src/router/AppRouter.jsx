@@ -101,14 +101,27 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // Settings (Admin + Manager)
+// التعديل المقترح:
 {
   path: "settings",
-  element: (
-    <PrivateRoute roles={["Admin", "admin", "Manager", "manager"]}>
-      <Settings />
-    </PrivateRoute>
-  ),
+  children: [
+    {
+      index: true, // هذه هي صفحة الإعدادات الرئيسية
+      element: (
+        <PrivateRoute roles={["Admin", "admin", "Manager", "manager"]}>
+          <Settings />
+        </PrivateRoute>
+      ),
+    },
+    {
+      path: "options", // هذا هو المسار الذي كان يعطي 404
+      element: (
+        <PrivateRoute roles={["Admin", "admin"]}>
+          <ManageOptions />
+        </PrivateRoute>
+      ),
+    },
+  ],
 },
 
 
