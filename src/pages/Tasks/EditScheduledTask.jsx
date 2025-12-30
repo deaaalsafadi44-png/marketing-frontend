@@ -1,44 +1,54 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-// استدعاء الدوال الأصلية من ملف الخدمة الخاص بك
 import { getTaskById, updateScheduledTaskApi, getOptions } from "../../services/tasksService";
 
 const EditScheduledTask = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [workers, setWorkers] = useState([]); // لتخزين قائمة الموظفين
+  
+  // حالات تخزين البيانات (Options)
+  const [options, setOptions] = useState({ companies: [], workers: [], priorities: ["Low", "Medium", "High", "Urgent"] });
+  
+  // حالة النموذج (Form State) لتشمل كل الحقول كما في صفحة Add
   const [formData, setFormData] = useState({
     title: "",
-    frequency: "",
+    description: "",
+    company: "",
+    assignedTo: "",
+    priority: "Medium",
+    status: "Pending",
+    frequency: "daily",
     startDate: "",
-    executionTime: "09:00", // وقت افتراضي
-    assignedTo: "" // المعرف الخاص بالموظف
+    executionTime: "09:00"
   });
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. جلب بيانات المهمة المجدولة
-        const taskRes = await getTaskById(id);
+        const [taskRes, optionsRes] = await Promise.all([
+          getTaskById(id),
+          getOptions()
+        ]);
+
         const task = taskRes.data;
+        setOptions(optionsRes.data);
 
-        // 2. جلب قائمة الموظفين من الإعدادات/الخيارات
-        const optionsRes = await getOptions();
-        setWorkers(optionsRes.data.workers || []);
-
-        // تعبئة النموذج بالبيانات المسترجعة
+        // ملء الحقول بالبيانات القادمة من الباك إند
         setFormData({
           title: task.title || "",
+          description: task.description || "",
+          company: task.company || "",
+          assignedTo: task.workerId || task.assignedTo || "",
+          priority: task.priority || "Medium",
+          status: task.status || "Pending",
           frequency: task.frequency || "daily",
-          assignedTo: task.assignedTo || "",
-          // فصل التاريخ عن الوقت إذا كانا مخزنين معاً
           startDate: task.nextRun ? new Date(task.nextRun).toISOString().split('T')[0] : "",
           executionTime: task.executionTime || "09:00"
         });
       } catch (err) {
-        console.error("Error fetching data", err);
-        alert("Could not load data.");
+        console.error("Error loading data", err);
       } finally {
         setLoading(false);
       }
@@ -50,99 +60,121 @@ const EditScheduledTask = () => {
     e.preventDefault();
     try {
       await updateScheduledTaskApi(id, formData);
-      alert("Schedule updated successfully! ✅");
+      alert("Task Updated Successfully! ✅");
       navigate("/tasks/scheduled");
     } catch (err) {
-      console.error("Update failed", err);
-      alert("Failed to update schedule. ❌");
+      alert("Update Failed! ❌");
     }
   };
 
-  if (loading) return <div style={{ padding: "50px", textAlign: "center" }}>Loading...</div>;
+  if (loading) return <div style={{textAlign: 'center', padding: '50px'}}>Loading Task Details...</div>;
 
   return (
-    <div style={{ padding: "30px", maxWidth: "500px", margin: "40px auto", backgroundColor: "#fff", borderRadius: "12px", boxShadow: "0 4px 15px rgba(0,0,0,0.1)" }}>
-      <h2 style={{ color: "#673ab7", marginBottom: "20px", textAlign: "center", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>
-        📝 Edit Schedule
-      </h2>
-      
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+    <div style={{ backgroundColor: "#f4f7f6", minHeight: "100vh", padding: "40px 20px" }}>
+      <div style={{ maxWidth: "800px", margin: "0 auto", backgroundColor: "#fff", borderRadius: "15px", boxShadow: "0 10px 25px rgba(0,0,0,0.05)", overflow: "hidden" }}>
         
-        {/* العنوان */}
-        <div>
-          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Task Title</label>
-          <input 
-            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
-            type="text" 
-            value={formData.title} 
-            onChange={(e) => setFormData({...formData, title: e.target.value})} 
-            required 
-          />
+        {/* Header مشابه للصور */}
+        <div style={{ padding: "20px", borderBottom: "1px solid #eee", textAlign: "center" }}>
+          <h2 style={{ color: "#673ab7", margin: 0 }}>📝 Edit Scheduled Task</h2>
         </div>
 
-        {/* الموظف المسؤول */}
-        <div>
-          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Assign To (الموظف)</label>
-          <select 
-            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd", backgroundColor: "white" }}
-            value={formData.assignedTo} 
-            onChange={(e) => setFormData({...formData, assignedTo: e.target.value})}
-            required
-          >
-            <option value="">Select Worker...</option>
-            {workers.map(worker => (
-              <option key={worker._id} value={worker._id}>{worker.name}</option>
-            ))}
-          </select>
-        </div>
+        <form onSubmit={handleSubmit} style={{ padding: "30px" }}>
+          
+          {/* Title & Description */}
+          <div style={{ marginBottom: "20px" }}>
+            <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Task Title</label>
+            <input 
+              style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
+              type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required 
+            />
+          </div>
 
-        {/* التكرار */}
-        <div>
-          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Frequency</label>
-          <select 
-            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd", backgroundColor: "white" }}
-            value={formData.frequency} 
-            onChange={(e) => setFormData({...formData, frequency: e.target.value})}
-          >
-            <option value="daily">Daily (يومي)</option>
-            <option value="weekly">Weekly (أسبوعي)</option>
-            <option value="monthly">Monthly (شهري)</option>
-          </select>
-        </div>
+          <div style={{ marginBottom: "20px" }}>
+            <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Description</label>
+            <textarea 
+              style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd", minHeight: "100px" }}
+              value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})}
+            />
+          </div>
 
-        {/* تاريخ التنفيذ القادم */}
-        <div>
-          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Next Date</label>
-          <input 
-            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
-            type="date" 
-            value={formData.startDate} 
-            onChange={(e) => setFormData({...formData, startDate: e.target.value})} 
-            required 
-          />
-        </div>
+          {/* Row: Company & Assigned User */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
+            <div>
+              <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Company</label>
+              <select style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
+                value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})}>
+                <option value="">Select Company</option>
+                {options.companies?.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Assigned User</label>
+              <select style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
+                value={formData.assignedTo} onChange={(e) => setFormData({...formData, assignedTo: e.target.value})}>
+                <option value="">Select User</option>
+                {options.workers?.map(w => <option key={w._id} value={w._id}>{w.name}</option>)}
+              </select>
+            </div>
+          </div>
 
-        {/* وقت التنفيذ */}
-        <div>
-          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Execution Time (الساعة)</label>
-          <input 
-            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
-            type="time" 
-            value={formData.executionTime} 
-            onChange={(e) => setFormData({...formData, executionTime: e.target.value})} 
-            required 
-          />
-        </div>
+          {/* Row: Priority & Status */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "30px" }}>
+            <div>
+              <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Priority</label>
+              <select style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
+                value={formData.priority} onChange={(e) => setFormData({...formData, priority: e.target.value})}>
+                {options.priorities.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Status</label>
+              <select style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
+                value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          </div>
 
-        <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
-          <button type="submit" style={{ flex: 1, backgroundColor: "#4caf50", color: "white", padding: "12px", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}>
-            Save Changes
-          </button>
-          <button type="button" onClick={() => navigate("/tasks/scheduled")} style={{ flex: 1, backgroundColor: "#f44336", color: "white", padding: "12px", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}>
-            Cancel
-          </button>
-        </div>
-      </form>
+          {/* Task Scheduling Section - مشابه للصورة 1178 */}
+          <div style={{ border: "2px dashed #673ab744", borderRadius: "12px", padding: "20px", backgroundColor: "#f9f9ff" }}>
+            <h4 style={{ margin: "0 0 15px 0", color: "#673ab7", display: "flex", alignItems: "center", gap: "10px" }}>
+              🕒 Task Scheduling
+            </h4>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+              <div>
+                <label style={{ fontSize: "13px", fontWeight: "bold", display: "block", marginBottom: "5px" }}>Frequency</label>
+                <select style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
+                  value={formData.frequency} onChange={(e) => setFormData({...formData, frequency: e.target.value})}>
+                  <option value="daily">Repeat Daily</option>
+                  <option value="weekly">Repeat Weekly</option>
+                  <option value="monthly">Repeat Monthly</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: "13px", fontWeight: "bold", display: "block", marginBottom: "5px" }}>Start Date & Time</label>
+                <div style={{ display: "flex", gap: "5px" }}>
+                  <input type="date" style={{ flex: 2, padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
+                    value={formData.startDate} onChange={(e) => setFormData({...formData, startDate: e.target.value})} />
+                  <input type="time" style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
+                    value={formData.executionTime} onChange={(e) => setFormData({...formData, executionTime: e.target.value})} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div style={{ marginTop: "30px", display: "flex", gap: "15px" }}>
+            <button type="submit" style={{ flex: 1, padding: "15px", backgroundColor: "#3f51b5", color: "#white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", fontSize: "16px" }}>
+               Update Task
+            </button>
+            <button type="button" onClick={() => navigate("/tasks/scheduled")} style={{ flex: 1, padding: "15px", backgroundColor: "#f44336", color: "#white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", fontSize: "16px" }}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
