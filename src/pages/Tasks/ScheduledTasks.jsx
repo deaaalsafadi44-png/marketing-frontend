@@ -46,14 +46,43 @@ const ScheduledTasks = () => {
         {templates.length === 0 ? (
           <p>No scheduled tasks found.</p>
         ) : (
-          templates.map((temp) => (
+         templates.map((temp) => (
             <div key={temp.id} className="schedule-card">
               <h3>{temp.title}</h3>
               <p><strong>Frequency:</strong> {temp.frequency}</p>
               <p><strong>Assigned to:</strong> {temp.workerName}</p>
               <p><strong>Next Run:</strong> {new Date(temp.nextRun).toLocaleDateString()}</p>
-              <div className="card-actions">
-                <button onClick={() => handleDelete(temp.id)} className="delete-btn">Stop Schedule</button>
+              
+              {/* قسم الأزرار المعدل */}
+              <div className="card-actions" style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                
+                {/* زر إيقاف الجدولة الأصلي */}
+                <button 
+                  onClick={() => handleDelete(temp.id)} 
+                  className="delete-btn"
+                >
+                  Stop Schedule
+                </button>
+
+                {/* زر التعديل الجديد - أضفناه ببطء لضمان المسار الصحيح */}
+                <Link 
+                  to={`/tasks/edit-scheduled/${temp.id || temp._id}`} 
+                  className="edit-btn"
+                  style={{
+                    backgroundColor: "#2196f3",
+                    color: "white",
+                    padding: "8px 16px",
+                    borderRadius: "6px",
+                    textDecoration: "none",
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    display: "flex",
+                    alignItems: "center"
+                  }}
+                >
+                  Edit 📝
+                </Link>
+
               </div>
             </div>
           ))

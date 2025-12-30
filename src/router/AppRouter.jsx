@@ -5,7 +5,7 @@ import MainLayout from "../layout/MainLayout";
 import NotificationsPage from "../pages/NotificationsPage";
 // Components
 import PrivateRoute from "../components/PrivateRoute";
-
+import EditScheduledTask from "../pages/Tasks/EditScheduledTask";
 // Context
 import { useAuth } from "../context/AuthContext";
 
@@ -124,6 +124,7 @@ export const router = createBrowserRouter([
               </PrivateRoute>
             ),
           },
+          
           // ✅ إضافة مسار المهام المجدولة هنا
           {
             path: "scheduled",
@@ -165,6 +166,25 @@ export const router = createBrowserRouter([
               </PrivateRoute>
             ),
           },
+          // ...
+          {
+            path: "edit/:id",
+            element: (
+              <PrivateRoute roles={["Admin", "Manager", "admin", "manager"]}>
+                <EditTask />
+              </PrivateRoute>
+            ),
+          },
+          // السطر الجديد الذي أضفناه ببطء هنا:
+          {
+            path: "edit-scheduled/:id",
+            element: (
+              <PrivateRoute roles={["Admin", "Manager", "admin", "manager"]}>
+                <EditScheduledTask />
+              </PrivateRoute>
+            ),
+          },
+// ...
         ],
       },
 
