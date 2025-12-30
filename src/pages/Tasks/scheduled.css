@@ -26,9 +26,10 @@
     border-radius: 4px;
     font-size: 11px;
     margin-left: 5px;
-}.page-content {
+}/* ✅ استبدل الكود القديم بهذا الكود المخصص */
+.scheduled-task-page .page-content {
     padding: 20px;
-    max-width: 1200px;
+    max-width: 1200px; 
     margin: 0 auto;
 }
 
